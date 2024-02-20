@@ -1,15 +1,11 @@
-package io.mattinfern0.kanbanboardapi.core.dtos;
+package io.mattinfern0.kanbanboardapi.boards.dtos;
 
-import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public class TaskDto {
+public class BoardTaskDto {
     UUID id;
-
-    @NotNull
-    UUID organizationId;
 
     @NotNull
     String title;
@@ -23,14 +19,6 @@ public class TaskDto {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public UUID getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(UUID organizationId) {
-        this.organizationId = organizationId;
     }
 
     public String getTitle() {

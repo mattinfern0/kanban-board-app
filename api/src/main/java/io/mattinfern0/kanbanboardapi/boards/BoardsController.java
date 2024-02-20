@@ -1,12 +1,14 @@
 package io.mattinfern0.kanbanboardapi.boards;
 
-import io.mattinfern0.kanbanboardapi.core.dtos.BoardDto;
+import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
+import io.mattinfern0.kanbanboardapi.boards.dtos.BoardSummaryDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,8 +21,13 @@ public class BoardsController {
         this.boardsService = boardsService;
     }
 
+    @GetMapping("")
+    List<BoardSummaryDto> listBoards() {
+        return boardsService.getBoardList();
+    }
+
     @GetMapping("/{boardId}")
-    BoardDto getBoard(@PathVariable UUID boardId) {
+    BoardDetailDto getBoard(@PathVariable UUID boardId) {
         return boardsService.getBoardDetail(boardId);
     }
 }

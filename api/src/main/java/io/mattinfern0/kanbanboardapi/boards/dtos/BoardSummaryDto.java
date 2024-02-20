@@ -1,11 +1,10 @@
-package io.mattinfern0.kanbanboardapi.core.dtos;
+package io.mattinfern0.kanbanboardapi.boards.dtos;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.util.List;
 import java.util.UUID;
 
-public class BoardDto {
+public class BoardSummaryDto {
     UUID id;
 
     @NotNull
@@ -13,8 +12,6 @@ public class BoardDto {
 
     @NotNull
     String title;
-
-    List<BoardColumnDto> boardColumns;
 
     public UUID getId() {
         return id;
@@ -38,13 +35,5 @@ public class BoardDto {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public List<BoardColumnDto> getBoardColumns() {
-        return boardColumns;
-    }
-
-    public void setBoardColumns(List<BoardColumnDto> boardColumns) {
-        this.boardColumns = boardColumns;
     }
 }
