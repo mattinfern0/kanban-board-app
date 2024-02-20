@@ -1,6 +1,6 @@
 # Jetbrains IDEs
 .idea
-.iml
+*.iml
 
 .code
 .vscode
