@@ -1,0 +1,9 @@
+# Jetbrains IDEs
+.idea
+.iml
+
+.code
+.vscode
+
+.env
+.env.*
