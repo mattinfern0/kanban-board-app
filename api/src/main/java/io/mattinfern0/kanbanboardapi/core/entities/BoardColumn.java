@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class BoardColumn {
     Integer displayOrder;
 
     @OneToMany(mappedBy = "boardColumn")
-    List<Task> tasks;
+    List<Task> tasks = new ArrayList<>();
 
     public UUID getId() {
         return id;

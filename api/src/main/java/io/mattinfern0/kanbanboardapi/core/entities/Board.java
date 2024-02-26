@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.core.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public class Board {
 
     @OneToMany(mappedBy = "board")
     @OrderBy("displayOrder")
-    List<BoardColumn> boardColumns;
+    List<BoardColumn> boardColumns = new ArrayList<>();
 
     public UUID getId() {
         return id;
