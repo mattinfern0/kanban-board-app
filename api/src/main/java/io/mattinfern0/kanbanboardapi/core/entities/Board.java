@@ -10,6 +10,7 @@ import java.util.UUID;
 @Table(name = "board")
 public class Board {
     @Id
+    @GeneratedValue
     UUID id;
 
     @NotNull

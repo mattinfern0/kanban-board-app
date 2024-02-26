@@ -11,6 +11,7 @@ import java.util.UUID;
 @Table(name = "board_column")
 public class BoardColumn {
     @Id
+    @GeneratedValue
     UUID id;
 
     @NotNull
