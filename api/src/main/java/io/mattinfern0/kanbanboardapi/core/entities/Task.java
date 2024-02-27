@@ -70,7 +70,7 @@ public class Task {
             this.boardColumn.getTasks().remove(this);
         }
 
-        if (newBoardColumn != null) {
+        if (newBoardColumn != null && !newBoardColumn.getTasks().contains(this)) {
             newBoardColumn.getTasks().add(this);
         }
 

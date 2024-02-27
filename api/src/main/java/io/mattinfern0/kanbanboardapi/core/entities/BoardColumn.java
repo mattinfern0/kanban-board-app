@@ -49,7 +49,7 @@ public class BoardColumn {
             this.board.getBoardColumns().remove(this);
         }
 
-        if (board != null) {
+        if (board != null && !board.getBoardColumns().contains(this)) {
             board.getBoardColumns().add(this);
         }
 
