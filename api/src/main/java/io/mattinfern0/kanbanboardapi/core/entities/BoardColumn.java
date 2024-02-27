@@ -79,4 +79,12 @@ public class BoardColumn {
     public void setTasks(List<Task> tasks) {
         this.tasks = tasks;
     }
+
+    public void addTask(Task task) {
+        task.setBoardColumn(this);
+    }
+
+    public void removeTask(Task task) {
+        task.setBoardColumn(null);
+    }
 }
