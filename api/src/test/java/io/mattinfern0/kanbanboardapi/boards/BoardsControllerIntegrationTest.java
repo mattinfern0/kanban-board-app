@@ -2,9 +2,11 @@ package io.mattinfern0.kanbanboardapi.boards;
 
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
+import io.mattinfern0.kanbanboardapi.boards.dtos.BoardTaskDto;
 import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.entities.Task;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
@@ -125,6 +127,49 @@ public class BoardsControllerIntegrationTest {
             BoardColumnDto dto = response.getBoardColumns().get(i);
             assert entity.getId().equals(dto.getId());
             assert entity.getTitle().equals(dto.getTitle());
+        }
+    }
+
+    @Test
+    @Transactional
+    public void testGetBoardWorksWithBoardWithTasks() {
+        Board testBoard = createTestBoard();
+        Task testTodoTask1 = new Task();
+        testTodoTask1.setTitle("Test Task 1");
+        testTodoTask1.setDescription("Testing");
+        testTodoTask1.setBoardColumn(testBoard.getBoardColumns().get(0));
+        taskRepository.save(testTodoTask1);
+
+        Task testTodoTask2 = new Task();
+        testTodoTask2.setTitle("Test Task 2");
+        testTodoTask2.setDescription("Testing");
+        testTodoTask2.setBoardColumn(testBoard.getBoardColumns().get(0));
+        taskRepository.save(testTodoTask2);
+
+        Task testCompletedTask = new Task();
+        testCompletedTask.setTitle("Test Completed 1");
+        testCompletedTask.setDescription("A completed task");
+        testCompletedTask.setBoardColumn(testBoard.getBoardColumns().get(2));
+        taskRepository.save(testCompletedTask);
+
+        BoardDetailDto response = boardsController.getBoard(testBoard.getId());
+
+        assert response.getId().equals(testBoard.getId());
+        assert response.getTitle().equals(testBoard.getTitle());
+
+        for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
+            BoardColumn columnEntity = testBoard.getBoardColumns().get(i);
+            BoardColumnDto columnDto = response.getBoardColumns().get(i);
+            assert columnEntity.getId().equals(columnDto.getId());
+            assert columnEntity.getTitle().equals(columnDto.getTitle());
+
+            for (int j = 0; j < columnEntity.getTasks().size(); j++) {
+                Task taskEntity = columnEntity.getTasks().get(j);
+                BoardTaskDto taskDto = columnDto.getTasks().get(j);
+
+                assert taskEntity.getId().equals(taskDto.getId());
+                assert taskEntity.getTitle().equals(taskDto.getTitle());
+            }
         }
     }
 

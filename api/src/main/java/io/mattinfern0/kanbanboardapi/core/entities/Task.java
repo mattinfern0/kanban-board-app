@@ -9,6 +9,7 @@ import java.util.UUID;
 @Table(name = "task")
 public class Task {
     @Id
+    @GeneratedValue
     UUID id;
 
     @ManyToOne
@@ -64,7 +65,15 @@ public class Task {
         return boardColumn;
     }
 
-    public void setBoardColumn(BoardColumn boardColumn) {
-        this.boardColumn = boardColumn;
+    public void setBoardColumn(BoardColumn newBoardColumn) {
+        if (this.boardColumn != null) {
+            this.boardColumn.getTasks().remove(this);
+        }
+
+        if (newBoardColumn != null) {
+            newBoardColumn.getTasks().add(this);
+        }
+
+        this.boardColumn = newBoardColumn;
     }
 }
