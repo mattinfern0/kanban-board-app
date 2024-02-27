@@ -45,6 +45,14 @@ public class BoardColumn {
     }
 
     public void setBoard(Board board) {
+        if (this.board != null) {
+            this.board.getBoardColumns().remove(this);
+        }
+
+        if (board != null) {
+            board.getBoardColumns().add(this);
+        }
+
         this.board = board;
     }
 

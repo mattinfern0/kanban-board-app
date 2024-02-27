@@ -58,4 +58,12 @@ public class Board {
     public void setBoardColumns(List<BoardColumn> boardColumns) {
         this.boardColumns = boardColumns;
     }
+
+    public void addBoardColumn(BoardColumn boardColumn) {
+        boardColumn.setBoard(this);
+    }
+
+    public void removeBoardColumn(BoardColumn boardColumn) {
+        boardColumn.setBoard(null);
+    }
 }
