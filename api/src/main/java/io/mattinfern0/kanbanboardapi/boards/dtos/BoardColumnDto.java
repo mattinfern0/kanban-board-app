@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.boards.dtos;
 
+import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -10,6 +11,9 @@ public class BoardColumnDto {
 
     @NotNull
     String title;
+
+    @NotNull
+    TaskStatusCode taskStatus;
 
     List<BoardTaskDto> tasks;
 
@@ -35,5 +39,13 @@ public class BoardColumnDto {
 
     public void setTasks(List<BoardTaskDto> tasks) {
         this.tasks = tasks;
+    }
+
+    public TaskStatusCode getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatusCode taskStatus) {
+        this.taskStatus = taskStatus;
     }
 }

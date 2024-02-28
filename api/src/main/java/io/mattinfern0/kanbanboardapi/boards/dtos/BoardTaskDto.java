@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.boards.dtos;
 
+import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
@@ -12,6 +13,9 @@ public class BoardTaskDto {
 
     @NotNull
     String description;
+
+    @NotNull
+    TaskStatusCode status;
 
     public UUID getId() {
         return id;
@@ -35,5 +39,13 @@ public class BoardTaskDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public TaskStatusCode getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatusCode status) {
+        this.status = status;
     }
 }

@@ -20,6 +20,14 @@ public class TaskStatus {
     @NaturalId
     TaskStatusCode codename;
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public TaskStatusCode getCodename() {
         return codename;
     }

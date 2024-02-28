@@ -29,6 +29,11 @@ public class BoardColumn {
     @Column(name = "display_order")
     Integer displayOrder;
 
+    @ManyToOne
+    @JoinColumn(name = "task_status_id")
+    @NotNull
+    TaskStatus taskStatus;
+
     @OneToMany(mappedBy = "boardColumn")
     List<Task> tasks = new ArrayList<>();
 
@@ -86,5 +91,13 @@ public class BoardColumn {
 
     public void removeTask(Task task) {
         task.setBoardColumn(null);
+    }
+
+    public TaskStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
     }
 }

@@ -15,7 +15,9 @@ public interface BoardDetailDtoMapper {
     @Mapping(target = "organizationId", source = "organization.id")
     BoardDetailDto boardToBoardDetailDto(Board board);
 
+    @Mapping(target = "taskStatus", source = "taskStatus.codename")
     BoardColumnDto boardColumnToBoardColumnDto(BoardColumn column);
 
+    @Mapping(target = "status", source = "taskStatus.codename")
     BoardTaskDto taskToTaskDto(Task task);
 }

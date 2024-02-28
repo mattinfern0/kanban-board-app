@@ -7,10 +7,7 @@ import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
-import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
-import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
-import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
-import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
+import io.mattinfern0.kanbanboardapi.core.repositories.*;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,16 +32,19 @@ public class BoardsControllerIntegrationTest {
 
     final TaskRepository taskRepository;
 
+    final TaskStatusRepository taskStatusRepository;
+
     final EntityManager entityManager;
 
     final BoardsController boardsController;
 
     @Autowired
-    public BoardsControllerIntegrationTest(OrganizationRepository organizationRepository, BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, TaskRepository taskRepository, EntityManager entityManager, BoardsController boardsController) {
+    public BoardsControllerIntegrationTest(OrganizationRepository organizationRepository, BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, TaskRepository taskRepository, TaskStatusRepository taskStatusRepository, EntityManager entityManager, BoardsController boardsController) {
         this.organizationRepository = organizationRepository;
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
         this.taskRepository = taskRepository;
+        this.taskStatusRepository = taskStatusRepository;
         this.entityManager = entityManager;
         this.boardsController = boardsController;
     }
