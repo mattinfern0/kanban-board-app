@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
+import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -28,6 +29,11 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "board_column_id")
     BoardColumn boardColumn;
+
+    @ManyToOne
+    @JoinColumn(name = "task_status_id")
+    @NotNull
+    TaskStatus taskStatus;
 
     public UUID getId() {
         return id;
@@ -75,5 +81,13 @@ public class Task {
         }
 
         this.boardColumn = newBoardColumn;
+    }
+
+    public TaskStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
     }
 }
