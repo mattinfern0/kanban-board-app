@@ -7,7 +7,9 @@ import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
+import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.repositories.*;
+import io.mattinfern0.kanbanboardapi.tasks.TaskStatusService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +40,10 @@ public class BoardsControllerIntegrationTest {
 
     final BoardsController boardsController;
 
+    final TaskStatusService taskStatusService;
+
     @Autowired
-    public BoardsControllerIntegrationTest(OrganizationRepository organizationRepository, BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, TaskRepository taskRepository, TaskStatusRepository taskStatusRepository, EntityManager entityManager, BoardsController boardsController) {
+    public BoardsControllerIntegrationTest(OrganizationRepository organizationRepository, BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, TaskRepository taskRepository, TaskStatusRepository taskStatusRepository, EntityManager entityManager, BoardsController boardsController, TaskStatusService taskStatusService) {
         this.organizationRepository = organizationRepository;
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
@@ -47,6 +51,7 @@ public class BoardsControllerIntegrationTest {
         this.taskStatusRepository = taskStatusRepository;
         this.entityManager = entityManager;
         this.boardsController = boardsController;
+        this.taskStatusService = taskStatusService;
     }
 
 
@@ -69,8 +74,10 @@ public class BoardsControllerIntegrationTest {
     }
 
     @BeforeEach
+    @Transactional
     void beforeEach() {
         clearRepositories();
+        createDefaultTaskStatuses();
     }
 
     void clearRepositories() {
@@ -78,6 +85,15 @@ public class BoardsControllerIntegrationTest {
         boardRepository.deleteAll();
         boardColumnRepository.deleteAll();
         taskRepository.deleteAll();
+        taskStatusRepository.deleteAll();
+    }
+
+    void createDefaultTaskStatuses() {
+        taskStatusService.findOrCreate(TaskStatusCode.BACKLOG);
+        taskStatusService.findOrCreate(TaskStatusCode.TODO);
+        taskStatusService.findOrCreate(TaskStatusCode.IN_PROGRESS);
+        taskStatusService.findOrCreate(TaskStatusCode.COMPLETED);
+        taskStatusService.findOrCreate(TaskStatusCode.OTHER);
     }
 
     Board createTestBoard() {
@@ -93,16 +109,19 @@ public class BoardsControllerIntegrationTest {
         testTodoColumn.setBoard(testBoard);
         testTodoColumn.setDisplayOrder(1);
         testTodoColumn.setTitle("Todo");
+        testTodoColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.TODO));
 
         BoardColumn testInProgressColumn = new BoardColumn();
         testInProgressColumn.setBoard(testBoard);
         testInProgressColumn.setDisplayOrder(1);
-        testInProgressColumn.setTitle("Todo");
+        testInProgressColumn.setTitle("In Progress");
+        testInProgressColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.IN_PROGRESS));
 
         BoardColumn testCompletedColumn = new BoardColumn();
         testCompletedColumn.setBoard(testBoard);
         testCompletedColumn.setDisplayOrder(1);
         testCompletedColumn.setTitle("Completed");
+        testCompletedColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.COMPLETED));
 
         organizationRepository.save(testOrganization);
         boardRepository.save(testBoard);
