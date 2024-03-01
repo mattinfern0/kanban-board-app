@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.core.entities;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.UUID;
 
@@ -76,8 +77,12 @@ public class Task {
             this.boardColumn.getTasks().remove(this);
         }
 
-        if (newBoardColumn != null && !newBoardColumn.getTasks().contains(this)) {
-            newBoardColumn.getTasks().add(this);
+        if (newBoardColumn != null) {
+            if (!newBoardColumn.getTasks().contains(this)) {
+                newBoardColumn.getTasks().add(this);
+            }
+
+            this.setTaskStatus(newBoardColumn.getTaskStatus());
         }
 
         this.boardColumn = newBoardColumn;
@@ -88,6 +93,17 @@ public class Task {
     }
 
     public void setTaskStatus(TaskStatus taskStatus) {
+
+        if (this.getBoardColumn() != null && !this.getBoardColumn().getTaskStatus().equals(taskStatus)) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "taskStatus %s is not consistent with column's status (%s)",
+                    taskStatus,
+                    this.getBoardColumn().getTaskStatus()
+                )
+            );
+        }
+
         this.taskStatus = taskStatus;
     }
 }

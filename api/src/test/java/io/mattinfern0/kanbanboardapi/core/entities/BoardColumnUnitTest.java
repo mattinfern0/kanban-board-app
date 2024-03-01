@@ -56,8 +56,14 @@ class BoardColumnUnitTest {
 
     @Test
     void addTask_removesOldColumn_taskAlreadyHasAColumn() {
+        TaskStatus testStatus = new TaskStatus();
+
         BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(testStatus);
+
         BoardColumn oldColumn = new BoardColumn();
+        oldColumn.setTaskStatus(testStatus);
+
         Task testTask = new Task();
         testTask.setBoardColumn(oldColumn);
 
