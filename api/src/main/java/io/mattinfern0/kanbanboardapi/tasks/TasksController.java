@@ -36,4 +36,10 @@ public class TasksController {
     public TaskDetailDto getTaskDetail(@PathVariable UUID taskId) {
         return taskService.getTaskDetail(taskId);
     }
+
+    @DeleteMapping("/{taskId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTask(@PathVariable UUID taskId) {
+        taskService.deleteTask(taskId);
+    }
 }

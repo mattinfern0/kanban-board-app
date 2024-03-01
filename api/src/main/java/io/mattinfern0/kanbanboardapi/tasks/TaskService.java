@@ -59,6 +59,10 @@ public class TaskService {
         return taskDtoMapper.taskToTaskDetailDto(newTask);
     }
 
+    public void deleteTask(UUID taskId) {
+        taskRepository.deleteById(taskId);
+    }
+
     Task taskFromCreateTaskDto(CreateTaskDto createTaskDto) {
         Task newTask = new Task();
         newTask.setId(UUID.randomUUID());
