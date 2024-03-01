@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,6 +39,17 @@ public class TaskService {
         this.organizationRepository = organizationRepository;
         this.taskStatusService = taskStatusService;
         this.taskDtoMapper = taskDtoMapper;
+    }
+
+    public List<TaskDetailDto> getTaskList() {
+        List<Task> taskEntities = taskRepository.findAll();
+        return taskDtoMapper.taskListToTaskDetailDtoList(taskEntities);
+    }
+
+    public TaskDetailDto getTaskDetail(UUID taskId) {
+        Task entity = taskRepository.findById(taskId)
+            .orElseThrow(() -> new EntityNotFoundException(String.format("Task with id %s not found", taskId)));
+        return taskDtoMapper.taskToTaskDetailDto(entity);
     }
 
     @Transactional
