@@ -10,6 +10,7 @@ import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+@Tag("UnitTest")
 @ExtendWith(MockitoExtension.class)
 class TaskServiceUnitTest {
 
