@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("UnitTest")
 @ExtendWith(MockitoExtension.class)
@@ -135,7 +135,7 @@ class BoardsServiceUnitTest {
 
         BoardDetailDto result = boardsService.createNewBoard(createBoardDto);
 
-        for (BoardColumnDto columnDto: result.getBoardColumns()) {
+        for (BoardColumnDto columnDto : result.getBoardColumns()) {
             assert columnDto.getTasks().isEmpty();
         }
     }

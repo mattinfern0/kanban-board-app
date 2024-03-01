@@ -1,9 +1,7 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
-import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.UUID;
 

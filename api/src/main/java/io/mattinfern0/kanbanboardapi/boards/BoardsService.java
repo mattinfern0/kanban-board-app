@@ -68,7 +68,7 @@ public class BoardsService {
         boardRepository.save(newBoard);
 
         List<BoardColumn> newColumns = createDefaultNewBoardColumns();
-        for (BoardColumn column: newColumns) {
+        for (BoardColumn column : newColumns) {
             column.setBoard(newBoard);
             boardColumnRepository.save(column);
         }
