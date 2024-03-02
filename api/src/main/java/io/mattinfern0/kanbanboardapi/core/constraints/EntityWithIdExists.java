@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {EntityWithIdExistsUUIDValidator.class})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EntityWithIdExists {
-    String message() default "{entityClass} entity with id ${validatedValue} does not exist";
+    String message() default "Entity with id ${validatedValue} not found";
 
     Class<?>[] groups() default {};
 
