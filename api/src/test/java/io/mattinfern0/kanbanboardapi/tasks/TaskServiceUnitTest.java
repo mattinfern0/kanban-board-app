@@ -131,9 +131,6 @@ class TaskServiceUnitTest {
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
             .thenReturn(Optional.of(testColumn));
 
-        Mockito.when(taskStatusService.findOrCreate(testColumnStatusCode))
-            .thenReturn(testColumnTaskStatus);
-
         TaskDetailDto result = taskService.createTask(testCreate);
         assert result.getStatus().equals(testColumnStatusCode);
     }

@@ -3,7 +3,6 @@ package io.mattinfern0.kanbanboardapi.tasks;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
-import io.mattinfern0.kanbanboardapi.core.entities.TaskStatus;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
@@ -76,27 +75,24 @@ public class TaskService {
             ));
         newTask.setOrganization(organization);
 
-        BoardColumn boardColumn = null;
-        TaskStatus status = null;
-        if (createTaskDto.getStatus() != null) {
-            status = taskStatusService.findOrCreate(createTaskDto.getStatus());
-        }
-
         if (createTaskDto.getBoardColumnId() != null) {
-            boardColumn = boardColumnRepository
+            BoardColumn boardColumn = boardColumnRepository
                 .findById(createTaskDto.getBoardColumnId())
                 .orElseThrow(() -> new EntityNotFoundException(
                     String.format("BoardColumn with id %s not found", createTaskDto.getBoardColumnId())
                 ));
-            status = taskStatusService.findOrCreate(boardColumn.getTaskStatus().getCodename());
+            boardColumn.addTask(newTask);
         }
 
-        if (status == null) {
-            status = taskStatusService.findOrCreate(DEFAULT_TASK_STATUS_CODE);
+        if (newTask.getTaskStatus() == null) {
+            TaskStatusCode statusCode = DEFAULT_TASK_STATUS_CODE;
+            if (createTaskDto.getStatus() != null) {
+                statusCode = createTaskDto.getStatus();
+            }
+
+            newTask.setTaskStatus(taskStatusService.findOrCreate(statusCode));
         }
 
-        newTask.setBoardColumn(boardColumn);
-        newTask.setTaskStatus(status);
         return newTask;
     }
 }

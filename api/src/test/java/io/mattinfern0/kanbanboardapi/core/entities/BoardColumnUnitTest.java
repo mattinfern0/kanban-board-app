@@ -3,6 +3,8 @@ package io.mattinfern0.kanbanboardapi.core.entities;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 @Tag("UnitTest")
 class BoardColumnUnitTest {
 
@@ -37,6 +39,7 @@ class BoardColumnUnitTest {
     @Test
     void addTask_setsProperty() {
         BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
         Task testTask = new Task();
 
         testColumn.addTask(testTask);
@@ -47,11 +50,42 @@ class BoardColumnUnitTest {
     @Test
     void addTask_addsTaskToTaskList() {
         BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
         Task testTask = new Task();
 
         testColumn.addTask(testTask);
 
         assert testColumn.getTasks().contains(testTask);
+    }
+
+    @Test
+    void addTask_syncsTaskStatusWithColumn() {
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
+
+        for (int i = 0; i < 3; i++) {
+            testColumn.addTask(new Task());
+        }
+
+        Task testTask = new Task();
+        testColumn.addTask(testTask);
+
+        assert testTask.getTaskStatus().equals(testColumn.getTaskStatus());
+    }
+
+    @Test
+    void addTask_setsTaskColumnOrderToLast() {
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
+
+        for (int i = 0; i < 3; i++) {
+            testColumn.addTask(new Task());
+        }
+
+        Task testTask = new Task();
+        testColumn.addTask(testTask);
+
+        assert Objects.equals(testTask.getBoardColumnOrder(), 3);
     }
 
     @Test
@@ -76,6 +110,7 @@ class BoardColumnUnitTest {
     @Test
     void removeTask_setsProperty() {
         BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
         Task testTask = new Task();
         testColumn.addTask(testTask);
 
@@ -87,11 +122,38 @@ class BoardColumnUnitTest {
     @Test
     void removeTask_removesTaskToTaskList() {
         BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
         Task testTask = new Task();
         testColumn.addTask(testTask);
 
         testColumn.removeTask(testTask);
 
         assert !testColumn.getTasks().contains(testTask);
+    }
+
+    @Test
+    void removeTask_setsTaskColumnOrderToNull() {
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
+        Task testTask = new Task();
+        testColumn.addTask(testTask);
+
+        testColumn.removeTask(testTask);
+
+        assert testTask.getBoardColumnOrder() == null;
+    }
+
+    @Test
+    void removeTask_keepsTaskStatus() {
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
+        Task testTask = new Task();
+        testColumn.addTask(testTask);
+
+        TaskStatus oldStatus = testTask.getTaskStatus();
+
+        testColumn.removeTask(testTask);
+
+        assert testTask.getTaskStatus().equals(oldStatus);
     }
 }

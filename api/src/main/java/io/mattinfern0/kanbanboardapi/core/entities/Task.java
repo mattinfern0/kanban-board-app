@@ -84,18 +84,6 @@ public class Task {
     }
 
     public void setBoardColumn(BoardColumn newBoardColumn) {
-        if (this.boardColumn != null) {
-            this.boardColumn.getTasks().remove(this);
-        }
-
-        if (newBoardColumn != null) {
-            if (!newBoardColumn.getTasks().contains(this)) {
-                newBoardColumn.getTasks().add(this);
-            }
-
-            this.setTaskStatus(newBoardColumn.getTaskStatus());
-        }
-
         this.boardColumn = newBoardColumn;
     }
 

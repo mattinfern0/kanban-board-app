@@ -8,66 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Tag("UnitTest")
 class TaskUnitTest {
     @Test
-    void setBoardColumn_setsProperty() {
-        BoardColumn testColumn = new BoardColumn();
-        Task testTask = new Task();
-
-        testTask.setBoardColumn(testColumn);
-        assert testTask.getBoardColumn().equals(testColumn);
-    }
-
-    @Test
-    void setBoardColumn_addsTaskToTaskList_boardColumnNotNull() {
-        BoardColumn testColumn = new BoardColumn();
-        Task testTask = new Task();
-
-        testTask.setBoardColumn(testColumn);
-        assert testColumn.getTasks().contains(testTask);
-    }
-
-    @Test
-    void setBoard_removesColumnFromOldBoardColumnList_oldBoardNotNull() {
-        TaskStatus testStatus = new TaskStatus();
-        BoardColumn testColumn = new BoardColumn();
-        testColumn.setTaskStatus(testStatus);
-        BoardColumn oldColumn = new BoardColumn();
-        oldColumn.setTaskStatus(testStatus);
-
-
-        Task testTask = new Task();
-        testTask.setBoardColumn(oldColumn);
-        testTask.setBoardColumn(testColumn);
-        assert !oldColumn.getTasks().contains(testTask);
-    }
-
-    @Test
-    void setBoardColumn_setsTaskStatusToColumnsStatus_ifColumnNotNull() {
-        BoardColumn testColumn = new BoardColumn();
-        Task testTask = new Task();
-        TaskStatus oldStatus = new TaskStatus();
-        testTask.setTaskStatus(oldStatus);
-
-
-        TaskStatus columnStatus = new TaskStatus();
-        testColumn.setTaskStatus(columnStatus);
-
-        testTask.setBoardColumn(testColumn);
-        assert testTask.getTaskStatus().equals(testColumn.getTaskStatus());
-    }
-
-    @Test
-    void setBoardColumn_doesNotChangeStatus_ifColumnIsNull() {
-        Task testTask = new Task();
-        TaskStatus oldStatus = new TaskStatus();
-        testTask.setTaskStatus(oldStatus);
-
-        testTask.setBoardColumn(null);
-        assert testTask.getTaskStatus().equals(oldStatus);
-    }
-
-    @Test
     void setTaskStatus_throwsError_ifStatusNotMatchColumnAndColumnIsNotNull() {
         BoardColumn testColumn = new BoardColumn();
+        TaskStatus testTaskStatus = new TaskStatus();
+        testColumn.setTaskStatus(testTaskStatus);
+
         Task testTask = new Task();
 
         TaskStatus otherStatus = new TaskStatus();

@@ -88,10 +88,17 @@ public class BoardColumn {
 
     public void addTask(Task task) {
         task.setBoardColumn(this);
+        task.setTaskStatus(this.taskStatus);
+
+        // Set task to last in order
+        task.setBoardColumnOrder(tasks.size());
+        tasks.add(task);
     }
 
     public void removeTask(Task task) {
         task.setBoardColumn(null);
+        task.setBoardColumnOrder(null);
+        tasks.remove(task);
     }
 
     public TaskStatus getTaskStatus() {
