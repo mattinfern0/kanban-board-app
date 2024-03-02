@@ -1,8 +1,12 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
@@ -11,6 +15,10 @@ public class Task {
     @Id
     @GeneratedValue
     UUID id;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    ZonedDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "organization_id")
@@ -28,6 +36,11 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "board_column_id")
     BoardColumn boardColumn;
+
+    @Nullable
+    @Column(name = "board_column_order")
+    @Min(0)
+    Integer boardColumnOrder;
 
     @ManyToOne
     @JoinColumn(name = "task_status_id")
@@ -86,6 +99,15 @@ public class Task {
         this.boardColumn = newBoardColumn;
     }
 
+    @Nullable
+    public Integer getBoardColumnOrder() {
+        return boardColumnOrder;
+    }
+
+    public void setBoardColumnOrder(@Nullable Integer boardColumnOrder) {
+        this.boardColumnOrder = boardColumnOrder;
+    }
+
     public TaskStatus getTaskStatus() {
         return taskStatus;
     }
@@ -103,5 +125,13 @@ public class Task {
         }
 
         this.taskStatus = taskStatus;
+    }
+
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(ZonedDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

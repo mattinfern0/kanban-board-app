@@ -35,6 +35,7 @@ public class BoardColumn {
     TaskStatus taskStatus;
 
     @OneToMany(mappedBy = "boardColumn")
+    @OrderBy("boardColumnOrder")
     List<Task> tasks = new ArrayList<>();
 
     public UUID getId() {

@@ -4,11 +4,14 @@ import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class TaskDetailDto {
 
     UUID id;
+
+    ZonedDateTime createdAt;
     @NotNull
     UUID organizationId;
 
@@ -29,6 +32,14 @@ public class TaskDetailDto {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(ZonedDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public UUID getOrganizationId() {
