@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.constraints;
 
+import io.mattinfern0.kanbanboardapi.core.validators.EntityWithIdExistsUUIDValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

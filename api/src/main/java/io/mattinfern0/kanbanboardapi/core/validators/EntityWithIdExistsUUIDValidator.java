@@ -1,5 +1,6 @@
-package io.mattinfern0.kanbanboardapi.core.constraints;
+package io.mattinfern0.kanbanboardapi.core.validators;
 
+import io.mattinfern0.kanbanboardapi.core.constraints.EntityWithIdExists;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

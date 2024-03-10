@@ -27,33 +27,57 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         List<FieldError> fieldErrors = result.getFieldErrors();
         List<ObjectError> globalErrors = result.getGlobalErrors();
 
-        List<FieldErrorItem> errorItems = new ArrayList<>();
+        List<FieldErrorSummary> errorItems = new ArrayList<>();
         fieldErrors.forEach((fieldError) -> {
-            errorItems.add(new FieldErrorItem(fieldError));
+            errorItems.add(new FieldErrorSummary(fieldError));
         });
 
+        List<NonFieldErrorSummary> globalErrorSummaries = globalErrors
+            .stream()
+            .map(NonFieldErrorSummary::new)
+            .toList();
+
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Bad Request");
-        problemDetail.setProperty("globalErrors", globalErrors);
+        problemDetail.setProperty("globalErrors", globalErrorSummaries);
         problemDetail.setProperty("fieldErrors", errorItems);
         return this.handleExceptionInternal(ex, problemDetail, headers, status, request);
     }
 }
 
-class FieldErrorItem {
+class FieldErrorSummary {
     @JsonProperty("field")
     String field;
+
+    @JsonProperty("code")
+    String code;
 
     @JsonProperty("message")
     String message;
 
-    public FieldErrorItem(String field, String message) {
+    public FieldErrorSummary(String field, String code, String message) {
         this.field = field;
+        this.code = code;
         this.message = message;
     }
 
-    public FieldErrorItem(FieldError error) {
-        this(error.getField(), error.getDefaultMessage());
+    public FieldErrorSummary(FieldError error) {
+        this(error.getField(), error.getCode(), error.getDefaultMessage());
+    }
+}
+
+class NonFieldErrorSummary {
+    @JsonProperty("code")
+    String code;
+
+    @JsonProperty("message")
+    String message;
+
+    public NonFieldErrorSummary(String code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
-
+    public NonFieldErrorSummary(ObjectError error) {
+        this(error.getCode(), error.getDefaultMessage());
+    }
 }

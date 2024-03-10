@@ -1,6 +1,7 @@
 package io.mattinfern0.kanbanboardapi.tasks.dtos;
 
 import io.mattinfern0.kanbanboardapi.core.constraints.EntityWithIdExists;
+import io.mattinfern0.kanbanboardapi.core.constraints.TaskColumnAndStatusComboValid;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
+@TaskColumnAndStatusComboValid
 public class CreateTaskDto {
     @NotNull
     @EntityWithIdExists(entityClass = Organization.class)
