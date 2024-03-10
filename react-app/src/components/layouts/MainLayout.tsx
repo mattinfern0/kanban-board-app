@@ -8,7 +8,7 @@ interface MainLayoutProps {
 export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <>
-      <AppBar position="static" p>
+      <AppBar position="static">
         <Toolbar>
           <Typography variant="h6">Kanban App</Typography>
         </Toolbar>
