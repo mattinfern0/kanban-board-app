@@ -70,6 +70,9 @@ public class TaskService {
     }
 
     public void deleteTask(UUID taskId) {
+        if (!taskRepository.existsById(taskId)) {
+            throw new EntityNotFoundException(String.format("Task with id %s not found", taskId));
+        }
         taskRepository.deleteById(taskId);
     }
 
