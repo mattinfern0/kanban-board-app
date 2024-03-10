@@ -69,6 +69,7 @@ public class BoardsControllerIntegrationTest {
         registry.add("spring.datasource.username", postgresContainer::getUsername);
         registry.add("spring.datasource.password", postgresContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.liquibase.enabled", () -> false);
     }
 
     @BeforeEach
