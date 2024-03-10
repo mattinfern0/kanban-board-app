@@ -10,7 +10,12 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "task")
+@Table(
+    name = "task",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"board_column_id", "board_column_order"})
+    }
+)
 public class Task {
     @Id
     @GeneratedValue

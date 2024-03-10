@@ -90,8 +90,10 @@ public class BoardColumn {
         task.setBoardColumn(this);
         task.setTaskStatus(this.taskStatus);
 
+        int maxOrder = tasks.stream().mapToInt(Task::getBoardColumnOrder).max().orElse(0);
+
         // Set task to last in order
-        task.setBoardColumnOrder(tasks.size());
+        task.setBoardColumnOrder(maxOrder + 1);
         tasks.add(task);
     }
 

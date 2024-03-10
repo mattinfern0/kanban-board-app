@@ -3,7 +3,10 @@ package io.mattinfern0.kanbanboardapi.core.entities;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Tag("UnitTest")
 class BoardColumnUnitTest {
@@ -78,14 +81,48 @@ class BoardColumnUnitTest {
         BoardColumn testColumn = new BoardColumn();
         testColumn.setTaskStatus(new TaskStatus());
 
+        Random r = new Random();
+
         for (int i = 0; i < 3; i++) {
-            testColumn.addTask(new Task());
+            Task existingTask = new Task();
+            testColumn.addTask(existingTask);
         }
+
 
         Task testTask = new Task();
         testColumn.addTask(testTask);
 
-        assert Objects.equals(testTask.getBoardColumnOrder(), 3);
+        List<Task> resultTasks = testColumn.getTasks();
+
+        resultTasks.sort(Comparator.comparingInt(Task::getBoardColumnOrder));
+
+        assert Objects.equals(testTask, resultTasks.get(resultTasks.size() - 1));
+    }
+
+    @Test
+    void addTask_setsTaskColumnOrderToLastEvenWithWeirdColumnOrders() {
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
+
+        Random r = new Random();
+
+        for (int i = 0; i < 3; i++) {
+            Task existingTask = new Task();
+            testColumn.addTask(existingTask);
+        }
+        // Column order values may be arbitrary
+        testColumn.getTasks().forEach((t) -> {
+            t.setBoardColumnOrder(Math.abs(r.nextInt()));
+        });
+
+        Task testTask = new Task();
+        testColumn.addTask(testTask);
+
+        List<Task> resultTasks = testColumn.getTasks();
+
+        resultTasks.sort(Comparator.comparingInt(Task::getBoardColumnOrder));
+
+        assert Objects.equals(testTask, resultTasks.get(resultTasks.size() - 1));
     }
 
     @Test
