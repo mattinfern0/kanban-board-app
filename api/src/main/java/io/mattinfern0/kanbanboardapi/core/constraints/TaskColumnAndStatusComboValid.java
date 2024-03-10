@@ -1,7 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.constraints;
 
 import io.mattinfern0.kanbanboardapi.core.validators.TaskEntityColumnAndStatusValidator;
-import io.mattinfern0.kanbanboardapi.tasks.validators.CreateUpdateTaskColumnStatusValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -12,7 +11,6 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Constraint(validatedBy = {
-    CreateUpdateTaskColumnStatusValidator.class,
     TaskEntityColumnAndStatusValidator.class
 })
 @Retention(RetentionPolicy.RUNTIME)

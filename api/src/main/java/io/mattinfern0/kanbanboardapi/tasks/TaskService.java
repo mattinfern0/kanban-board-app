@@ -59,6 +59,10 @@ public class TaskService {
     }
 
     public TaskDetailDto updateTask(UUID taskId, @Valid CreateUpdateTaskDto createUpdateTaskDto) {
+        if (!taskRepository.existsById(taskId)) {
+            throw new EntityNotFoundException(String.format("Task with id %s not found", taskId));
+        }
+
         Task task = taskFromCreateTaskDto(createUpdateTaskDto);
         task.setId(taskId);
         taskRepository.save(task);

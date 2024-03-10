@@ -10,6 +10,7 @@ import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("UnitTest")
 @ExtendWith(MockitoExtension.class)
@@ -133,5 +136,129 @@ class TaskServiceUnitTest {
 
         TaskDetailDto result = taskService.createTask(testCreate);
         assert result.getStatus().equals(testColumnStatusCode);
+    }
+
+    @Test
+    void updateTask__worksWithNoColumn() {
+        Organization testOrganization = new Organization();
+        testOrganization.setId(UUID.randomUUID());
+
+        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+        TaskStatus testTaskStatus = new TaskStatus();
+        testTaskStatus.setCodename(testStatusCode);
+
+        UUID testTaskId = UUID.randomUUID();
+
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
+        testUpdateDto.setOrganizationId(testOrganization.getId());
+        testUpdateDto.setTitle("Test Task");
+        testUpdateDto.setDescription("Test Description");
+        testUpdateDto.setStatus(testStatusCode);
+        testUpdateDto.setBoardColumnId(null);
+
+        Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
+
+        Mockito.when(
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+        );
+
+        Mockito.when(
+            taskStatusService.findOrCreate(testStatusCode)
+        ).thenReturn(testTaskStatus);
+
+        TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
+        assert result.getOrganizationId().equals(testUpdateDto.getOrganizationId());
+        assert result.getTitle().equals(testUpdateDto.getTitle());
+        assert result.getDescription().equals(testUpdateDto.getDescription());
+        assert result.getStatus().equals(testUpdateDto.getStatus());
+    }
+
+    @Test
+    void updateTask__setsStatusToDefault_whenStatusAndColumnAreNull() {
+        Organization testOrganization = new Organization();
+        testOrganization.setId(UUID.randomUUID());
+
+        UUID testTaskId = UUID.randomUUID();
+
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
+        testUpdateDto.setOrganizationId(testOrganization.getId());
+        testUpdateDto.setTitle("Test Task");
+        testUpdateDto.setDescription("Test Description");
+        testUpdateDto.setStatus(null);
+        testUpdateDto.setBoardColumnId(null);
+
+        TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
+        TaskStatus defaultTaskStatus = new TaskStatus();
+        defaultTaskStatus.setCodename(defaultStatusCode);
+
+        Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
+
+        Mockito.when(
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+        );
+
+        Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
+
+
+        TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
+        assert result.getStatus().equals(defaultStatusCode);
+    }
+
+    @Test
+    void updateTask__setsStatusToColumnStatus_whenStatusAndColumnAreNotNull() {
+        Organization testOrganization = new Organization();
+        testOrganization.setId(UUID.randomUUID());
+
+        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+        TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+        TaskStatus testColumnTaskStatus = new TaskStatus();
+        testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setId(UUID.randomUUID());
+        testColumn.setTaskStatus(testColumnTaskStatus);
+
+        UUID testTaskId = UUID.randomUUID();
+
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
+        testUpdateDto.setOrganizationId(testOrganization.getId());
+        testUpdateDto.setTitle("Test Task");
+        testUpdateDto.setDescription("Test Description");
+        testUpdateDto.setStatus(testStatusCode);
+        testUpdateDto.setBoardColumnId(testColumn.getId());
+
+        Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
+
+        Mockito.when(organizationRepository.findById(testOrganization.getId()))
+            .thenReturn(Optional.of(testOrganization));
+
+        Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+            .thenReturn(Optional.of(testColumn));
+
+        TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
+        assert result.getStatus().equals(testColumnStatusCode);
+    }
+
+    @Test
+    void updateTask__throwsErrorIfTaskWithTaskIdDoesNotExist() {
+        Organization testOrganization = new Organization();
+        testOrganization.setId(UUID.randomUUID());
+
+        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+        UUID testTaskId = UUID.randomUUID();
+
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
+        testUpdateDto.setOrganizationId(testOrganization.getId());
+        testUpdateDto.setTitle("Test Task");
+        testUpdateDto.setDescription("Test Description");
+        testUpdateDto.setStatus(testStatusCode);
+
+        Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            taskService.updateTask(testTaskId, testUpdateDto);
+        });
     }
 }

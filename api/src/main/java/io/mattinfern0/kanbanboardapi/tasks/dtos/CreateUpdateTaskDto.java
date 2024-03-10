@@ -1,7 +1,6 @@
 package io.mattinfern0.kanbanboardapi.tasks.dtos;
 
 import io.mattinfern0.kanbanboardapi.core.constraints.EntityWithIdExists;
-import io.mattinfern0.kanbanboardapi.core.constraints.TaskColumnAndStatusComboValid;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-@TaskColumnAndStatusComboValid
 public class CreateUpdateTaskDto {
     @NotNull
     @EntityWithIdExists(entityClass = Organization.class)
@@ -26,6 +24,7 @@ public class CreateUpdateTaskDto {
     @EntityWithIdExists(entityClass = BoardColumn.class)
     UUID boardColumnId;
 
+    // If column and status are both not null, system should prioritize column's status
     @Nullable
     TaskStatusCode status;
 
