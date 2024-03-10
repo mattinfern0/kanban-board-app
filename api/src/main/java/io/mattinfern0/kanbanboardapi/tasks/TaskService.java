@@ -7,7 +7,7 @@ import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateTaskDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -52,42 +52,49 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDetailDto createTask(@Valid CreateTaskDto createTaskDto) {
-        Task newTask = taskFromCreateTaskDto(createTaskDto);
+    public TaskDetailDto createTask(@Valid CreateUpdateTaskDto createUpdateTaskDto) {
+        Task newTask = taskFromCreateTaskDto(createUpdateTaskDto);
         taskRepository.save(newTask);
         return taskDtoMapper.taskToTaskDetailDto(newTask);
+    }
+
+    public TaskDetailDto updateTask(UUID taskId, @Valid CreateUpdateTaskDto createUpdateTaskDto) {
+        Task task = taskFromCreateTaskDto(createUpdateTaskDto);
+        task.setId(taskId);
+        taskRepository.save(task);
+        return taskDtoMapper.taskToTaskDetailDto(task);
     }
 
     public void deleteTask(UUID taskId) {
         taskRepository.deleteById(taskId);
     }
 
-    Task taskFromCreateTaskDto(CreateTaskDto createTaskDto) {
+    Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDto) {
         Task newTask = new Task();
         newTask.setId(UUID.randomUUID());
-        newTask.setTitle(createTaskDto.getTitle());
-        newTask.setDescription(createTaskDto.getDescription());
+        newTask.setTitle(createUpdateTaskDto.getTitle());
+        newTask.setDescription(createUpdateTaskDto.getDescription());
 
         Organization organization = organizationRepository
-            .findById(createTaskDto.getOrganizationId())
+            .findById(createUpdateTaskDto.getOrganizationId())
             .orElseThrow(() -> new EntityNotFoundException(
-                String.format("Organization with id %s not found", createTaskDto.getOrganizationId())
+                String.format("Organization with id %s not found", createUpdateTaskDto.getOrganizationId())
             ));
         newTask.setOrganization(organization);
 
-        if (createTaskDto.getBoardColumnId() != null) {
+        if (createUpdateTaskDto.getBoardColumnId() != null) {
             BoardColumn boardColumn = boardColumnRepository
-                .findById(createTaskDto.getBoardColumnId())
+                .findById(createUpdateTaskDto.getBoardColumnId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                    String.format("BoardColumn with id %s not found", createTaskDto.getBoardColumnId())
+                    String.format("BoardColumn with id %s not found", createUpdateTaskDto.getBoardColumnId())
                 ));
             boardColumn.addTask(newTask);
         }
 
         if (newTask.getTaskStatus() == null) {
             TaskStatusCode statusCode = DEFAULT_TASK_STATUS_CODE;
-            if (createTaskDto.getStatus() != null) {
-                statusCode = createTaskDto.getStatus();
+            if (createUpdateTaskDto.getStatus() != null) {
+                statusCode = createUpdateTaskDto.getStatus();
             }
 
             newTask.setTaskStatus(taskStatusService.findOrCreate(statusCode));

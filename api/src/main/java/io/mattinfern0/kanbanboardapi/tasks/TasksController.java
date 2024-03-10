@@ -1,6 +1,6 @@
 package io.mattinfern0.kanbanboardapi.tasks;
 
-import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateTaskDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +28,21 @@ public class TasksController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskDetailDto createTask(@Valid @RequestBody CreateTaskDto createTaskDto) {
-        return taskService.createTask(createTaskDto);
+    public TaskDetailDto createTask(@Valid @RequestBody CreateUpdateTaskDto createUpdateTaskDto) {
+        return taskService.createTask(createUpdateTaskDto);
     }
 
     @GetMapping("/{taskId}")
     public TaskDetailDto getTaskDetail(@PathVariable UUID taskId) {
         return taskService.getTaskDetail(taskId);
+    }
+
+    @PatchMapping("/{taskId}")
+    public TaskDetailDto partialUpdateTask(
+        @PathVariable UUID taskId,
+        @Valid @RequestBody CreateUpdateTaskDto createUpdateTaskDto
+    ) {
+        return taskService.updateTask(taskId, createUpdateTaskDto);
     }
 
     @DeleteMapping("/{taskId}")

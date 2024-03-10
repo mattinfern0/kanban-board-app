@@ -3,7 +3,7 @@ package io.mattinfern0.kanbanboardapi.tasks.validators;
 import io.mattinfern0.kanbanboardapi.core.constraints.TaskColumnAndStatusComboValid;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateTaskDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class CreateUpdateTaskColumnStatusValidator implements ConstraintValidator<TaskColumnAndStatusComboValid, CreateTaskDto> {
+public class CreateUpdateTaskColumnStatusValidator implements ConstraintValidator<TaskColumnAndStatusComboValid, CreateUpdateTaskDto> {
     private final BoardColumnRepository boardColumnRepository;
 
     @Autowired
@@ -26,22 +26,22 @@ public class CreateUpdateTaskColumnStatusValidator implements ConstraintValidato
     }
 
     @Override
-    public boolean isValid(CreateTaskDto createTaskDto, ConstraintValidatorContext constraintValidatorContext) {
-        if (createTaskDto == null) {
+    public boolean isValid(CreateUpdateTaskDto createUpdateTaskDto, ConstraintValidatorContext constraintValidatorContext) {
+        if (createUpdateTaskDto == null) {
             return true;
         }
 
-        if (createTaskDto.getBoardColumnId() == null || createTaskDto.getStatus() == null) {
-            return false;
+        if (createUpdateTaskDto.getBoardColumnId() == null || createUpdateTaskDto.getStatus() == null) {
+            return true;
         }
 
-        Optional<BoardColumn> boardColumn = boardColumnRepository.findById(createTaskDto.getBoardColumnId());
+        Optional<BoardColumn> boardColumn = boardColumnRepository.findById(createUpdateTaskDto.getBoardColumnId());
 
         if (boardColumn.isEmpty()) {
             // Don't throw error if board column does not exist
             return true;
         }
 
-        return boardColumn.get().getTaskStatus().getCodename().equals(createTaskDto.getStatus());
+        return boardColumn.get().getTaskStatus().getCodename().equals(createUpdateTaskDto.getStatus());
     }
 }

@@ -7,7 +7,7 @@ import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateTaskDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
 import org.junit.jupiter.api.Tag;
@@ -54,7 +54,7 @@ class TaskServiceUnitTest {
         TaskStatus testTaskStatus = new TaskStatus();
         testTaskStatus.setCodename(testStatusCode);
 
-        CreateTaskDto testCreate = new CreateTaskDto();
+        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
         testCreate.setOrganizationId(testOrganization.getId());
         testCreate.setTitle("Test Task");
         testCreate.setDescription("Test Description");
@@ -81,7 +81,7 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
 
-        CreateTaskDto testCreate = new CreateTaskDto();
+        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
         testCreate.setOrganizationId(testOrganization.getId());
         testCreate.setTitle("Test Task");
         testCreate.setDescription("Test Description");
@@ -118,7 +118,7 @@ class TaskServiceUnitTest {
         testColumn.setId(UUID.randomUUID());
         testColumn.setTaskStatus(testColumnTaskStatus);
 
-        CreateTaskDto testCreate = new CreateTaskDto();
+        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
         testCreate.setOrganizationId(testOrganization.getId());
         testCreate.setTitle("Test Task");
         testCreate.setDescription("Test Description");

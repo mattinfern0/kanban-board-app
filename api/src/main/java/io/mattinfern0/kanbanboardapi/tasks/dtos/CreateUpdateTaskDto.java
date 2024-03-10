@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 @TaskColumnAndStatusComboValid
-public class CreateTaskDto {
+public class CreateUpdateTaskDto {
     @NotNull
     @EntityWithIdExists(entityClass = Organization.class)
     UUID organizationId;
