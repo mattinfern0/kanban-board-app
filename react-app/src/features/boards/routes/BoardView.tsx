@@ -16,5 +16,9 @@ export const BoardView = () => {
   }
 
   console.debug(boardQuery.data);
-  return <Typography>Data loaded!</Typography>;
+  return (
+    <>
+      <Typography variant="h3">{boardQuery.data.title}</Typography>
+    </>
+  );
 };
