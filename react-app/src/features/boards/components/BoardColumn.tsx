@@ -1,15 +1,16 @@
 import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
-import { BoardColumn as BoardColumnType } from "../types";
+import { BoardColumn as BoardColumnType, BoardTask } from "../types";
 import { Add } from "@mui/icons-material";
 
 interface BoardColumnProps {
   boardColumn: BoardColumnType;
+  onTaskCardClick: (task: BoardTask) => void;
 }
 
-export const BoardColumn = ({ boardColumn }: BoardColumnProps) => {
+export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) => {
   const cardElements = boardColumn.tasks.map((t) => {
-    return <BoardTaskCard key={t.id} boardTask={t} />;
+    return <BoardTaskCard onClick={onTaskCardClick} key={t.id} boardTask={t} />;
   });
 
   return (
