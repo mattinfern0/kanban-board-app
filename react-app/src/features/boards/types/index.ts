@@ -15,6 +15,8 @@ export type BoardColumn = {
 };
 
 export type Board = {
+  id: string;
+  organizationId: string;
   title: string;
   boardColumns: BoardColumn[];
 };

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TaskStatus } from "@/types";
 
 export const CreateTaskFormSchema = z.object({
   title: z.string({
@@ -10,5 +11,26 @@ export const CreateTaskFormSchema = z.object({
 export interface CreateTaskFormValues {
   title: string;
   description: string;
+  board_id: string;
   column_id: string;
 }
+
+export interface CreateTaskBody {
+  organizationId: string;
+
+  title: string;
+  description: string;
+
+  boardColumnId?: string;
+  status?: TaskStatus;
+}
+
+export type TaskDetail = {
+  id: string;
+  organizationId: string;
+  title: string;
+  description: string;
+
+  boardColumnId: string | null;
+  status: TaskStatus;
+};

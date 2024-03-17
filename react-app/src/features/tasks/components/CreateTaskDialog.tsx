@@ -1,5 +1,5 @@
 import { Controller, useForm } from "react-hook-form";
-import { CreateTaskFormValues } from "@/features/tasks/types";
+import { CreateTaskBody, CreateTaskFormValues } from "@/features/tasks/types";
 import {
   Button,
   Dialog,
@@ -13,6 +13,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
+import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ interface CreateTaskDialogProps {
 export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
   const { open, onClose, boardId } = props;
   const boardQuery = useBoardQuery(boardId);
+  const createTaskMutation = useCreateTaskMutation();
 
   const boardTitle = boardQuery.data?.title || "";
   const boardColumns = boardQuery.data?.boardColumns || [];
@@ -32,6 +34,7 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
     defaultValues: {
       title: "",
       description: "",
+      board_id: boardId || "",
       column_id: boardColumns.length > 0 ? boardColumns[0].id : "",
     },
   });
@@ -41,20 +44,36 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
       {column.title}
     </MenuItem>
   ));
-
-  const onSubmit = handleSubmit(
-    (data) => {
-      console.log(data);
-    },
-    (errors) => {
-      console.log(errors);
-    },
-  );
+  const isSubmitting = createTaskMutation.isPending;
 
   const handleClose = () => {
     reset();
     onClose();
   };
+
+  const onSubmit = handleSubmit(
+    (data) => {
+      if (isSubmitting) {
+        return;
+      }
+
+      const taskBody: CreateTaskBody = {
+        organizationId: props.organizationId,
+        title: data.title,
+        description: data.description,
+        boardColumnId: data.column_id,
+      };
+
+      createTaskMutation.mutate(taskBody, {
+        onSuccess: () => {
+          handleClose();
+        },
+      });
+    },
+    (errors) => {
+      console.log(errors);
+    },
+  );
 
   return (
     <Dialog open={open} maxWidth="lg" fullWidth onClose={handleClose}>
@@ -80,7 +99,11 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
             </Grid>
           </Grid>
           <Stack spacing={3}>
-            <Controller control={control} name="title" render={({ field }) => <TextField {...field} label="Title" />} />
+            <Controller
+              control={control}
+              name="title"
+              render={({ field }) => <TextField {...field} label="Title" required />}
+            />
 
             <Controller
               control={control}
@@ -89,7 +112,7 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
             />
 
             <Stack direction="row-reverse" spacing={3}>
-              <Button variant="contained" type="submit">
+              <Button variant="contained" type="submit" disabled={isSubmitting}>
                 Create
               </Button>
               <Button variant="contained" color="secondary" onClick={handleClose}>

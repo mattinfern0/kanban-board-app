@@ -47,8 +47,8 @@ export const BoardView = () => {
       <CreateTaskDialog
         open={showCreateTaskDialog}
         onClose={() => setShowCreateTaskDialog(false)}
-        organizationId={"someId"}
-        boardId={boardId || null}
+        organizationId={board.organizationId}
+        boardId={board.id}
       />
 
       <Grid container spacing={3}>
