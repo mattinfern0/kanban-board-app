@@ -20,3 +20,9 @@ export type Board = {
   title: string;
   boardColumns: BoardColumn[];
 };
+
+export type BoardSummary = {
+  id: string;
+  organizationId: string;
+  title: string;
+};
