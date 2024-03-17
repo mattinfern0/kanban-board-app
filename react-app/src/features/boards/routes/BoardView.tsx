@@ -21,8 +21,6 @@ export const BoardView = () => {
     return <Typography>Error!</Typography>;
   }
 
-  console.debug(boardQuery.data);
-
   const board = boardQuery.data;
 
   const gridColumnSize = 12 / board.boardColumns.length;
@@ -39,7 +37,7 @@ export const BoardView = () => {
     <>
       <BoardTaskDetail
         open={showTaskDialog}
-        taskId={taskDialogTaskId || ""}
+        taskId={taskDialogTaskId}
         onClose={() => {
           setShowTaskDialog(false);
         }}

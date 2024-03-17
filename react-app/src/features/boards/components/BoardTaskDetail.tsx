@@ -4,7 +4,7 @@ import React from "react";
 
 interface BoardTaskDetailProps {
   open: boolean;
-  taskId: string;
+  taskId: string | null;
   onClose: () => void;
 }
 
