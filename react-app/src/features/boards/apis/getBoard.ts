@@ -6,11 +6,12 @@ export const getBoard = async (boardId: string): Promise<Board> => {
   return await client.get(`boards/${boardId}`).json();
 };
 
-export const useBoardQuery = (boardId: string) => {
+export const useBoardQuery = (boardId: string | null) => {
   return useQuery({
     queryFn: async () => {
-      return await getBoard(boardId);
+      return await getBoard(boardId || "");
     },
     queryKey: ["boards", boardId],
+    enabled: boardId != null,
   });
 };
