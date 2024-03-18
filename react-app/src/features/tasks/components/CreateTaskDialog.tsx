@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
+import { useEffect } from "react";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -30,14 +31,17 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
 
   const boardTitle = boardQuery.data?.title || "";
   const boardColumns = boardQuery.data?.boardColumns || [];
-  const { control, handleSubmit, reset } = useForm<CreateTaskFormValues>({
-    defaultValues: {
+  const defaultBoardColumnId: string = boardColumns.length > 0 ? boardColumns[0].id : "";
+  const { control, handleSubmit, reset } = useForm<CreateTaskFormValues>({});
+
+  useEffect(() => {
+    reset({
       title: "",
       description: "",
       board_id: boardId || "",
-      column_id: boardColumns.length > 0 ? boardColumns[0].id : "",
-    },
-  });
+      column_id: defaultBoardColumnId,
+    });
+  }, [boardId, defaultBoardColumnId, reset]);
 
   const columnSelectOptions = boardColumns.map((column) => (
     <MenuItem key={column.id} value={column.id}>
