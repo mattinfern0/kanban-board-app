@@ -1,5 +1,5 @@
 import { useBoardQuery } from "../apis/getBoard.ts";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Grid, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { useState } from "react";
@@ -51,15 +51,16 @@ export const BoardView = () => {
         boardId={board.id}
       />
 
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h5" mb={0}>
+          {boardQuery.data.title}
+        </Typography>
+        <Button variant="contained" onClick={() => setShowCreateTaskDialog(true)}>
+          Create Task
+        </Button>
+      </Stack>
+
       <Grid container spacing={3}>
-        <Grid item md={8}>
-          <Typography variant="h3">{boardQuery.data.title}</Typography>
-        </Grid>
-        <Grid item md={4}>
-          <Button variant="contained" onClick={() => setShowCreateTaskDialog(true)}>
-            Create Task
-          </Button>
-        </Grid>
         {columnElements}
       </Grid>
     </>

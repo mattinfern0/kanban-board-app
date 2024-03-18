@@ -15,6 +15,7 @@ import {
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
 import { useEffect } from "react";
+import { useSnackbar } from "notistack";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
   const { open, onClose, boardId } = props;
   const boardQuery = useBoardQuery(boardId);
   const createTaskMutation = useCreateTaskMutation();
+  const { enqueueSnackbar } = useSnackbar();
 
   const boardTitle = boardQuery.data?.title || "";
   const boardColumns = boardQuery.data?.boardColumns || [];
@@ -70,7 +72,11 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
 
       createTaskMutation.mutate(taskBody, {
         onSuccess: () => {
+          enqueueSnackbar("Task created!", { variant: "success" });
           handleClose();
+        },
+        onError: () => {
+          enqueueSnackbar("An error occurred while creating this task.", { variant: "error" });
         },
       });
     },
