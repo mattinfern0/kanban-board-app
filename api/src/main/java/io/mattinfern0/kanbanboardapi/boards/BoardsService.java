@@ -6,12 +6,12 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.CreateBoardDto;
 import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardDetailDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardSummaryDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,8 +42,8 @@ public class BoardsService {
 
     BoardDetailDto getBoardDetail(UUID boardId) {
         Board boardEntity = boardRepository
-            .findById(boardId)
-            .orElseThrow(() -> new EntityNotFoundException(String.format("Board with id %s not found", boardId)));
+                .findById(boardId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Board with id %s not found", boardId)));
 
         return boardDetailDtoMapper.boardToBoardDetailDto(boardEntity);
     }
@@ -56,11 +56,11 @@ public class BoardsService {
     @Transactional
     BoardDetailDto createNewBoard(@Valid CreateBoardDto createBoardDto) {
         Organization organization = organizationRepository
-            .findById(createBoardDto.getOrganizationId())
-            .orElseThrow(() -> new EntityNotFoundException(
-                String.format("Organization with id %s not found", createBoardDto.getOrganizationId()
-                ))
-            );
+                .findById(createBoardDto.getOrganizationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Organization with id %s not found", createBoardDto.getOrganizationId()
+                        ))
+                );
 
         Board newBoard = new Board();
         newBoard.setOrganization(organization);

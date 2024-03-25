@@ -4,13 +4,13 @@ import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.TaskStatus;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
+import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,11 +66,11 @@ class TaskServiceUnitTest {
         testCreate.setBoardColumnId(null);
 
         Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(
-            taskStatusService.findOrCreate(testStatusCode)
+                taskStatusService.findOrCreate(testStatusCode)
         ).thenReturn(testTaskStatus);
 
         TaskDetailDto result = taskService.createTask(testCreate);
@@ -96,11 +96,11 @@ class TaskServiceUnitTest {
         testCreate.setBoardColumnId(null);
 
         Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(
-            taskStatusService.findOrCreate(testStatusCode)
+                taskStatusService.findOrCreate(testStatusCode)
         ).thenReturn(testTaskStatus);
 
         TaskDetailDto result = taskService.createTask(testCreate);
@@ -128,11 +128,11 @@ class TaskServiceUnitTest {
         testCreate.setBoardColumnId(testColumn.getId());
 
         Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
+                .thenReturn(Optional.of(testColumn));
 
         TaskDetailDto result = taskService.createTask(testCreate);
         assert Objects.equals(result.getBoardColumnId(), testColumn.getId());
@@ -155,7 +155,7 @@ class TaskServiceUnitTest {
         defaultTaskStatus.setCodename(defaultStatusCode);
 
         Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
@@ -188,10 +188,10 @@ class TaskServiceUnitTest {
         testCreate.setBoardColumnId(testColumn.getId());
 
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
+                .thenReturn(Optional.of(testOrganization));
 
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
+                .thenReturn(Optional.of(testColumn));
 
         TaskDetailDto result = taskService.createTask(testCreate);
         assert result.getStatus().equals(testColumnStatusCode);
@@ -202,7 +202,7 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
+                .thenReturn(Optional.of(testOrganization));
 
         TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
         TaskStatus testTaskStatus = new TaskStatus();
@@ -230,13 +230,13 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
+                .thenReturn(Optional.of(testOrganization));
 
         TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
         TaskStatus testTaskStatus = new TaskStatus();
         testTaskStatus.setCodename(testStatusCode);
         Mockito.when(
-            taskStatusService.findOrCreate(testStatusCode)
+                taskStatusService.findOrCreate(testStatusCode)
         ).thenReturn(testTaskStatus);
 
         UUID testTaskId = UUID.randomUUID();
@@ -258,7 +258,7 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
+                .thenReturn(Optional.of(testOrganization));
 
         TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
         TaskStatus testTaskStatus = new TaskStatus();
@@ -268,7 +268,7 @@ class TaskServiceUnitTest {
         testColumn.setId(UUID.randomUUID());
         testColumn.setTaskStatus(testTaskStatus);
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
+                .thenReturn(Optional.of(testColumn));
 
         UUID testTaskId = UUID.randomUUID();
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
@@ -305,7 +305,7 @@ class TaskServiceUnitTest {
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
         Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
@@ -342,10 +342,10 @@ class TaskServiceUnitTest {
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
+                .thenReturn(Optional.of(testOrganization));
 
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
+                .thenReturn(Optional.of(testColumn));
 
         TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
         assert result.getStatus().equals(testColumnStatusCode);
@@ -368,7 +368,7 @@ class TaskServiceUnitTest {
 
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(false);
 
-        assertThrows(EntityNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             taskService.updateTask(testTaskId, testUpdateDto);
         });
     }
@@ -378,7 +378,7 @@ class TaskServiceUnitTest {
         UUID testTaskId = UUID.randomUUID();
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(false);
 
-        assertThrows(EntityNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             taskService.deleteTask(testTaskId);
         });
     }

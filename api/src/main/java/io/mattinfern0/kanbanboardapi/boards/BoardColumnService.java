@@ -4,9 +4,9 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnTaskOrderItemDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnTaskReorderDto;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
+import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class BoardColumnService {
         BoardColumn column = boardColumnRepository
                 .findById(boardColumnId)
                 .orElseThrow(
-                        () -> new EntityNotFoundException(String.format("BoardColumn with id %s not found", boardColumnId))
+                        () -> new ResourceNotFoundException(String.format("BoardColumn with id %s not found", boardColumnId))
                 );
 
         Map<UUID, Task> taskIdToTask = new HashMap<>();

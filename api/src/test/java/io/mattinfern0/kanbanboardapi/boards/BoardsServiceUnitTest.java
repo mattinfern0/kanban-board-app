@@ -4,12 +4,12 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.CreateBoardDto;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardDetailDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardSummaryDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +50,7 @@ class BoardsServiceUnitTest {
 
 
     @Test
-    void createNewBoard_throwsEntityNotFoundException_ifOrganizationWithOrganizationIdNotExist() {
+    void createNewBoard_throwsResourceNotFoundException_ifOrganizationWithOrganizationIdNotExist() {
         UUID badId = UUID.randomUUID();
 
         CreateBoardDto createBoardDto = new CreateBoardDto();
@@ -59,7 +59,7 @@ class BoardsServiceUnitTest {
 
         Mockito.when(organizationRepository.findById(badId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             boardsService.createNewBoard(createBoardDto);
         });
     }

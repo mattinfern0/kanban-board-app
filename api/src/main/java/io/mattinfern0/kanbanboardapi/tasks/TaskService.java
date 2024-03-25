@@ -4,13 +4,13 @@ import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
+import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class TaskService {
 
     public TaskDetailDto getTaskDetail(UUID taskId) {
         Task entity = taskRepository.findById(taskId)
-            .orElseThrow(() -> new EntityNotFoundException(String.format("Task with id %s not found", taskId)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
         return taskDtoMapper.taskToTaskDetailDto(entity);
     }
 
@@ -60,7 +60,7 @@ public class TaskService {
 
     public TaskDetailDto updateTask(UUID taskId, @Valid CreateUpdateTaskDto createUpdateTaskDto) {
         if (!taskRepository.existsById(taskId)) {
-            throw new EntityNotFoundException(String.format("Task with id %s not found", taskId));
+            throw new ResourceNotFoundException(String.format("Task with id %s not found", taskId));
         }
 
         Task task = taskFromCreateTaskDto(createUpdateTaskDto);
@@ -71,7 +71,7 @@ public class TaskService {
 
     public void deleteTask(UUID taskId) {
         if (!taskRepository.existsById(taskId)) {
-            throw new EntityNotFoundException(String.format("Task with id %s not found", taskId));
+            throw new ResourceNotFoundException(String.format("Task with id %s not found", taskId));
         }
         taskRepository.deleteById(taskId);
     }
@@ -83,18 +83,18 @@ public class TaskService {
         newTask.setDescription(createUpdateTaskDto.getDescription());
 
         Organization organization = organizationRepository
-            .findById(createUpdateTaskDto.getOrganizationId())
-            .orElseThrow(() -> new EntityNotFoundException(
-                String.format("Organization with id %s not found", createUpdateTaskDto.getOrganizationId())
-            ));
+                .findById(createUpdateTaskDto.getOrganizationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Organization with id %s not found", createUpdateTaskDto.getOrganizationId())
+                ));
         newTask.setOrganization(organization);
 
         if (createUpdateTaskDto.getBoardColumnId() != null) {
             BoardColumn boardColumn = boardColumnRepository
-                .findById(createUpdateTaskDto.getBoardColumnId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                    String.format("BoardColumn with id %s not found", createUpdateTaskDto.getBoardColumnId())
-                ));
+                    .findById(createUpdateTaskDto.getBoardColumnId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            String.format("BoardColumn with id %s not found", createUpdateTaskDto.getBoardColumnId())
+                    ));
             boardColumn.addTask(newTask);
         }
 
