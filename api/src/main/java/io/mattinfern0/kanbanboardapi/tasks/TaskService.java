@@ -3,13 +3,17 @@ package io.mattinfern0.kanbanboardapi.tasks;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
+import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
+import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskAssigneeDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
+import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskAssigneeDtoMapper;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +31,21 @@ public class TaskService {
     final TaskRepository taskRepository;
     final BoardColumnRepository boardColumnRepository;
     final OrganizationRepository organizationRepository;
+    final UserRepository userRepository;
     final TaskStatusService taskStatusService;
 
     final TaskDtoMapper taskDtoMapper;
+    final TaskAssigneeDtoMapper taskAssigneeDtoMapper;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, TaskStatusService taskStatusService, TaskDtoMapper taskDtoMapper) {
+    public TaskService(TaskRepository taskRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, UserRepository userRepository, TaskStatusService taskStatusService, TaskDtoMapper taskDtoMapper, TaskAssigneeDtoMapper taskAssigneeDtoMapper) {
         this.taskRepository = taskRepository;
         this.boardColumnRepository = boardColumnRepository;
         this.organizationRepository = organizationRepository;
+        this.userRepository = userRepository;
         this.taskStatusService = taskStatusService;
         this.taskDtoMapper = taskDtoMapper;
+        this.taskAssigneeDtoMapper = taskAssigneeDtoMapper;
     }
 
     public List<TaskDetailDto> getTaskList() {
@@ -47,7 +55,7 @@ public class TaskService {
 
     public TaskDetailDto getTaskDetail(UUID taskId) {
         Task entity = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
         return taskDtoMapper.taskToTaskDetailDto(entity);
     }
 
@@ -76,6 +84,30 @@ public class TaskService {
         taskRepository.deleteById(taskId);
     }
 
+    public TaskAssigneeDto assignUserToTask(UUID taskId, UUID userId) {
+        Task task = taskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
+
+        User user = userRepository
+            .findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("User with id %s not found", userId)));
+
+        task.setAssignee(user);
+
+        taskRepository.save(task);
+        return taskAssigneeDtoMapper.userToTaskAssigneeDto(user);
+    }
+
+    public void removeTaskAssignee(UUID taskId) {
+        Task task = taskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
+
+        task.setAssignee(null);
+        taskRepository.save(task);
+    }
+
     Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDto) {
         Task newTask = new Task();
         newTask.setId(UUID.randomUUID());
@@ -83,18 +115,18 @@ public class TaskService {
         newTask.setDescription(createUpdateTaskDto.getDescription());
 
         Organization organization = organizationRepository
-                .findById(createUpdateTaskDto.getOrganizationId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Organization with id %s not found", createUpdateTaskDto.getOrganizationId())
-                ));
+            .findById(createUpdateTaskDto.getOrganizationId())
+            .orElseThrow(() -> new ResourceNotFoundException(
+                String.format("Organization with id %s not found", createUpdateTaskDto.getOrganizationId())
+            ));
         newTask.setOrganization(organization);
 
         if (createUpdateTaskDto.getBoardColumnId() != null) {
             BoardColumn boardColumn = boardColumnRepository
-                    .findById(createUpdateTaskDto.getBoardColumnId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            String.format("BoardColumn with id %s not found", createUpdateTaskDto.getBoardColumnId())
-                    ));
+                .findById(createUpdateTaskDto.getBoardColumnId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    String.format("BoardColumn with id %s not found", createUpdateTaskDto.getBoardColumnId())
+                ));
             boardColumn.addTask(newTask);
         }
 

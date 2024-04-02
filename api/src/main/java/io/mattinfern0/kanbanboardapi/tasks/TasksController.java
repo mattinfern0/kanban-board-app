@@ -1,7 +1,11 @@
 package io.mattinfern0.kanbanboardapi.tasks;
 
+import io.mattinfern0.kanbanboardapi.core.constraints.EntityWithIdExists;
+import io.mattinfern0.kanbanboardapi.core.entities.Task;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskAssigneeDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.UpdateTaskAssigneeDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,5 +53,20 @@ public class TasksController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTask(@PathVariable UUID taskId) {
         taskService.deleteTask(taskId);
+    }
+
+    @PutMapping("/{taskId}/assignee")
+    public TaskAssigneeDto assignUserToTask(
+        @PathVariable UUID taskId,
+        @Valid @RequestBody UpdateTaskAssigneeDto updateTaskAssigneeDto
+    ) {
+        return taskService.assignUserToTask(taskId, updateTaskAssigneeDto.getUserId());
+    }
+
+    @DeleteMapping("/{taskId}/assignee")
+    public void removeTaskAssignee(
+        @EntityWithIdExists(entityClass = Task.class) @PathVariable UUID taskId
+    ) {
+        taskService.removeTaskAssignee(taskId);
     }
 }

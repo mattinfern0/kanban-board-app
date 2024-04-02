@@ -11,10 +11,10 @@ import java.util.UUID;
 
 @Entity
 @Table(
-    name = "task",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"board_column_id", "board_column_order"})
-    }
+        name = "task",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"board_column_id", "board_column_order"})
+        }
 )
 public class Task {
     @Id
@@ -51,6 +51,11 @@ public class Task {
     @JoinColumn(name = "task_status_id")
     @NotNull
     TaskStatus taskStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    @Nullable
+    User assignee;
 
     public UUID getId() {
         return id;
@@ -109,11 +114,11 @@ public class Task {
 
         if (this.getBoardColumn() != null && !this.getBoardColumn().getTaskStatus().equals(taskStatus)) {
             throw new IllegalArgumentException(
-                String.format(
-                    "taskStatus %s is not consistent with column's status (%s)",
-                    taskStatus,
-                    this.getBoardColumn().getTaskStatus()
-                )
+                    String.format(
+                            "taskStatus %s is not consistent with column's status (%s)",
+                            taskStatus,
+                            this.getBoardColumn().getTaskStatus()
+                    )
             );
         }
 
@@ -126,5 +131,14 @@ public class Task {
 
     public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Nullable
+    public User getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(@Nullable User assignee) {
+        this.assignee = assignee;
     }
 }
