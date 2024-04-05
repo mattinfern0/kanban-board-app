@@ -20,12 +20,14 @@ public class BoardColumnController {
 
     @PutMapping("/{columnId}/tasks/order")
     public List<BoardColumnTaskOrderItemDto> reorderTasks(
-            @PathVariable UUID columnId,
-            @RequestBody List<BoardColumnTaskOrderItemDto> newOrder
+        @PathVariable UUID columnId,
+        @RequestBody List<BoardColumnTaskOrderItemDto> newOrder
     ) {
-        BoardColumnTaskReorderDto dto = new BoardColumnTaskReorderDto();
-        dto.setBoardColumnId(columnId);
-        dto.setNewOrder(newOrder);
+        BoardColumnTaskReorderDto dto = new BoardColumnTaskReorderDto(
+            columnId,
+            newOrder
+        );
+
         return boardColumnService.reorderTasks(dto);
     }
 }

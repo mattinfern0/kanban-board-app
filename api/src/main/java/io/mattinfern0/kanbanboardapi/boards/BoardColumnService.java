@@ -27,14 +27,14 @@ public class BoardColumnService {
 
     @Transactional
     public List<BoardColumnTaskOrderItemDto> reorderTasks(@Valid BoardColumnTaskReorderDto boardColumnTaskReorderDto) {
-        UUID boardColumnId = boardColumnTaskReorderDto.getBoardColumnId();
-        List<BoardColumnTaskOrderItemDto> newOrder = boardColumnTaskReorderDto.getNewOrder();
+        UUID boardColumnId = boardColumnTaskReorderDto.boardColumnId();
+        List<BoardColumnTaskOrderItemDto> newOrder = boardColumnTaskReorderDto.newOrder();
 
         BoardColumn column = boardColumnRepository
-                .findById(boardColumnId)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException(String.format("BoardColumn with id %s not found", boardColumnId))
-                );
+            .findById(boardColumnId)
+            .orElseThrow(
+                () -> new ResourceNotFoundException(String.format("BoardColumn with id %s not found", boardColumnId))
+            );
 
         Map<UUID, Task> taskIdToTask = new HashMap<>();
         column.getTasks().forEach((t) -> {
@@ -43,7 +43,7 @@ public class BoardColumnService {
 
         List<Task> newTaskList = new ArrayList<>();
         for (int i = 0; i < newOrder.size(); i++) {
-            UUID taskId = newOrder.get(i).getTaskId();
+            UUID taskId = newOrder.get(i).taskId();
             Task task = taskIdToTask.get(taskId);
 
             if (task == null) {

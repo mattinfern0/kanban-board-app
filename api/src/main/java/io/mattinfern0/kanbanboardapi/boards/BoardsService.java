@@ -42,8 +42,8 @@ public class BoardsService {
 
     BoardDetailDto getBoardDetail(UUID boardId) {
         Board boardEntity = boardRepository
-                .findById(boardId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Board with id %s not found", boardId)));
+            .findById(boardId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Board with id %s not found", boardId)));
 
         return boardDetailDtoMapper.boardToBoardDetailDto(boardEntity);
     }
@@ -54,17 +54,17 @@ public class BoardsService {
     }
 
     @Transactional
-    BoardDetailDto createNewBoard(@Valid CreateBoardDto createBoardDto) {
+    BoardDetailDto createNewBoard(@Valid CreateBoardDto createBoardDtoOld) {
         Organization organization = organizationRepository
-                .findById(createBoardDto.getOrganizationId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Organization with id %s not found", createBoardDto.getOrganizationId()
-                        ))
-                );
+            .findById(createBoardDtoOld.organizationId())
+            .orElseThrow(() -> new ResourceNotFoundException(
+                String.format("Organization with id %s not found", createBoardDtoOld.organizationId()
+                ))
+            );
 
         Board newBoard = new Board();
         newBoard.setOrganization(organization);
-        newBoard.setTitle(createBoardDto.getTitle());
+        newBoard.setTitle(createBoardDtoOld.title());
         boardRepository.save(newBoard);
 
         List<BoardColumn> newColumns = createDefaultNewBoardColumns();

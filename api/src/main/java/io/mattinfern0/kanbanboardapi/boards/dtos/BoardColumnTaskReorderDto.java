@@ -8,25 +8,10 @@ import java.util.List;
 import java.util.UUID;
 
 @BoardColumnOrderTasksOrderOnlyHasAllColumnTasks
-public class BoardColumnTaskReorderDto {
+public record BoardColumnTaskReorderDto(
     @EntityWithIdExists(entityClass = BoardColumn.class)
-    UUID boardColumnId;
+    UUID boardColumnId,
 
-    List<BoardColumnTaskOrderItemDto> newOrder;
-
-    public UUID getBoardColumnId() {
-        return boardColumnId;
-    }
-
-    public void setBoardColumnId(UUID boardColumnId) {
-        this.boardColumnId = boardColumnId;
-    }
-
-    public List<BoardColumnTaskOrderItemDto> getNewOrder() {
-        return newOrder;
-    }
-
-    public void setNewOrder(List<BoardColumnTaskOrderItemDto> newOrder) {
-        this.newOrder = newOrder;
-    }
+    List<BoardColumnTaskOrderItemDto> newOrder
+) {
 }

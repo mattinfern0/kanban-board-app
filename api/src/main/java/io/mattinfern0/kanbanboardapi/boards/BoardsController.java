@@ -28,8 +28,8 @@ public class BoardsController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    BoardDetailDto createBoard(@RequestBody @Valid CreateBoardDto createBoardDto) {
-        return boardsService.createNewBoard(createBoardDto);
+    BoardDetailDto createBoard(@RequestBody @Valid CreateBoardDto createBoardDtoOld) {
+        return boardsService.createNewBoard(createBoardDtoOld);
     }
 
     @GetMapping("/{boardId}")

@@ -137,14 +137,14 @@ public class BoardsControllerIntegrationTest {
         Board testBoard = createTestBoard();
         BoardDetailDto response = boardsController.getBoard(testBoard.getId());
 
-        assert response.getId().equals(testBoard.getId());
-        assert response.getTitle().equals(testBoard.getTitle());
+        assert response.id().equals(testBoard.getId());
+        assert response.title().equals(testBoard.getTitle());
 
         for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
             BoardColumn entity = testBoard.getBoardColumns().get(i);
-            BoardColumnDto dto = response.getBoardColumns().get(i);
-            assert entity.getId().equals(dto.getId());
-            assert entity.getTitle().equals(dto.getTitle());
+            BoardColumnDto dto = response.boardColumns().get(i);
+            assert entity.getId().equals(dto.id());
+            assert entity.getTitle().equals(dto.title());
         }
     }
 
@@ -172,21 +172,21 @@ public class BoardsControllerIntegrationTest {
 
         BoardDetailDto response = boardsController.getBoard(testBoard.getId());
 
-        assert response.getId().equals(testBoard.getId());
-        assert response.getTitle().equals(testBoard.getTitle());
+        assert response.id().equals(testBoard.getId());
+        assert response.title().equals(testBoard.getTitle());
 
         for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
             BoardColumn columnEntity = testBoard.getBoardColumns().get(i);
-            BoardColumnDto columnDto = response.getBoardColumns().get(i);
-            assert columnEntity.getId().equals(columnDto.getId());
-            assert columnEntity.getTitle().equals(columnDto.getTitle());
+            BoardColumnDto columnDto = response.boardColumns().get(i);
+            assert columnEntity.getId().equals(columnDto.id());
+            assert columnEntity.getTitle().equals(columnDto.title());
 
             for (int j = 0; j < columnEntity.getTasks().size(); j++) {
                 Task taskEntity = columnEntity.getTasks().get(j);
-                BoardTaskDto taskDto = columnDto.getTasks().get(j);
+                BoardTaskDto taskDto = columnDto.tasks().get(j);
 
-                assert taskEntity.getId().equals(taskDto.getId());
-                assert taskEntity.getTitle().equals(taskDto.getTitle());
+                assert taskEntity.getId().equals(taskDto.id());
+                assert taskEntity.getTitle().equals(taskDto.title());
             }
         }
     }

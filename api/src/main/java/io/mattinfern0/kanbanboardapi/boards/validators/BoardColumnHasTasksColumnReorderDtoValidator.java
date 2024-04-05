@@ -32,18 +32,18 @@ public class BoardColumnHasTasksColumnReorderDtoValidator implements ConstraintV
 
     @Override
     public boolean isValid(BoardColumnTaskReorderDto boardColumnTaskReorderDto, ConstraintValidatorContext constraintValidatorContext) {
-        Optional<BoardColumn> column = boardColumnRepository.findById(boardColumnTaskReorderDto.getBoardColumnId());
+        Optional<BoardColumn> column = boardColumnRepository.findById(boardColumnTaskReorderDto.boardColumnId());
         if (column.isEmpty()) {
             return true;
         }
 
         Set<UUID> columnTaskIds = column.get().getTasks().stream()
-                .map(Task::getId)
-                .collect(Collectors.toSet());
+            .map(Task::getId)
+            .collect(Collectors.toSet());
 
-        Set<UUID> orderTaskIds = boardColumnTaskReorderDto.getNewOrder().stream()
-                .map(BoardColumnTaskOrderItemDto::getTaskId)
-                .collect(Collectors.toSet());
+        Set<UUID> orderTaskIds = boardColumnTaskReorderDto.newOrder().stream()
+            .map(BoardColumnTaskOrderItemDto::taskId)
+            .collect(Collectors.toSet());
 
         Set<UUID> idDifference = SetUtils.disjunction(columnTaskIds, orderTaskIds);
         return idDifference.isEmpty();

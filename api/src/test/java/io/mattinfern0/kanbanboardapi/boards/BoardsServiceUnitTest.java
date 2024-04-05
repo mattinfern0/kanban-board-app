@@ -53,9 +53,10 @@ class BoardsServiceUnitTest {
     void createNewBoard_throwsResourceNotFoundException_ifOrganizationWithOrganizationIdNotExist() {
         UUID badId = UUID.randomUUID();
 
-        CreateBoardDto createBoardDto = new CreateBoardDto();
-        createBoardDto.setTitle("");
-        createBoardDto.setOrganizationId(badId);
+        CreateBoardDto createBoardDto = new CreateBoardDto(
+            "",
+            badId
+        );
 
         Mockito.when(organizationRepository.findById(badId)).thenReturn(Optional.empty());
 
@@ -70,14 +71,16 @@ class BoardsServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(testOrganizationId);
 
-        CreateBoardDto createBoardDto = new CreateBoardDto();
-        createBoardDto.setTitle("");
-        createBoardDto.setOrganizationId(testOrganizationId);
+
+        CreateBoardDto createBoardDto = new CreateBoardDto(
+            "",
+            testOrganizationId
+        );
 
         Mockito.when(organizationRepository.findById(testOrganizationId)).thenReturn(Optional.of(testOrganization));
 
         BoardDetailDto result = boardsService.createNewBoard(createBoardDto);
-        assert result.getOrganizationId().equals(createBoardDto.getOrganizationId());
+        assert result.organizationId().equals(createBoardDto.organizationId());
     }
 
     @Test
@@ -86,14 +89,15 @@ class BoardsServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(testOrganizationId);
 
-        CreateBoardDto createBoardDto = new CreateBoardDto();
-        createBoardDto.setTitle("My Super Evil Inator Plans");
-        createBoardDto.setOrganizationId(testOrganizationId);
+        CreateBoardDto createBoardDto = new CreateBoardDto(
+            "My Super Evil Inator Plans",
+            testOrganizationId
+        );
 
         Mockito.when(organizationRepository.findById(testOrganizationId)).thenReturn(Optional.of(testOrganization));
 
         BoardDetailDto result = boardsService.createNewBoard(createBoardDto);
-        assert result.getTitle().equals(createBoardDto.getTitle());
+        assert result.title().equals(createBoardDto.title());
     }
 
     @Test
@@ -102,9 +106,10 @@ class BoardsServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(testOrganizationId);
 
-        CreateBoardDto createBoardDto = new CreateBoardDto();
-        createBoardDto.setTitle("My Super Evil Inator Plans");
-        createBoardDto.setOrganizationId(testOrganizationId);
+        CreateBoardDto createBoardDto = new CreateBoardDto(
+            "My Super Evil Inator Plans",
+            testOrganizationId
+        );
 
         Mockito.when(organizationRepository.findById(testOrganizationId)).thenReturn(Optional.of(testOrganization));
 
@@ -114,9 +119,9 @@ class BoardsServiceUnitTest {
 
         for (int i = 0; i < expectedColumnTitles.size(); i++) {
             String expectedTitle = expectedColumnTitles.get(i);
-            BoardColumnDto columnDto = result.getBoardColumns().get(i);
+            BoardColumnDto columnDto = result.boardColumns().get(i);
 
-            assert columnDto.getTitle().equals(expectedTitle);
+            assert columnDto.title().equals(expectedTitle);
 
         }
     }
@@ -127,16 +132,17 @@ class BoardsServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(testOrganizationId);
 
-        CreateBoardDto createBoardDto = new CreateBoardDto();
-        createBoardDto.setTitle("My Super Evil Inator Plans");
-        createBoardDto.setOrganizationId(testOrganizationId);
+        CreateBoardDto createBoardDto = new CreateBoardDto(
+            "My Super Evil Inator Plans",
+            testOrganizationId
+        );
 
         Mockito.when(organizationRepository.findById(testOrganizationId)).thenReturn(Optional.of(testOrganization));
 
         BoardDetailDto result = boardsService.createNewBoard(createBoardDto);
 
-        for (BoardColumnDto columnDto : result.getBoardColumns()) {
-            assert columnDto.getTasks().isEmpty();
+        for (BoardColumnDto columnDto : result.boardColumns()) {
+            assert columnDto.tasks().isEmpty();
         }
     }
 }
