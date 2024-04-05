@@ -108,32 +108,32 @@ public class TaskService {
         taskRepository.save(task);
     }
 
-    Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDto) {
+    Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDtoOld) {
         Task newTask = new Task();
         newTask.setId(UUID.randomUUID());
-        newTask.setTitle(createUpdateTaskDto.getTitle());
-        newTask.setDescription(createUpdateTaskDto.getDescription());
+        newTask.setTitle(createUpdateTaskDtoOld.title());
+        newTask.setDescription(createUpdateTaskDtoOld.description());
 
         Organization organization = organizationRepository
-            .findById(createUpdateTaskDto.getOrganizationId())
+            .findById(createUpdateTaskDtoOld.organizationId())
             .orElseThrow(() -> new ResourceNotFoundException(
-                String.format("Organization with id %s not found", createUpdateTaskDto.getOrganizationId())
+                String.format("Organization with id %s not found", createUpdateTaskDtoOld.organizationId())
             ));
         newTask.setOrganization(organization);
 
-        if (createUpdateTaskDto.getBoardColumnId() != null) {
+        if (createUpdateTaskDtoOld.boardColumnId() != null) {
             BoardColumn boardColumn = boardColumnRepository
-                .findById(createUpdateTaskDto.getBoardColumnId())
+                .findById(createUpdateTaskDtoOld.boardColumnId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    String.format("BoardColumn with id %s not found", createUpdateTaskDto.getBoardColumnId())
+                    String.format("BoardColumn with id %s not found", createUpdateTaskDtoOld.boardColumnId())
                 ));
             boardColumn.addTask(newTask);
         }
 
         if (newTask.getTaskStatus() == null) {
             TaskStatusCode statusCode = DEFAULT_TASK_STATUS_CODE;
-            if (createUpdateTaskDto.getStatus() != null) {
-                statusCode = createUpdateTaskDto.getStatus();
+            if (createUpdateTaskDtoOld.status() != null) {
+                statusCode = createUpdateTaskDtoOld.status();
             }
 
             newTask.setTaskStatus(taskStatusService.findOrCreate(statusCode));

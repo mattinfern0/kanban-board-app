@@ -58,25 +58,26 @@ class TaskServiceUnitTest {
         TaskStatus testTaskStatus = new TaskStatus();
         testTaskStatus.setCodename(testStatusCode);
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(testStatusCode);
-        testCreate.setBoardColumnId(null);
-
-        Mockito.when(
-                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            testStatusCode
         );
 
         Mockito.when(
-                taskStatusService.findOrCreate(testStatusCode)
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+        );
+
+        Mockito.when(
+            taskStatusService.findOrCreate(testStatusCode)
         ).thenReturn(testTaskStatus);
 
-        TaskDetailDto result = taskService.createTask(testCreate);
-        assert result.getOrganizationId().equals(testCreate.getOrganizationId());
-        assert result.getTitle().equals(testCreate.getTitle());
-        assert result.getDescription().equals(testCreate.getDescription());
+        TaskDetailDto result = taskService.createTask(testCreateDto);
+        assert result.organizationId().equals(testCreateDto.organizationId());
+        assert result.title().equals(testCreateDto.title());
+        assert result.description().equals(testCreateDto.description());
     }
 
     @Test
@@ -88,23 +89,24 @@ class TaskServiceUnitTest {
         TaskStatus testTaskStatus = new TaskStatus();
         testTaskStatus.setCodename(testStatusCode);
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(testStatusCode);
-        testCreate.setBoardColumnId(null);
-
-        Mockito.when(
-                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            testStatusCode
         );
 
         Mockito.when(
-                taskStatusService.findOrCreate(testStatusCode)
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+        );
+
+        Mockito.when(
+            taskStatusService.findOrCreate(testStatusCode)
         ).thenReturn(testTaskStatus);
 
-        TaskDetailDto result = taskService.createTask(testCreate);
-        assert result.getBoardColumnId() == null;
+        TaskDetailDto result = taskService.createTask(testCreateDto);
+        assert result.boardColumnId() == null;
     }
 
     @Test
@@ -120,22 +122,23 @@ class TaskServiceUnitTest {
         testColumn.setId(UUID.randomUUID());
         testColumn.setTaskStatus(testTaskStatus);
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(testStatusCode);
-        testCreate.setBoardColumnId(testColumn.getId());
+        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            testColumn.getId(),
+            testStatusCode
+        );
 
         Mockito.when(
-                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-                .thenReturn(Optional.of(testColumn));
+            .thenReturn(Optional.of(testColumn));
 
-        TaskDetailDto result = taskService.createTask(testCreate);
-        assert Objects.equals(result.getBoardColumnId(), testColumn.getId());
+        TaskDetailDto result = taskService.createTask(testCreateDto);
+        assert Objects.equals(result.boardColumnId(), testColumn.getId());
     }
 
     @Test
@@ -143,26 +146,27 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(null);
-        testCreate.setBoardColumnId(null);
+        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            null
+        );
 
         TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
         TaskStatus defaultTaskStatus = new TaskStatus();
         defaultTaskStatus.setCodename(defaultStatusCode);
 
         Mockito.when(
-                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
 
 
-        TaskDetailDto result = taskService.createTask(testCreate);
-        assert result.getStatus().equals(defaultStatusCode);
+        TaskDetailDto result = taskService.createTask(testCreateDto);
+        assert result.status().equals(defaultStatusCode);
     }
 
     @Test
@@ -180,21 +184,22 @@ class TaskServiceUnitTest {
         testColumn.setId(UUID.randomUUID());
         testColumn.setTaskStatus(testColumnTaskStatus);
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(testStatusCode);
-        testCreate.setBoardColumnId(testColumn.getId());
+        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            testColumn.getId(),
+            testStatusCode
+        );
 
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-                .thenReturn(Optional.of(testOrganization));
+            .thenReturn(Optional.of(testOrganization));
 
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-                .thenReturn(Optional.of(testColumn));
+            .thenReturn(Optional.of(testColumn));
 
-        TaskDetailDto result = taskService.createTask(testCreate);
-        assert result.getStatus().equals(testColumnStatusCode);
+        TaskDetailDto result = taskService.createTask(testCreateDto);
+        assert result.status().equals(testColumnStatusCode);
     }
 
     @Test
@@ -202,7 +207,7 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-                .thenReturn(Optional.of(testOrganization));
+            .thenReturn(Optional.of(testOrganization));
 
         TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
         TaskStatus testTaskStatus = new TaskStatus();
@@ -212,17 +217,18 @@ class TaskServiceUnitTest {
         UUID testTaskId = UUID.randomUUID();
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(testStatusCode);
-        testCreate.setBoardColumnId(null);
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            testStatusCode
+        );
 
-        TaskDetailDto result = taskService.updateTask(testTaskId, testCreate);
-        assert result.getOrganizationId().equals(testCreate.getOrganizationId());
-        assert result.getTitle().equals(testCreate.getTitle());
-        assert result.getDescription().equals(testCreate.getDescription());
+        TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
+        assert result.organizationId().equals(testUpdateDto.organizationId());
+        assert result.title().equals(testUpdateDto.title());
+        assert result.description().equals(testUpdateDto.description());
     }
 
     @Test
@@ -230,27 +236,28 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-                .thenReturn(Optional.of(testOrganization));
+            .thenReturn(Optional.of(testOrganization));
 
         TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
         TaskStatus testTaskStatus = new TaskStatus();
         testTaskStatus.setCodename(testStatusCode);
         Mockito.when(
-                taskStatusService.findOrCreate(testStatusCode)
+            taskStatusService.findOrCreate(testStatusCode)
         ).thenReturn(testTaskStatus);
 
         UUID testTaskId = UUID.randomUUID();
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
-        CreateUpdateTaskDto testCreate = new CreateUpdateTaskDto();
-        testCreate.setOrganizationId(testOrganization.getId());
-        testCreate.setTitle("Test Task");
-        testCreate.setDescription("Test Description");
-        testCreate.setStatus(testStatusCode);
-        testCreate.setBoardColumnId(null);
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            testStatusCode
+        );
 
-        TaskDetailDto result = taskService.updateTask(testTaskId, testCreate);
-        assert result.getBoardColumnId() == null;
+        TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
+        assert result.boardColumnId() == null;
     }
 
     @Test
@@ -258,7 +265,7 @@ class TaskServiceUnitTest {
         Organization testOrganization = new Organization();
         testOrganization.setId(UUID.randomUUID());
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-                .thenReturn(Optional.of(testOrganization));
+            .thenReturn(Optional.of(testOrganization));
 
         TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
         TaskStatus testTaskStatus = new TaskStatus();
@@ -268,20 +275,21 @@ class TaskServiceUnitTest {
         testColumn.setId(UUID.randomUUID());
         testColumn.setTaskStatus(testTaskStatus);
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-                .thenReturn(Optional.of(testColumn));
+            .thenReturn(Optional.of(testColumn));
 
         UUID testTaskId = UUID.randomUUID();
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
-        testUpdateDto.setOrganizationId(testOrganization.getId());
-        testUpdateDto.setTitle("Test Task");
-        testUpdateDto.setDescription("Test Description");
-        testUpdateDto.setStatus(testStatusCode);
-        testUpdateDto.setBoardColumnId(testColumn.getId());
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            testColumn.getId(),
+            testStatusCode
+        );
 
         TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
-        assert Objects.equals(result.getBoardColumnId(), testColumn.getId());
+        assert Objects.equals(result.boardColumnId(), testColumn.getId());
     }
 
     @Test
@@ -291,12 +299,13 @@ class TaskServiceUnitTest {
 
         UUID testTaskId = UUID.randomUUID();
 
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
-        testUpdateDto.setOrganizationId(testOrganization.getId());
-        testUpdateDto.setTitle("Test Task");
-        testUpdateDto.setDescription("Test Description");
-        testUpdateDto.setStatus(null);
-        testUpdateDto.setBoardColumnId(null);
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            null
+        );
 
         TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
         TaskStatus defaultTaskStatus = new TaskStatus();
@@ -305,14 +314,14 @@ class TaskServiceUnitTest {
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
         Mockito.when(
-                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
         );
 
         Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
 
 
         TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
-        assert result.getStatus().equals(defaultStatusCode);
+        assert result.status().equals(defaultStatusCode);
     }
 
     @Test
@@ -332,23 +341,24 @@ class TaskServiceUnitTest {
 
         UUID testTaskId = UUID.randomUUID();
 
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
-        testUpdateDto.setOrganizationId(testOrganization.getId());
-        testUpdateDto.setTitle("Test Task");
-        testUpdateDto.setDescription("Test Description");
-        testUpdateDto.setStatus(testStatusCode);
-        testUpdateDto.setBoardColumnId(testColumn.getId());
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            testColumn.getId(),
+            testStatusCode
+        );
 
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
 
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
-                .thenReturn(Optional.of(testOrganization));
+            .thenReturn(Optional.of(testOrganization));
 
         Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-                .thenReturn(Optional.of(testColumn));
+            .thenReturn(Optional.of(testColumn));
 
         TaskDetailDto result = taskService.updateTask(testTaskId, testUpdateDto);
-        assert result.getStatus().equals(testColumnStatusCode);
+        assert result.status().equals(testColumnStatusCode);
     }
 
     @Test
@@ -360,11 +370,13 @@ class TaskServiceUnitTest {
 
         UUID testTaskId = UUID.randomUUID();
 
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto();
-        testUpdateDto.setOrganizationId(testOrganization.getId());
-        testUpdateDto.setTitle("Test Task");
-        testUpdateDto.setDescription("Test Description");
-        testUpdateDto.setStatus(testStatusCode);
+        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+            testOrganization.getId(),
+            "Test Task",
+            "Test Description",
+            null,
+            testStatusCode
+        );
 
         Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(false);
 

@@ -60,7 +60,7 @@ public class TasksController {
         @PathVariable UUID taskId,
         @Valid @RequestBody UpdateTaskAssigneeDto updateTaskAssigneeDto
     ) {
-        return taskService.assignUserToTask(taskId, updateTaskAssigneeDto.getUserId());
+        return taskService.assignUserToTask(taskId, updateTaskAssigneeDto.userId());
     }
 
     @DeleteMapping("/{taskId}/assignee")
