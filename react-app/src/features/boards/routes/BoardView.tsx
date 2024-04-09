@@ -3,9 +3,83 @@ import { Button, Grid, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { useState } from "react";
-import { BoardTask } from "@/features/boards/types";
+import { Board, BoardColumn as BoardColumnType, BoardTask } from "@/features/boards/types";
 import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  UniqueIdentifier,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
+
+interface BoardColumnsProps {
+  board: Board;
+  handleTaskCardClick: (task: BoardTask) => void;
+}
+
+const BoardColumns = (props: BoardColumnsProps) => {
+  const { board, handleTaskCardClick } = props;
+  const [draggingTaskId, setDraggingTaskId] = useState<UniqueIdentifier | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const gridColumnSize = 12 / board.boardColumns.length;
+  const columnElements = board.boardColumns.map((c) => (
+    <Grid key={c.id} item md={gridColumnSize}>
+      <BoardColumn boardColumn={c} onTaskCardClick={handleTaskCardClick} />
+    </Grid>
+  ));
+
+  const taskIdToTasks: Record<string, BoardTask> = {};
+  const taskIdToBoardColumn: Record<string, BoardColumnType> = {};
+
+  for (const column of board.boardColumns) {
+    for (const task of column.tasks) {
+      taskIdToTasks[task.id] = task;
+      taskIdToBoardColumn[task.id] = column;
+    }
+  }
+
+  console.log(draggingTaskId);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setDraggingTaskId(active.id);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    console.log(event);
+    const { over } = event;
+    if (over != null && Object.keys(taskIdToTasks).includes(String(over.id))) {
+      console.log("Task dropped on task droppable");
+    } else {
+      console.log("Task dropped on a column droppable");
+    }
+    setDraggingTaskId(null);
+  };
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <Grid container spacing={3}>
+        {columnElements}
+      </Grid>
+      <DragOverlay>
+        {draggingTaskId ? <BoardTaskCard boardTask={taskIdToTasks[draggingTaskId]} onClick={() => {}} /> : null}
+      </DragOverlay>
+    </DndContext>
+  );
+};
 
 export const BoardView = () => {
   const { boardId } = useParams();
@@ -25,16 +99,11 @@ export const BoardView = () => {
 
   const board = boardQuery.data;
 
-  const gridColumnSize = 12 / board.boardColumns.length;
   const onTaskCardClick = (task: BoardTask) => {
     setTaskDialogTaskId(task.id);
     setShowTaskDialog(true);
   };
-  const columnElements = board.boardColumns.map((c) => (
-    <Grid key={c.id} item md={gridColumnSize}>
-      <BoardColumn boardColumn={c} onTaskCardClick={onTaskCardClick} />
-    </Grid>
-  ));
+
   return (
     <>
       <BoardTaskDetail
@@ -60,9 +129,7 @@ export const BoardView = () => {
         </Button>
       </Stack>
 
-      <Grid container spacing={3}>
-        {columnElements}
-      </Grid>
+      <BoardColumns board={board} handleTaskCardClick={onTaskCardClick} />
     </>
   );
 };
