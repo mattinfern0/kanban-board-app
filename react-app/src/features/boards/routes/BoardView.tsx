@@ -27,7 +27,14 @@ interface BoardColumnsProps {
 const BoardColumns = (props: BoardColumnsProps) => {
   const { board, handleTaskCardClick } = props;
   const [draggingTaskId, setDraggingTaskId] = useState<UniqueIdentifier | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // Differentiate between dragging a task vs. clicking to open the task detail dialog
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
 
   const gridColumnSize = 12 / board.boardColumns.length;
   const columnElements = board.boardColumns.map((c) => (
