@@ -5,6 +5,7 @@ import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
 import { MoreVertRounded } from "@mui/icons-material";
 import { PopoverProps } from "@mui/material/Popover";
 import { useSnackbar } from "notistack";
+import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -33,6 +34,7 @@ const DetailMenu = (props: DetailMenuProps) => {
 export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
+  const deleteTaskMutation = useDeleteTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -46,8 +48,17 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   };
 
   const handleTaskDelete = () => {
-    enqueueSnackbar("Task deleted", { variant: "success" });
-    onClose();
+    if (!taskId || deleteTaskMutation.isPending) return;
+
+    deleteTaskMutation.mutate(taskId, {
+      onSuccess: () => {
+        enqueueSnackbar("Task deleted.", { variant: "success" });
+        onClose();
+      },
+      onError: () => {
+        enqueueSnackbar("An error occurred while deleting the task.", { variant: "error" });
+      },
+    });
   };
 
   let dialogContent: React.ReactNode;
