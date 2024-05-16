@@ -1,6 +1,10 @@
-import { Dialog, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { useTaskDetailQuery } from "@/features/boards/apis/getTaskDetail.ts";
 import React from "react";
+import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
+import { MoreVertRounded } from "@mui/icons-material";
+import { PopoverProps } from "@mui/material/Popover";
+import { useSnackbar } from "notistack";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -8,9 +12,43 @@ interface BoardTaskDetailProps {
   onClose: () => void;
 }
 
+interface DetailMenuProps {
+  anchorEl: PopoverProps["anchorEl"];
+
+  open: boolean;
+  onClose: () => void;
+
+  onDeleteClick: () => void;
+}
+
+const DetailMenu = (props: DetailMenuProps) => {
+  const { open, onClose, onDeleteClick, anchorEl } = props;
+  return (
+    <Menu open={open} onClose={onClose} anchorEl={anchorEl}>
+      <MenuItem onClick={onDeleteClick}>Delete</MenuItem>
+    </Menu>
+  );
+};
+
 export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(menuAnchorEl);
+
+  const handleMenuButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  const handleTaskDelete = () => {
+    enqueueSnackbar("Task deleted", { variant: "success" });
+    onClose();
+  };
 
   let dialogContent: React.ReactNode;
 
@@ -23,7 +61,20 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     dialogContent = (
       <>
         <DialogTitle>
-          {task.title} - {task.status}
+          <Stack direction="row" justifyContent="space-between">
+            <span>
+              {task.title} <TaskStatusChip status={task.status} />
+            </span>
+            <IconButton onClick={handleMenuButtonClick}>
+              <MoreVertRounded />
+            </IconButton>
+            <DetailMenu
+              open={menuOpen}
+              anchorEl={menuAnchorEl}
+              onClose={handleMenuClose}
+              onDeleteClick={handleTaskDelete}
+            />
+          </Stack>
         </DialogTitle>
         <DialogContent>
           <Typography>{task.description}</Typography>
