@@ -2,10 +2,7 @@ package io.mattinfern0.kanbanboardapi.tasks;
 
 import io.mattinfern0.kanbanboardapi.core.constraints.EntityWithIdExists;
 import io.mattinfern0.kanbanboardapi.core.entities.Task;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskAssigneeDto;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.UpdateTaskAssigneeDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,5 +65,12 @@ public class TasksController {
         @EntityWithIdExists(entityClass = Task.class) @PathVariable UUID taskId
     ) {
         taskService.removeTaskAssignee(taskId);
+    }
+
+    @PutMapping("/{taskId}/column-position")
+    public void updateTaskColumnPosition(
+        UUID taskId,
+        @Valid @RequestBody UpdateTaskColumnPositionDTO updateTaskColumnPositionDTO
+    ) {
     }
 }
