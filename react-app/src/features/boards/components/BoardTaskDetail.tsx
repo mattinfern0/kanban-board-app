@@ -47,13 +47,18 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     setMenuAnchorEl(null);
   };
 
+  const handleDialogClose = () => {
+    handleMenuClose();
+    onClose();
+  };
+
   const handleTaskDelete = () => {
     if (!taskId || deleteTaskMutation.isPending) return;
 
     deleteTaskMutation.mutate(taskId, {
       onSuccess: () => {
         enqueueSnackbar("Task deleted.", { variant: "success" });
-        onClose();
+        handleDialogClose();
       },
       onError: () => {
         enqueueSnackbar("An error occurred while deleting the task.", { variant: "error" });
@@ -95,7 +100,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleDialogClose} maxWidth="md" fullWidth>
       {dialogContent}
     </Dialog>
   );
