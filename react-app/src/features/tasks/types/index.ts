@@ -25,6 +25,18 @@ export interface CreateTaskBody {
   status?: TaskStatus;
 }
 
+export interface UpdateTaskBody {
+  organizationId: string;
+
+  title: string;
+  description: string;
+
+  boardColumnId?: string;
+  boardColumnOrder?: number;
+
+  status?: TaskStatus;
+}
+
 export type TaskDetail = {
   id: string;
   organizationId: string;
