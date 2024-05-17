@@ -46,7 +46,7 @@ const BoardColumns = (props: BoardColumnsProps) => {
 
   const previousBoardColumns = usePrevious(board.boardColumns);
   useEffect(() => {
-    if (!deepEqual(board.boardColumns, previousBoardColumns)) {
+    if (deepEqual(board.boardColumns, previousBoardColumns)) {
       return;
     }
     setLocalBoardColumns(board.boardColumns);
