@@ -9,11 +9,10 @@ import java.util.UUID;
 
 public record UpdateTaskColumnPositionDTO(
     @NotNull
-    @EntityWithIdExists(entityClass = BoardColumn.class)
+    @EntityWithIdExists(entityClass = BoardColumn.class, message = "Column with provided ID not found.")
     UUID boardColumnId,
 
-    @NotNull
-    @Min(0)
+    @Min(value = 0, message = "Column order must be greater than or equal to 0")
     Integer boardColumnOrder
 ) {
 }

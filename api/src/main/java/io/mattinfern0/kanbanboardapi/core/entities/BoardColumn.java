@@ -87,14 +87,23 @@ public class BoardColumn {
     }
 
     public void addTask(Task task) {
-        task.setBoardColumn(this);
-        task.setTaskStatus(this.taskStatus);
-
         int maxOrder = tasks.stream().mapToInt(Task::getBoardColumnOrder).max().orElse(0);
 
         // Set task to last in order
-        task.setBoardColumnOrder(maxOrder + 1);
-        tasks.add(task);
+        insertTask(task, maxOrder + 1);
+    }
+
+    public void insertTask(Task task, int orderIndex) {
+        task.setBoardColumn(this);
+        task.setTaskStatus(this.taskStatus);
+
+        task.setBoardColumnOrder(orderIndex);
+
+        if (orderIndex < tasks.size()) {
+            tasks.add(orderIndex, task);
+        } else {
+            tasks.add(task);
+        }
     }
 
     public void removeTask(Task task) {

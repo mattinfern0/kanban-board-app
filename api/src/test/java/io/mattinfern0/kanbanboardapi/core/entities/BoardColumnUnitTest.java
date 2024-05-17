@@ -145,6 +145,25 @@ class BoardColumnUnitTest {
     }
 
     @Test
+    void insertTask_insertsTaskAtCorrectPositionInList() {
+        TaskStatus testStatus = new TaskStatus();
+
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(testStatus);
+
+        for (int i = 0; i < 4; i++) {
+            Task existingTask = new Task();
+            testColumn.addTask(existingTask);
+        }
+
+        Task testTask = new Task();
+        testColumn.insertTask(testTask, 1);
+
+        assert Objects.equals(testTask.getBoardColumnOrder(), 1);
+        assert testColumn.getTasks().get(1).equals(testTask);
+    }
+
+    @Test
     void removeTask_setsProperty() {
         BoardColumn testColumn = new BoardColumn();
         testColumn.setTaskStatus(new TaskStatus());

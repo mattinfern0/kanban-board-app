@@ -69,8 +69,9 @@ public class TasksController {
 
     @PutMapping("/{taskId}/column-position")
     public void updateTaskColumnPosition(
-        UUID taskId,
+        @PathVariable UUID taskId,
         @Valid @RequestBody UpdateTaskColumnPositionDTO updateTaskColumnPositionDTO
     ) {
+        taskService.updateTaskColumnPosition(taskId, updateTaskColumnPositionDTO);
     }
 }

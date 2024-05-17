@@ -13,6 +13,7 @@ import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskAssigneeDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
+import io.mattinfern0.kanbanboardapi.tasks.dtos.UpdateTaskColumnPositionDTO;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskAssigneeDtoMapper;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
 import jakarta.validation.Valid;
@@ -106,6 +107,26 @@ public class TaskService {
 
         task.setAssignee(null);
         taskRepository.save(task);
+    }
+
+    @Transactional
+    public void updateTaskColumnPosition(UUID taskId, UpdateTaskColumnPositionDTO dto) {
+        Task task = taskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
+
+        BoardColumn boardColumn = boardColumnRepository
+            .findById(dto.boardColumnId())
+            .orElseThrow(() -> new ResourceNotFoundException(
+                String.format("BoardColumn with id %s not found", dto.boardColumnId())
+            ));
+
+        if (!task.getBoardColumn().getId().equals(boardColumn.getId())) {
+            task.getBoardColumn().removeTask(task);
+            boardColumn.insertTask(task, dto.boardColumnOrder());
+        }
+
+        taskRepository.saveAndFlush(task);
     }
 
     Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDtoOld) {
