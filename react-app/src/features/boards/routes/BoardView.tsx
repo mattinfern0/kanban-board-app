@@ -2,7 +2,7 @@ import { useBoardQuery } from "../apis/getBoard.ts";
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Board, BoardColumn as BoardColumnType, BoardTask } from "@/features/boards/types";
 import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
@@ -20,6 +20,8 @@ import {
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
 import { useUpdateTaskColumnPositionMutation } from "@/features/tasks/apis/updateTaskColumnPosition.ts";
 import { useSnackbar } from "notistack";
+import { usePrevious } from "@/lib/hooks.ts";
+import deepEqual from "deep-equal";
 
 interface BoardColumnsProps {
   board: Board;
@@ -40,8 +42,18 @@ const BoardColumns = (props: BoardColumnsProps) => {
   );
   const updateTaskColumnPositionMutation = useUpdateTaskColumnPositionMutation();
 
-  const gridColumnSize = 12 / board.boardColumns.length;
-  const columnElements = board.boardColumns.map((c) => (
+  const [localBoardColumns, setLocalBoardColumns] = useState<BoardColumnType[]>(board.boardColumns);
+
+  const previousBoardColumns = usePrevious(board.boardColumns);
+  useEffect(() => {
+    if (!deepEqual(board.boardColumns, previousBoardColumns)) {
+      return;
+    }
+    setLocalBoardColumns(board.boardColumns);
+  }, [board.boardColumns, previousBoardColumns]);
+
+  const gridColumnSize = 12 / localBoardColumns.length;
+  const columnElements = localBoardColumns.map((c) => (
     <Grid key={c.id} item md={gridColumnSize}>
       <BoardColumn boardColumn={c} onTaskCardClick={handleTaskCardClick} />
     </Grid>
@@ -50,14 +62,12 @@ const BoardColumns = (props: BoardColumnsProps) => {
   const taskIdToTasks: Record<string, BoardTask> = {};
   const taskIdToBoardColumn: Record<string, BoardColumnType> = {};
 
-  for (const column of board.boardColumns) {
+  for (const column of localBoardColumns) {
     for (const task of column.tasks) {
       taskIdToTasks[task.id] = task;
       taskIdToBoardColumn[task.id] = column;
     }
   }
-
-  console.log(draggingTaskId);
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
