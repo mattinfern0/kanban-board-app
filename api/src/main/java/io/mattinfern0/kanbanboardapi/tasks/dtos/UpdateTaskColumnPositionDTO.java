@@ -12,7 +12,7 @@ public record UpdateTaskColumnPositionDTO(
     @EntityWithIdExists(entityClass = BoardColumn.class, message = "Column with provided ID not found.")
     UUID boardColumnId,
 
-    @Min(value = 0, message = "Column order must be greater than or equal to 0")
-    Integer boardColumnOrder
+    @Min(value = 0, message = "Must be greater than or equal to 0")
+    Integer orderIndex
 ) {
 }
