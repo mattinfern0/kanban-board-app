@@ -82,6 +82,7 @@ const BoardColumns = (props: BoardColumnsProps) => {
       updateTaskColumnPositionMutation.mutate(
         {
           taskId: active.id as string,
+          boardId: board.id,
           body: { boardColumnId: overBoardColumn.id, orderIndex: newIndex },
         },
         {
