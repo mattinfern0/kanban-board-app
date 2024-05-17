@@ -39,7 +39,7 @@ export interface UpdateTaskBody {
 
 export interface UpdateTaskColumnPositionBody {
   boardColumnId: string;
-  boardColumnOrder: number;
+  orderIndex: number;
 }
 
 export type TaskDetail = {

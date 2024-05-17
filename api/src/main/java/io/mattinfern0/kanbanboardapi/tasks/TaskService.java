@@ -123,10 +123,12 @@ public class TaskService {
 
         if (!task.getBoardColumn().getId().equals(boardColumn.getId())) {
             task.getBoardColumn().removeTask(task);
-            boardColumn.insertTask(task, dto.orderIndex());
+
         }
 
-        taskRepository.saveAndFlush(task);
+        boardColumn.insertTask(task, dto.orderIndex());
+
+        taskRepository.saveAllAndFlush(boardColumn.getTasks());
     }
 
     Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDtoOld) {

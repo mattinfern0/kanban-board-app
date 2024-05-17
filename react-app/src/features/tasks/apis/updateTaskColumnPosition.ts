@@ -7,7 +7,7 @@ export const updateTaskColumnPosition = async (
   body: UpdateTaskColumnPositionBody,
 ): Promise<TaskDetail> => {
   return await client
-    .patch(`tasks/${taskId}`, {
+    .put(`tasks/${taskId}/column-position`, {
       json: body,
     })
     .json();

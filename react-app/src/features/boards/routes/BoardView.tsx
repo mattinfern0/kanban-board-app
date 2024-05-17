@@ -18,6 +18,8 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
+import { useUpdateTaskColumnPositionMutation } from "@/features/tasks/apis/updateTaskColumnPosition.ts";
+import { useSnackbar } from "notistack";
 
 interface BoardColumnsProps {
   board: Board;
@@ -27,6 +29,7 @@ interface BoardColumnsProps {
 const BoardColumns = (props: BoardColumnsProps) => {
   const { board, handleTaskCardClick } = props;
   const [draggingTaskId, setDraggingTaskId] = useState<UniqueIdentifier | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       // Differentiate between dragging a task vs. clicking to open the task detail dialog
@@ -35,6 +38,7 @@ const BoardColumns = (props: BoardColumnsProps) => {
       },
     }),
   );
+  const updateTaskColumnPositionMutation = useUpdateTaskColumnPositionMutation();
 
   const gridColumnSize = 12 / board.boardColumns.length;
   const columnElements = board.boardColumns.map((c) => (
@@ -62,9 +66,30 @@ const BoardColumns = (props: BoardColumnsProps) => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     console.log(event);
-    const { over } = event;
+    const { active, over } = event;
+
+    console.debug(active, over);
+
     if (over != null && Object.keys(taskIdToTasks).includes(String(over.id))) {
+      if (updateTaskColumnPositionMutation.isPending) {
+        return;
+      }
+
       console.log("Task dropped on task droppable");
+      const overBoardColumn = taskIdToBoardColumn[over.id];
+      const newIndex = overBoardColumn.tasks.findIndex((t) => t.id === over.id);
+
+      updateTaskColumnPositionMutation.mutate(
+        {
+          taskId: active.id as string,
+          body: { boardColumnId: overBoardColumn.id, orderIndex: newIndex },
+        },
+        {
+          onError: () => {
+            enqueueSnackbar("Failed to move task.", { variant: "error" });
+          },
+        },
+      );
     } else {
       console.log("Task dropped on a column droppable");
     }

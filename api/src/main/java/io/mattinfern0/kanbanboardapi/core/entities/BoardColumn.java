@@ -99,11 +99,15 @@ public class BoardColumn {
 
         task.setBoardColumnOrder(orderIndex);
 
+        tasks.remove(task);
+
         if (orderIndex < tasks.size()) {
             tasks.add(orderIndex, task);
         } else {
             tasks.add(task);
         }
+
+        syncTaskListPositions();
     }
 
     public void removeTask(Task task) {
@@ -118,5 +122,11 @@ public class BoardColumn {
 
     public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    void syncTaskListPositions() {
+        for (int i = 0; i < tasks.size(); i++) {
+            tasks.get(i).setBoardColumnOrder(i);
+        }
     }
 }
