@@ -22,6 +22,7 @@ import { useUpdateTaskColumnPositionMutation } from "@/features/tasks/apis/updat
 import { useSnackbar } from "notistack";
 import { usePrevious } from "@/lib/hooks.ts";
 import deepEqual from "deep-equal";
+import { arrayMove } from "@dnd-kit/sortable";
 
 interface BoardColumnsProps {
   board: Board;
@@ -112,30 +113,44 @@ const BoardColumns = (props: BoardColumnsProps) => {
 
     console.debug(active, over);
 
-    if (over != null && Object.keys(taskIdToTasks).includes(String(over.id))) {
-      if (updateTaskColumnPositionMutation.isPending) {
-        return;
-      }
+    const activeBoardColumn = taskIdToBoardColumn[active.id as string];
+    const overBoardColumn = taskIdToBoardColumn[over?.id as string];
 
-      console.log("Task dropped on task droppable");
-      const overBoardColumn = taskIdToBoardColumn[over.id];
-      const newIndex = overBoardColumn.tasks.findIndex((t) => t.id === over.id);
+    if (!activeBoardColumn || !overBoardColumn || activeBoardColumn.id !== overBoardColumn.id) {
+      return;
+    }
+
+    const activeIndex = activeBoardColumn.tasks.findIndex((t) => t.id === active.id);
+    const overIndex = overBoardColumn.tasks.findIndex((t) => t.id === over?.id);
+
+    if (activeIndex !== overIndex && !updateTaskColumnPositionMutation.isPending) {
+      const oldLocalBoardColumns = localBoardColumns;
+
+      setLocalBoardColumns((oldData) => {
+        const newData = structuredClone(oldData);
+
+        const newDataOverColumn = newData.find((c) => c.id === overBoardColumn.id);
+        if (newDataOverColumn != null) {
+          newDataOverColumn.tasks = arrayMove(newDataOverColumn.tasks, activeIndex, overIndex);
+        }
+
+        return newData;
+      });
 
       updateTaskColumnPositionMutation.mutate(
         {
           taskId: active.id as string,
-          boardId: board.id,
-          body: { boardColumnId: overBoardColumn.id, orderIndex: newIndex },
+          body: { boardColumnId: overBoardColumn.id, orderIndex: overIndex },
         },
         {
           onError: () => {
             enqueueSnackbar("Failed to move task.", { variant: "error" });
+            setLocalBoardColumns(oldLocalBoardColumns);
           },
         },
       );
-    } else {
-      console.log("Task dropped on a column droppable");
     }
+
     setDraggingTaskId(null);
   };
 
