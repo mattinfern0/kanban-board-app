@@ -11,14 +11,14 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <>
       <SnackbarProvider>
-        <AppBar position="static" sx={{ zIndex: 1300 }}>
+        <AppBar sx={{ zIndex: 1300 }}>
           <Toolbar>
             <Typography variant="h6">Kanban App</Typography>
           </Toolbar>
         </AppBar>
         <Toolbar />
         <AppSidebar />
-        <Container>{children}</Container>
+        <Container sx={{ paddingTop: "3rem" }}>{children}</Container>
       </SnackbarProvider>
     </>
   );
