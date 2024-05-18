@@ -67,14 +67,15 @@ public class TaskService {
         return taskDtoMapper.taskToTaskDetailDto(newTask);
     }
 
-    public TaskDetailDto updateTask(UUID taskId, @Valid CreateUpdateTaskDto createUpdateTaskDto) {
-        if (!taskRepository.existsById(taskId)) {
-            throw new ResourceNotFoundException(String.format("Task with id %s not found", taskId));
-        }
+    @Transactional
+    public TaskDetailDto updateTask(UUID taskId, @Valid CreateUpdateTaskDto dto) {
+        Task task = taskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
 
-        Task task = taskFromCreateTaskDto(createUpdateTaskDto);
-        task.setId(taskId);
-        taskRepository.save(task);
+        task.setDescription(dto.description());
+        task.setTitle(dto.title());
+        taskRepository.saveAndFlush(task);
         return taskDtoMapper.taskToTaskDetailDto(task);
     }
 

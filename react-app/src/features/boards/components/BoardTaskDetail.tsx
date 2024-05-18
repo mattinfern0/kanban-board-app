@@ -85,6 +85,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
 
+  // TODO figure how to only call this if the form data is different.
   const onSubmit = handleSubmit(
     (data) => {
       if (!taskDetailQuery.data) {
@@ -194,13 +195,20 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
               <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
                 Description
               </Typography>
-              <HoverTextField
-                id="task-detail-description"
-                value={task.description}
-                fullWidth
-                multiline
-                minRows={5}
-                hiddenLabel
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <HoverTextField
+                    {...field}
+                    id="task-detail-description"
+                    fullWidth
+                    multiline
+                    minRows={5}
+                    hiddenLabel
+                    onBlur={onSubmit}
+                  />
+                )}
               />
             </Grid>
             <Grid item>
