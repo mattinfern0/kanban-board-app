@@ -1,4 +1,16 @@
-import { Dialog, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Stack, Typography } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  styled,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useTaskDetailQuery } from "@/features/boards/apis/getTaskDetail.ts";
 import React from "react";
 import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
@@ -6,6 +18,26 @@ import { MoreVertRounded } from "@mui/icons-material";
 import { PopoverProps } from "@mui/material/Popover";
 import { useSnackbar } from "notistack";
 import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
+
+const HoverTextField = styled(TextField)({
+  "& label.Mui-focused": {
+    color: "#A0AAB4",
+  },
+  "& .MuiInput-underline:after": {
+    borderBottomColor: "#B2BAC2",
+  },
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "rgba(255,255,255,0)",
+    },
+    "&:hover fieldset": {
+      borderColor: "#B2BAC2",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#6F7E8C",
+    },
+  },
+});
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -78,9 +110,16 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
       <>
         <DialogTitle>
           <Stack direction="row" justifyContent="space-between">
-            <span>
-              {task.title} <TaskStatusChip status={task.status} />
-            </span>
+            <HoverTextField
+              value={task.title}
+              sx={{ width: "50vw" }}
+              InputProps={{
+                style: {
+                  fontSize: "1.5rem",
+                  fontWeight: "bold",
+                },
+              }}
+            />
             <IconButton onClick={handleMenuButtonClick}>
               <MoreVertRounded />
             </IconButton>
@@ -93,14 +132,31 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
           </Stack>
         </DialogTitle>
         <DialogContent>
-          <Typography>{task.description}</Typography>
+          <Grid container>
+            <Grid item md={9}>
+              <Typography component="label" htmlFor={"task-detail-description"}>
+                Description
+              </Typography>
+              <HoverTextField
+                id="task-detail-description"
+                value={task.description}
+                fullWidth
+                multiline
+                minRows={5}
+                hiddenLabel
+              />
+            </Grid>
+            <Grid item>
+              <TaskStatusChip status={task.status} />
+            </Grid>
+          </Grid>
         </DialogContent>
       </>
     );
   }
 
   return (
-    <Dialog open={open} onClose={handleDialogClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleDialogClose} maxWidth="xl" fullWidth>
       {dialogContent}
     </Dialog>
   );
