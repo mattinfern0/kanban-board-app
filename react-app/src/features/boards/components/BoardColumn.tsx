@@ -1,8 +1,9 @@
-import { Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
 import { BoardColumn as BoardColumnType, BoardTask } from "../types";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableDraggable } from "@/components/dragging/SortableDraggable.tsx";
+import { useDroppable } from "@dnd-kit/core";
 
 interface BoardColumnProps {
   boardColumn: BoardColumnType;
@@ -10,6 +11,8 @@ interface BoardColumnProps {
 }
 
 export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) => {
+  const { setNodeRef } = useDroppable({ id: boardColumn.id });
+
   const cardElements = boardColumn.tasks.map((t) => {
     return (
       <SortableDraggable key={t.id} id={t.id}>
@@ -18,18 +21,16 @@ export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) 
     );
   });
 
-  const taskSortItems: string[] = boardColumn.tasks.map((t) => t.id);
-
   return (
     <Card sx={{ height: "100%" }}>
       <CardContent sx={{ height: "100%" }}>
         <Typography variant="body1" mb={1}>
           {boardColumn.title}
         </Typography>
-        <SortableContext items={taskSortItems} strategy={verticalListSortingStrategy}>
-          <Stack spacing={3} sx={{ backgroundColor: "lightgray", padding: "3px" }}>
-            {cardElements}
-          </Stack>
+        <SortableContext id={boardColumn.id} items={boardColumn.tasks} strategy={verticalListSortingStrategy}>
+          <Box ref={setNodeRef} sx={{ height: "60vh", backgroundColor: "lightgray", padding: "3px" }}>
+            <Stack spacing={3}>{cardElements}</Stack>
+          </Box>
         </SortableContext>
       </CardContent>
     </Card>

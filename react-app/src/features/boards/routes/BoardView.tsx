@@ -162,7 +162,7 @@ const BoardColumns = (props: BoardColumnsProps) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <Grid container spacing={3}>
+      <Grid container spacing={3} height="75vh">
         {columnElements}
       </Grid>
       <DragOverlay>
