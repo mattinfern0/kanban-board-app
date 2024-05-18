@@ -7,7 +7,7 @@ import { Board, BoardColumn as BoardColumnType, BoardTask } from "@/features/boa
 import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
 import {
-  closestCenter,
+  closestCorners,
   DndContext,
   DragEndEvent,
   DragOverlay,
@@ -74,6 +74,38 @@ const BoardColumns = (props: BoardColumnsProps) => {
     setDraggingTaskId(active.id);
   };
 
+  const handleDragOver = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    const activeBoardColumn = taskIdToBoardColumn[active.id as string];
+    const overContainingBoardColumn = taskIdToBoardColumn[over?.id as string];
+
+    // If the task is not being dragged over to a different column, do nothing
+    if (!activeBoardColumn || !overContainingBoardColumn || activeBoardColumn.id === overContainingBoardColumn.id) {
+      return;
+    }
+
+    // If the task is being dragged over to a different column, remove the task from the active column
+    // and make it appear in the correct position in the over column. This will only affect the UI state (localBoardColumn)
+    // and won't be persisted to the backend until the task is dropped.
+    setLocalBoardColumns((oldData) => {
+      const newData = structuredClone(oldData);
+
+      const newDataActiveColumn = newData.find((c) => c.id === activeBoardColumn.id);
+      if (newDataActiveColumn != null) {
+        newDataActiveColumn.tasks = newDataActiveColumn.tasks.filter((t) => t.id !== active.id);
+      }
+
+      const newDataOverColumn = newData.find((c) => c.id === overContainingBoardColumn.id);
+      if (newDataOverColumn != null) {
+        const overIndex = newDataOverColumn.tasks.findIndex((t) => t.id === over?.id);
+        newDataOverColumn.tasks.splice(overIndex, 0, taskIdToTasks[active.id as string]);
+      }
+
+      return newData;
+    });
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     console.log(event);
     const { active, over } = event;
@@ -110,8 +142,9 @@ const BoardColumns = (props: BoardColumnsProps) => {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <Grid container spacing={3}>
