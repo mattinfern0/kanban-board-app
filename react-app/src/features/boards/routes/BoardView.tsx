@@ -200,6 +200,7 @@ export const BoardView = () => {
       <BoardTaskDetail
         open={showTaskDialog}
         taskId={taskDialogTaskId}
+        organizationId={board.organizationId}
         onClose={() => {
           setShowTaskDialog(false);
         }}

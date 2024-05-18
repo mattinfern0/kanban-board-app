@@ -12,12 +12,15 @@ import {
   Typography,
 } from "@mui/material";
 import { useTaskDetailQuery } from "@/features/boards/apis/getTaskDetail.ts";
-import React from "react";
+import React, { useEffect } from "react";
 import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
 import { MoreVertRounded } from "@mui/icons-material";
 import { PopoverProps } from "@mui/material/Popover";
 import { useSnackbar } from "notistack";
 import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
+import { UpdateTaskFormValues } from "@/features/tasks/types";
+import { Controller, useForm } from "react-hook-form";
+import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
 
 const HoverTextField = styled(TextField)({
   "& label.Mui-focused": {
@@ -42,6 +45,7 @@ const HoverTextField = styled(TextField)({
 interface BoardTaskDetailProps {
   open: boolean;
   taskId: string | null;
+  organizationId: string;
   onClose: () => void;
 }
 
@@ -66,11 +70,56 @@ const DetailMenu = (props: DetailMenuProps) => {
 export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
+  const updateTaskMutation = useUpdateTaskMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
+  const { control, reset, handleSubmit } = useForm<UpdateTaskFormValues>();
+
+  useEffect(() => {
+    reset({
+      title: taskDetailQuery.data?.title || "",
+      description: taskDetailQuery.data?.description || "",
+    });
+  }, [reset, taskDetailQuery.data]);
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
+
+  const onSubmit = handleSubmit(
+    (data) => {
+      if (!taskDetailQuery.data) {
+        return;
+      }
+
+      console.debug("Updating task");
+      console.debug(data);
+
+      const oldTaskData = taskDetailQuery.data;
+
+      const newTaskData = structuredClone(taskDetailQuery.data);
+      newTaskData.title = data.title;
+      newTaskData.description = data.description;
+
+      updateTaskMutation.mutate(
+        {
+          taskId: oldTaskData.id,
+          body: {
+            title: data.title,
+            description: data.description,
+            organizationId: props.organizationId,
+          },
+        },
+        {
+          onError: () => {
+            enqueueSnackbar("An error occurred while updating the task.", { variant: "error" });
+          },
+        },
+      );
+    },
+    (errors) => {
+      console.debug(errors);
+    },
+  );
 
   const handleMenuButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -107,19 +156,27 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   } else {
     const task = taskDetailQuery.data;
     dialogContent = (
-      <>
+      <form onSubmit={onSubmit}>
         <DialogTitle>
           <Stack direction="row" justifyContent="space-between">
-            <HoverTextField
-              value={task.title}
-              sx={{ width: "50vw" }}
-              InputProps={{
-                style: {
-                  fontSize: "1.5rem",
-                  fontWeight: "bold",
-                },
-              }}
+            <Controller
+              control={control}
+              name="title"
+              render={({ field }) => (
+                <HoverTextField
+                  {...field}
+                  sx={{ width: "50vw" }}
+                  InputProps={{
+                    style: {
+                      fontSize: "1.5rem",
+                      fontWeight: "bold",
+                    },
+                  }}
+                  onBlur={onSubmit}
+                />
+              )}
             />
+
             <IconButton onClick={handleMenuButtonClick}>
               <MoreVertRounded />
             </IconButton>
@@ -134,7 +191,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
         <DialogContent>
           <Grid container>
             <Grid item md={9}>
-              <Typography component="label" htmlFor={"task-detail-description"}>
+              <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
                 Description
               </Typography>
               <HoverTextField
@@ -151,12 +208,12 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
             </Grid>
           </Grid>
         </DialogContent>
-      </>
+      </form>
     );
   }
 
   return (
-    <Dialog open={open} onClose={handleDialogClose} maxWidth="xl" fullWidth>
+    <Dialog open={open} onClose={handleDialogClose} maxWidth="lg" fullWidth>
       {dialogContent}
     </Dialog>
   );

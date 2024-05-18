@@ -15,6 +15,11 @@ export interface CreateTaskFormValues {
   column_id: string;
 }
 
+export interface UpdateTaskFormValues {
+  title: string;
+  description: string;
+}
+
 export interface CreateTaskBody {
   organizationId: string;
 
