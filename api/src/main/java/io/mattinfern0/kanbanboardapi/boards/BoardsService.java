@@ -6,6 +6,7 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.CreateBoardDto;
 import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.entities.Task;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardDetailDtoMapper;
@@ -13,6 +14,7 @@ import io.mattinfern0.kanbanboardapi.core.mappers.BoardSummaryDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
+import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.tasks.TaskStatusService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +31,19 @@ public class BoardsService {
     private final BoardRepository boardRepository;
     private final BoardColumnRepository boardColumnRepository;
     private final OrganizationRepository organizationRepository;
+    private final TaskRepository taskRepository;
     private final BoardSummaryDtoMapper boardSummaryDtoMapper;
     private final BoardDetailDtoMapper boardDetailDtoMapper;
+
 
     private final TaskStatusService taskStatusService;
 
     @Autowired
-    public BoardsService(BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, BoardSummaryDtoMapper boardSummaryDtoMapper, BoardDetailDtoMapper boardDetailDtoMapper, TaskStatusService taskStatusService) {
+    public BoardsService(BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, TaskRepository taskRepository, BoardSummaryDtoMapper boardSummaryDtoMapper, BoardDetailDtoMapper boardDetailDtoMapper, TaskStatusService taskStatusService) {
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
         this.organizationRepository = organizationRepository;
+        this.taskRepository = taskRepository;
         this.boardSummaryDtoMapper = boardSummaryDtoMapper;
         this.boardDetailDtoMapper = boardDetailDtoMapper;
         this.taskStatusService = taskStatusService;
@@ -81,8 +86,20 @@ public class BoardsService {
     }
 
     @Transactional
-    void deleteBoard(UUID boardId) {
+    void deleteBoard(UUID boardId, Boolean deleteTasks) {
+        List<Task> tasks = new ArrayList<>();
+        tasks.forEach(task -> task.setBoardColumn(null));
+        taskRepository.saveAll(tasks);
+
+        List<BoardColumn> columns = boardColumnRepository.findByBoardId(boardId);
+        boardColumnRepository.deleteAll(columns);
+
         boardRepository.deleteById(boardId);
+
+        if (deleteTasks) {
+
+            taskRepository.deleteAll(tasks);
+        }
     }
 
     List<BoardColumn> createDefaultNewBoardColumns() {

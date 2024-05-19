@@ -4,6 +4,7 @@ import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import React, { useState } from "react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { ChevronLeft } from "@mui/icons-material";
+import { DeleteBoardDialog } from "@/features/boards/components/DeleteBoardDialog.tsx";
 
 type TabValue = "settings" | "danger";
 
@@ -11,6 +12,7 @@ export const BoardSettings = () => {
   const { boardId } = useParams();
   const boardQuery = useBoardQuery(boardId || "");
   const [activeTab, setActiveTab] = useState<TabValue>("settings");
+  const [showDeleteBoardDialog, setShowDeleteBoardDialog] = useState<boolean>(false);
 
   let element;
 
@@ -18,7 +20,7 @@ export const BoardSettings = () => {
     element = <Typography>Loading...</Typography>;
   } else if (boardQuery.isError) {
     element = <Typography>Error loading board</Typography>;
-  } else if (boardQuery.isSuccess) {
+  } else if (boardId != null && boardQuery.isSuccess) {
     const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
       setActiveTab(newValue);
     };
@@ -37,13 +39,19 @@ export const BoardSettings = () => {
               <TabPanel value="settings">Update Board Settings Form</TabPanel>
 
               <TabPanel value="danger">
-                <Button variant="outlined" color="error">
+                <Button variant="outlined" color="error" onClick={() => setShowDeleteBoardDialog(true)}>
                   Delete Board
                 </Button>
               </TabPanel>
             </TabContext>
           </CardContent>
         </Card>
+        <DeleteBoardDialog
+          open={showDeleteBoardDialog}
+          onClose={() => setShowDeleteBoardDialog(false)}
+          boardId={boardId}
+          boardTitle={boardQuery.data.title}
+        />
       </>
     );
   }

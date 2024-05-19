@@ -39,7 +39,7 @@ public class BoardsController {
 
     @DeleteMapping("/{boardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteBoard(@PathVariable UUID boardId) {
-        boardsService.deleteBoard(boardId);
+    void deleteBoard(@PathVariable UUID boardId, boolean deleteTasks) {
+        boardsService.deleteBoard(boardId, deleteTasks);
     }
 }
