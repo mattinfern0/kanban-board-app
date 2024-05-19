@@ -213,7 +213,7 @@ export const BoardView = () => {
       />
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" mb={0}>
+        <Typography variant="h4" mb={0}>
           {boardQuery.data.title}
         </Typography>
         <Button variant="contained" onClick={() => setShowCreateTaskDialog(true)}>
