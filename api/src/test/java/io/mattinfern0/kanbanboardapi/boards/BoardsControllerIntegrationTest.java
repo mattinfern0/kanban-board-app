@@ -19,6 +19,8 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.util.List;
+
 @SpringBootTest()
 @Tag("IntegrationTest")
 public class BoardsControllerIntegrationTest {
@@ -188,6 +190,83 @@ public class BoardsControllerIntegrationTest {
                 assert taskEntity.getId().equals(taskDto.id());
                 assert taskEntity.getTitle().equals(taskDto.title());
             }
+        }
+    }
+
+    @Test
+    @Transactional
+    public void testDeleteBoard_setsTaskColumnToNullByDefault() {
+        Organization testOrganization = new Organization();
+        testOrganization.setDisplayName("Test Organization");
+        organizationRepository.save(testOrganization);
+
+        Board testBoard = createTestBoard();
+        Task testTodoTask1 = new Task();
+        testTodoTask1.setTitle("Test Task 1");
+        testTodoTask1.setDescription("Testing");
+        testTodoTask1.setOrganization(testOrganization);
+        testBoard.getBoardColumns().get(0).addTask(testTodoTask1);
+        taskRepository.save(testTodoTask1);
+
+        Task testTodoTask2 = new Task();
+        testTodoTask2.setTitle("Test Task 2");
+        testTodoTask2.setDescription("Testing");
+        testTodoTask2.setOrganization(testOrganization);
+        testBoard.getBoardColumns().get(0).addTask(testTodoTask2);
+        taskRepository.save(testTodoTask2);
+
+        Task testCompletedTask = new Task();
+        testCompletedTask.setTitle("Test Completed 1");
+        testCompletedTask.setDescription("A completed task");
+        testCompletedTask.setOrganization(testOrganization);
+        testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
+        taskRepository.save(testCompletedTask);
+
+        List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
+
+        boardsController.deleteBoard(testBoard.getId(), false);
+
+        for (Task task : boardTasks) {
+            entityManager.refresh(task);
+            assert task.getBoardColumn() == null;
+        }
+    }
+
+    @Test
+    @Transactional
+    public void testDeleteBoard_deletesTasksIfDeleteTasksIsTrue() {
+        Organization testOrganization = new Organization();
+        testOrganization.setDisplayName("Test Organization");
+        organizationRepository.save(testOrganization);
+
+        Board testBoard = createTestBoard();
+        Task testTodoTask1 = new Task();
+        testTodoTask1.setTitle("Test Task 1");
+        testTodoTask1.setDescription("Testing");
+        testTodoTask1.setOrganization(testOrganization);
+        testBoard.getBoardColumns().get(0).addTask(testTodoTask1);
+        taskRepository.save(testTodoTask1);
+
+        Task testTodoTask2 = new Task();
+        testTodoTask2.setTitle("Test Task 2");
+        testTodoTask2.setDescription("Testing");
+        testTodoTask2.setOrganization(testOrganization);
+        testBoard.getBoardColumns().get(0).addTask(testTodoTask2);
+        taskRepository.save(testTodoTask2);
+
+        Task testCompletedTask = new Task();
+        testCompletedTask.setTitle("Test Completed 1");
+        testCompletedTask.setDescription("A completed task");
+        testCompletedTask.setOrganization(testOrganization);
+        testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
+        taskRepository.save(testCompletedTask);
+
+        List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
+
+        boardsController.deleteBoard(testBoard.getId(), true);
+
+        for (Task task : boardTasks) {
+            assert taskRepository.findById(task.getId()).isEmpty();
         }
     }
 
