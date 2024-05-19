@@ -14,7 +14,7 @@ export type BoardColumn = {
   tasks: BoardTask[];
 };
 
-export type Board = {
+export type BoardDetail = {
   id: string;
   organizationId: string;
   title: string;
@@ -23,6 +23,15 @@ export type Board = {
 
 export type BoardSummary = {
   id: string;
+  organizationId: string;
+  title: string;
+};
+
+export type CreateBoardFormValues = {
+  title: string;
+};
+
+export type CreateBoardBody = {
   organizationId: string;
   title: string;
 };

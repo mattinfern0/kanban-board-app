@@ -1,10 +1,14 @@
 import { Button, Card, CardActionArea, CardContent, Stack, Typography } from "@mui/material";
 import { useBoardListQuery } from "@/features/boards/apis/getBoardList.ts";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Link } from "react-router-dom";
+import { CreateBoardDialog } from "@/features/boards/components/CreateBoardDialog.tsx";
+
+const MOCK_ORGANIZATION_ID = "846ba4b8-5556-4855-8fa6-b274dea3a3cc";
 
 export const BoardListView = () => {
   const boardListQuery = useBoardListQuery();
+  const [showCreateBoardDialog, setShowCreateBoardDialog] = useState<boolean>(false);
 
   let listElement: ReactNode;
   if (boardListQuery.isPending) {
@@ -30,9 +34,17 @@ export const BoardListView = () => {
 
   return (
     <>
+      <CreateBoardDialog
+        open={showCreateBoardDialog}
+        onClose={() => setShowCreateBoardDialog(false)}
+        organizationId={MOCK_ORGANIZATION_ID}
+      />
+
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">Boards</Typography>
-        <Button variant="contained">Create Board</Button>
+        <Button variant="contained" onClick={() => setShowCreateBoardDialog(true)}>
+          Create Board
+        </Button>
       </Stack>
 
       {listElement}

@@ -3,7 +3,7 @@ import { Button, Grid, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { useEffect, useState } from "react";
-import { Board, BoardColumn as BoardColumnType, BoardTask } from "@/features/boards/types";
+import { BoardColumn as BoardColumnType, BoardDetail, BoardTask } from "@/features/boards/types";
 import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
 import {
@@ -25,7 +25,7 @@ import deepEqual from "deep-equal";
 import { arrayMove } from "@dnd-kit/sortable";
 
 interface BoardColumnsProps {
-  board: Board;
+  board: BoardDetail;
   handleTaskCardClick: (task: BoardTask) => void;
 }
 

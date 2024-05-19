@@ -6,12 +6,14 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.CreateBoardDto;
 import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardDetailDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.mappers.BoardSummaryDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
+import io.mattinfern0.kanbanboardapi.tasks.TaskStatusService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,14 +32,16 @@ public class BoardsService {
     private final BoardSummaryDtoMapper boardSummaryDtoMapper;
     private final BoardDetailDtoMapper boardDetailDtoMapper;
 
+    private final TaskStatusService taskStatusService;
 
     @Autowired
-    public BoardsService(BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, BoardSummaryDtoMapper boardSummaryDtoMapper, BoardDetailDtoMapper boardDetailDtoMapper) {
+    public BoardsService(BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, BoardSummaryDtoMapper boardSummaryDtoMapper, BoardDetailDtoMapper boardDetailDtoMapper, TaskStatusService taskStatusService) {
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
         this.organizationRepository = organizationRepository;
         this.boardSummaryDtoMapper = boardSummaryDtoMapper;
         this.boardDetailDtoMapper = boardDetailDtoMapper;
+        this.taskStatusService = taskStatusService;
     }
 
     BoardDetailDto getBoardDetail(UUID boardId) {
@@ -81,21 +85,27 @@ public class BoardsService {
         BoardColumn backlogColumn = new BoardColumn();
         backlogColumn.setTitle("Back Log");
         backlogColumn.setDisplayOrder(1);
+        backlogColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.BACKLOG));
+
+
         result.add(backlogColumn);
 
         BoardColumn todoColumn = new BoardColumn();
         todoColumn.setTitle("Todo");
         todoColumn.setDisplayOrder(2);
+        todoColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.TODO));
         result.add(todoColumn);
 
         BoardColumn inProgressColumn = new BoardColumn();
         inProgressColumn.setTitle("In-Progress");
         inProgressColumn.setDisplayOrder(3);
+        inProgressColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.IN_PROGRESS));
         result.add(inProgressColumn);
 
         BoardColumn doneColumn = new BoardColumn();
         doneColumn.setTitle("Done");
         doneColumn.setDisplayOrder(4);
+        doneColumn.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.COMPLETED));
         result.add(doneColumn);
 
         return result;
