@@ -10,6 +10,7 @@ import io.mattinfern0.kanbanboardapi.core.mappers.BoardSummaryDtoMapper;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
+import io.mattinfern0.kanbanboardapi.tasks.TaskStatusService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,9 @@ class BoardsServiceUnitTest {
 
     @InjectMocks
     BoardsService boardsService;
+
+    @Mock
+    TaskStatusService taskStatusService;
 
     @Mock
     private BoardRepository boardRepository;
