@@ -29,10 +29,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     @Nullable
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request
+        MethodArgumentNotValidException ex,
+        HttpHeaders headers,
+        HttpStatusCode status,
+        WebRequest request
     ) {
 
         BindingResult result = ex.getBindingResult();
@@ -45,9 +45,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         });
 
         List<NonFieldErrorSummary> globalErrorSummaries = globalErrors
-                .stream()
-                .map(NonFieldErrorSummary::new)
-                .toList();
+            .stream()
+            .map(NonFieldErrorSummary::new)
+            .toList();
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Bad Request");
         problemDetail.setProperty("globalErrors", globalErrorSummaries);
