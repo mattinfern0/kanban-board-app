@@ -36,4 +36,10 @@ public class BoardsController {
     BoardDetailDto getBoard(@PathVariable UUID boardId) {
         return boardsService.getBoardDetail(boardId);
     }
+
+    @DeleteMapping("/{boardId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteBoard(@PathVariable UUID boardId) {
+        boardsService.deleteBoard(boardId);
+    }
 }

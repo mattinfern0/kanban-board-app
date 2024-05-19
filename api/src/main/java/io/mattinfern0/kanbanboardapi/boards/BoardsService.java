@@ -80,7 +80,12 @@ public class BoardsService {
         return boardDetailDtoMapper.boardToBoardDetailDto(newBoard);
     }
 
-    protected List<BoardColumn> createDefaultNewBoardColumns() {
+    @Transactional
+    void deleteBoard(UUID boardId) {
+        boardRepository.deleteById(boardId);
+    }
+
+    List<BoardColumn> createDefaultNewBoardColumns() {
         List<BoardColumn> result = new ArrayList<>();
         BoardColumn backlogColumn = new BoardColumn();
         backlogColumn.setTitle("Back Log");
