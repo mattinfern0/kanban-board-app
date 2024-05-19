@@ -1,6 +1,6 @@
 import { useBoardQuery } from "../apis/getBoard.ts";
-import { Button, Grid, Stack, Typography } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { Button, Grid, IconButton, Stack, Typography } from "@mui/material";
+import { Link, useParams } from "react-router-dom";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { useEffect, useState } from "react";
 import { BoardColumn as BoardColumnType, BoardDetail, BoardTask } from "@/features/boards/types";
@@ -23,6 +23,7 @@ import { useSnackbar } from "notistack";
 import { usePrevious } from "@/lib/hooks.ts";
 import deepEqual from "deep-equal";
 import { arrayMove } from "@dnd-kit/sortable";
+import { Settings } from "@mui/icons-material";
 
 interface BoardColumnsProps {
   board: BoardDetail;
@@ -216,9 +217,15 @@ export const BoardView = () => {
         <Typography variant="h4" mb={0}>
           {boardQuery.data.title}
         </Typography>
-        <Button variant="contained" onClick={() => setShowCreateTaskDialog(true)}>
-          Create Task
-        </Button>
+
+        <Stack direction="row" spacing={3}>
+          <Button variant="contained" onClick={() => setShowCreateTaskDialog(true)}>
+            Create Task
+          </Button>
+          <IconButton component={Link} to={`/boards/${boardId}/settings`}>
+            <Settings />
+          </IconButton>
+        </Stack>
       </Stack>
 
       <BoardColumns board={board} handleTaskCardClick={onTaskCardClick} />
