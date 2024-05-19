@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.boards;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardSummaryDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.CreateBoardDto;
+import io.mattinfern0.kanbanboardapi.boards.dtos.UpdateBoardHeaderDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,11 @@ public class BoardsController {
     @ResponseStatus(HttpStatus.CREATED)
     BoardDetailDto createBoard(@RequestBody @Valid CreateBoardDto createBoardDtoOld) {
         return boardsService.createNewBoard(createBoardDtoOld);
+    }
+
+    @PutMapping("/{boardId}/header")
+    BoardDetailDto updateBoardHeader(@PathVariable UUID boardId, @RequestBody @Valid UpdateBoardHeaderDTO updateBoardHeaderDTO) {
+        return boardsService.updateBoard(boardId, updateBoardHeaderDTO);
     }
 
     @GetMapping("/{boardId}")

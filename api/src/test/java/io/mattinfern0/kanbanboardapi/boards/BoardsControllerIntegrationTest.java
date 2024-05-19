@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.boards;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardTaskDto;
+import io.mattinfern0.kanbanboardapi.boards.dtos.UpdateBoardHeaderDTO;
 import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
@@ -268,6 +269,18 @@ public class BoardsControllerIntegrationTest {
         for (Task task : boardTasks) {
             assert taskRepository.findById(task.getId()).isEmpty();
         }
+    }
+
+    @Test
+    @Transactional
+    public void test_updateBoardHeade_returnsUpdatedBoard() {
+        Board testBoard = createTestBoard();
+        UpdateBoardHeaderDTO requestBody = new UpdateBoardHeaderDTO("New Title 23");
+        assert !testBoard.getTitle().equals(requestBody.title());
+        BoardDetailDto response = boardsController.updateBoardHeader(testBoard.getId(), requestBody);
+
+        assert response.id().equals(testBoard.getId());
+        assert response.title().equals(requestBody.title());
     }
 
 }

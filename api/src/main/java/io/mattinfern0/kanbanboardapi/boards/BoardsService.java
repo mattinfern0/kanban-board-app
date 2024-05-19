@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.boards;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardSummaryDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.CreateBoardDto;
+import io.mattinfern0.kanbanboardapi.boards.dtos.UpdateBoardHeaderDTO;
 import io.mattinfern0.kanbanboardapi.core.entities.Board;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
@@ -83,6 +84,16 @@ public class BoardsService {
         }
 
         return boardDetailDtoMapper.boardToBoardDetailDto(newBoard);
+    }
+
+    BoardDetailDto updateBoard(UUID boardId, UpdateBoardHeaderDTO dto) {
+        Board board = boardRepository
+            .findById(boardId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Board with id %s not found", boardId)));
+
+        board.setTitle(dto.title());
+        boardRepository.save(board);
+        return boardDetailDtoMapper.boardToBoardDetailDto(board);
     }
 
     @Transactional
