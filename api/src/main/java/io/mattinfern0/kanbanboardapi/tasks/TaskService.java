@@ -94,12 +94,15 @@ public class TaskService {
                 ));
 
             BoardColumn oldColumn = task.getBoardColumn();
+
+
             if (oldColumn != null && !oldColumn.getId().equals(newColumn.getId())) {
                 oldColumn.removeTask(task);
                 taskRepository.saveAllAndFlush(oldColumn.getTasks());
+                newColumn.addTask(task);
+            } else if (oldColumn == null) {
+                newColumn.addTask(task);
             }
-
-            newColumn.addTask(task);
         }
 
         if (dto.status() != null && dto.boardColumnId() == null) {
