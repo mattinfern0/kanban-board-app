@@ -4,6 +4,7 @@ import { BoardColumn as BoardColumnType, BoardTask } from "../types";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableDraggable } from "@/components/dragging/SortableDraggable.tsx";
 import { useDroppable } from "@dnd-kit/core";
+import { DragHandle } from "@mui/icons-material";
 
 interface BoardColumnProps {
   boardColumn: BoardColumnType;
@@ -24,11 +25,16 @@ export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) 
   return (
     <Card sx={{ height: "100%" }}>
       <CardContent sx={{ height: "100%" }}>
-        <Typography variant="body1" mb={1}>
-          {boardColumn.title}
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" mb={1}>
+          <Typography variant="h6">{boardColumn.title}</Typography>
+          <DragHandle />
+        </Stack>
+
         <SortableContext id={boardColumn.id} items={boardColumn.tasks} strategy={verticalListSortingStrategy}>
-          <Box ref={setNodeRef} sx={{ height: "60vh", backgroundColor: "lightgray", padding: "3px" }}>
+          <Box
+            ref={setNodeRef}
+            sx={{ height: "60vh", backgroundColor: "lightgray", padding: "3px", overflowY: "scroll" }}
+          >
             <Stack spacing={3}>{cardElements}</Stack>
           </Box>
         </SortableContext>
