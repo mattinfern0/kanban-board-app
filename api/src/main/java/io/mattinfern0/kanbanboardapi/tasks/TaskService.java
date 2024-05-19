@@ -73,8 +73,41 @@ public class TaskService {
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
 
+        Organization targetOrganization = organizationRepository
+            .findById(dto.organizationId())
+            .orElseThrow(() -> new ResourceNotFoundException(
+                String.format("Organization with id %s not found", dto.organizationId())
+            ));
+
         task.setDescription(dto.description());
         task.setTitle(dto.title());
+        task.setOrganization(targetOrganization);
+
+
+        if (dto.boardColumnId() == null && task.getBoardColumn() != null) {
+            task.getBoardColumn().removeTask(task);
+        } else if (dto.boardColumnId() != null) {
+            BoardColumn newColumn = boardColumnRepository
+                .findById(dto.boardColumnId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    String.format("BoardColumn with id %s not found", dto.boardColumnId())
+                ));
+
+            BoardColumn oldColumn = task.getBoardColumn();
+            if (oldColumn != null && !oldColumn.getId().equals(newColumn.getId())) {
+                oldColumn.removeTask(task);
+                taskRepository.saveAllAndFlush(oldColumn.getTasks());
+            }
+
+            newColumn.addTask(task);
+        }
+
+        if (dto.status() != null && dto.boardColumnId() == null) {
+            task.setTaskStatus(taskStatusService.findOrCreate(dto.status()));
+        } else if (dto.status() == null && dto.boardColumnId() == null) {
+            task.setTaskStatus(taskStatusService.findOrCreate(DEFAULT_TASK_STATUS_CODE));
+        }
+
         taskRepository.saveAndFlush(task);
         return taskDtoMapper.taskToTaskDetailDto(task);
     }
@@ -116,48 +149,50 @@ public class TaskService {
             .findById(taskId)
             .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
 
-        BoardColumn boardColumn = boardColumnRepository
+        BoardColumn newColumn = boardColumnRepository
             .findById(dto.boardColumnId())
             .orElseThrow(() -> new ResourceNotFoundException(
                 String.format("BoardColumn with id %s not found", dto.boardColumnId())
             ));
 
-        if (!task.getBoardColumn().getId().equals(boardColumn.getId())) {
-            task.getBoardColumn().removeTask(task);
+        BoardColumn oldColumn = task.getBoardColumn();
 
+        if (oldColumn != null && !oldColumn.getId().equals(newColumn.getId())) {
+            task.getBoardColumn().removeTask(task);
+            taskRepository.saveAllAndFlush(oldColumn.getTasks());
         }
 
-        boardColumn.insertTask(task, dto.orderIndex());
+        newColumn.insertTask(task, dto.orderIndex());
 
-        taskRepository.saveAllAndFlush(boardColumn.getTasks());
+        taskRepository.saveAllAndFlush(newColumn.getTasks());
     }
 
-    Task taskFromCreateTaskDto(CreateUpdateTaskDto createUpdateTaskDtoOld) {
+    Task taskFromCreateTaskDto(CreateUpdateTaskDto dto) {
         Task newTask = new Task();
         newTask.setId(UUID.randomUUID());
-        newTask.setTitle(createUpdateTaskDtoOld.title());
-        newTask.setDescription(createUpdateTaskDtoOld.description());
+        newTask.setTitle(dto.title());
+        newTask.setDescription(dto.description());
 
         Organization organization = organizationRepository
-            .findById(createUpdateTaskDtoOld.organizationId())
+            .findById(dto.organizationId())
             .orElseThrow(() -> new ResourceNotFoundException(
-                String.format("Organization with id %s not found", createUpdateTaskDtoOld.organizationId())
+                String.format("Organization with id %s not found", dto.organizationId())
             ));
         newTask.setOrganization(organization);
 
-        if (createUpdateTaskDtoOld.boardColumnId() != null) {
+        if (dto.boardColumnId() != null) {
             BoardColumn boardColumn = boardColumnRepository
-                .findById(createUpdateTaskDtoOld.boardColumnId())
+                .findById(dto.boardColumnId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    String.format("BoardColumn with id %s not found", createUpdateTaskDtoOld.boardColumnId())
+                    String.format("BoardColumn with id %s not found", dto.boardColumnId())
                 ));
             boardColumn.addTask(newTask);
         }
 
         if (newTask.getTaskStatus() == null) {
             TaskStatusCode statusCode = DEFAULT_TASK_STATUS_CODE;
-            if (createUpdateTaskDtoOld.status() != null) {
-                statusCode = createUpdateTaskDtoOld.status();
+            if (dto.status() != null) {
+                statusCode = dto.status();
             }
 
             newTask.setTaskStatus(taskStatusService.findOrCreate(statusCode));

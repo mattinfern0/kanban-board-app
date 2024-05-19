@@ -212,4 +212,26 @@ class BoardColumnUnitTest {
 
         assert testTask.getTaskStatus().equals(oldStatus);
     }
+
+    @Test
+    void removeTask_updatesColumnOrderOfOtherTasks() {
+        BoardColumn testColumn = new BoardColumn();
+        testColumn.setTaskStatus(new TaskStatus());
+
+
+        Task lowerTask = new Task();
+        testColumn.addTask(lowerTask);
+
+
+        Task testTask = new Task();
+        testColumn.addTask(testTask);
+
+        Task higherTask = new Task();
+        testColumn.addTask(higherTask);
+
+        testColumn.removeTask(testTask);
+
+        assert Objects.equals(lowerTask.getBoardColumnOrder(), 0);
+        assert Objects.requireNonNull(higherTask.getBoardColumnOrder()).equals(1);
+    }
 }

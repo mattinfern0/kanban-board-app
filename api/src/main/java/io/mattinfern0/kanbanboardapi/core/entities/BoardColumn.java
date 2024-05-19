@@ -34,7 +34,7 @@ public class BoardColumn {
     @NotNull
     TaskStatus taskStatus;
 
-    @OneToMany(mappedBy = "boardColumn")
+    @OneToMany(mappedBy = "boardColumn", cascade = CascadeType.ALL)
     @OrderBy("boardColumnOrder")
     List<Task> tasks = new ArrayList<>();
 
@@ -114,6 +114,7 @@ public class BoardColumn {
         task.setBoardColumn(null);
         task.setBoardColumnOrder(null);
         tasks.remove(task);
+        syncTaskListPositions();
     }
 
     public TaskStatus getTaskStatus() {
