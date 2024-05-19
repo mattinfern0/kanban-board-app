@@ -36,10 +36,10 @@ export interface UpdateTaskBody {
   title: string;
   description: string;
 
-  boardColumnId?: string;
-  boardColumnOrder?: number;
+  boardColumnId: string | null;
+  boardColumnOrder: number | null;
 
-  status?: TaskStatus;
+  status: TaskStatus | null;
 }
 
 export interface UpdateTaskColumnPositionBody {
@@ -54,5 +54,6 @@ export type TaskDetail = {
   description: string;
 
   boardColumnId: string | null;
+  boardColumnOrder: number | null;
   status: TaskStatus;
 };

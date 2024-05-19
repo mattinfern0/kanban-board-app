@@ -108,6 +108,9 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
             title: data.title,
             description: data.description,
             organizationId: props.organizationId,
+            boardColumnId: oldTaskData.boardColumnId,
+            boardColumnOrder: oldTaskData.boardColumnOrder,
+            status: oldTaskData.status,
           },
         },
         {

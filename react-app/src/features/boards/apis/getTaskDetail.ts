@@ -1,8 +1,8 @@
 import { client } from "@/lib/backendApi.ts";
-import { BoardTask } from "@/features/boards/types";
 import { useQuery } from "@tanstack/react-query";
+import { TaskDetail } from "@/features/tasks/types";
 
-export const getTaskDetail = async (taskId: string): Promise<BoardTask> => {
+export const getTaskDetail = async (taskId: string): Promise<TaskDetail> => {
   return await client.get(`tasks/${taskId}`).json();
 };
 

@@ -23,6 +23,9 @@ public record TaskDetailDto(
     @Nullable
     UUID boardColumnId,
 
+    @Nullable
+    Integer boardColumnOrder,
+
     TaskStatusCode status
 ) {
 }
