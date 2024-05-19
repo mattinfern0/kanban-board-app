@@ -14,8 +14,8 @@ export const useCreateBoardMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (body: CreateBoardBody) => await createBoard(body),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: ["boards"],
       });
     },

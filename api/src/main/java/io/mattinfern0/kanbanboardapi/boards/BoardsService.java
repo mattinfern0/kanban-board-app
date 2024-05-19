@@ -87,9 +87,12 @@ public class BoardsService {
 
     @Transactional
     void deleteBoard(UUID boardId, Boolean deleteTasks) {
-        List<Task> tasks = new ArrayList<>();
-        tasks.forEach(task -> task.setBoardColumn(null));
-        taskRepository.saveAll(tasks);
+        List<Task> tasks = taskRepository.findByBoardId(boardId);
+        tasks.forEach(task -> {
+            task.setBoardColumn(null);
+            task.setBoardColumnOrder(null);
+        });
+        taskRepository.saveAllAndFlush(tasks);
 
         List<BoardColumn> columns = boardColumnRepository.findByBoardId(boardId);
         boardColumnRepository.deleteAll(columns);

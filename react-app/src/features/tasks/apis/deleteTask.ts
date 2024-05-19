@@ -9,8 +9,8 @@ export const useDeleteTaskMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (taskId: string) => await deleteTask(taskId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: ["boards"],
       });
     },

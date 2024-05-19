@@ -13,6 +13,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import { useDeleteBoardMutation } from "@/features/boards/apis/deleteBoard.ts";
 
 interface DeleteBoardDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ type DeleteFormValues = {
 
 export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
   const { open, onClose, boardId, boardTitle } = props;
+  const deleteBoardMutation = useDeleteBoardMutation();
   const { control, handleSubmit, watch } = useForm<DeleteFormValues>({
     defaultValues: {
       confirmTitle: "",
@@ -42,8 +44,19 @@ export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
 
   const onSubmit = handleSubmit(
     (data) => {
-      enqueueSnackbar("Board deleted!", { variant: "success" });
-      navigate("/boards");
+      deleteBoardMutation.mutate(
+        { boardId, deleteTasks: data.deleteTasks },
+        {
+          onSuccess: () => {
+            enqueueSnackbar("Board deleted!", { variant: "success" });
+            navigate("/boards");
+          },
+          onError: (error) => {
+            console.error(error);
+            enqueueSnackbar("Failed to delete board", { variant: "error" });
+          },
+        },
+      );
     },
     (errors) => {
       console.debug(errors);
@@ -68,7 +81,16 @@ export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
                 render={({ field }) => <TextField {...field} fullWidth size="small" required />}
               />
 
-              <FormControlLabel control={<Checkbox color="error" />} label="Delete All Tasks in This Board" />
+              <Controller
+                control={control}
+                name="deleteTasks"
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Checkbox {...field} checked={field.value} color="error" />}
+                    label="Delete All Tasks in This Board"
+                  />
+                )}
+              />
             </Stack>
           </form>
           <Stack direction="row" justifyContent="space-between">

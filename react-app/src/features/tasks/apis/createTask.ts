@@ -14,8 +14,8 @@ export const useCreateTaskMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (body: CreateTaskBody) => await createTask(body),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
         queryKey: ["boards"],
       });
     },
