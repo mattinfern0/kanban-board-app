@@ -34,7 +34,7 @@ public class BoardColumn {
     @NotNull
     TaskStatus taskStatus;
 
-    @OneToMany(mappedBy = "boardColumn", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "boardColumn")
     @OrderBy("boardColumnOrder")
     List<Task> tasks = new ArrayList<>();
 
