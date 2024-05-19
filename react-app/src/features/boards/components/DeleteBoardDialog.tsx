@@ -78,7 +78,7 @@ export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
           <Typography variant="body1">Are you sure you want to delete this board?</Typography>
           <form onSubmit={onSubmit} id={DELETE_FORM_ID}>
             <Stack spacing={1}>
-              <InputLabel htmlFor="confirmTitle">Enter the board's title {boardTitle} to confirm</InputLabel>
+              <InputLabel htmlFor="confirmTitle">Enter the board's title ({boardTitle}) to confirm</InputLabel>
               <Controller
                 control={control}
                 name="confirmTitle"
