@@ -44,6 +44,10 @@ export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
 
   const onSubmit = handleSubmit(
     (data) => {
+      if (deleteBoardMutation.isPending) {
+        return;
+      }
+
       deleteBoardMutation.mutate(
         { boardId, deleteTasks: data.deleteTasks },
         {

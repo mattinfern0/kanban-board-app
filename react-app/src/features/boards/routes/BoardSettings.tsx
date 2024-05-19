@@ -1,12 +1,77 @@
-import { Box, Button, Card, CardContent, Stack, Tab, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Stack, Tab, TextField, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import React, { useState } from "react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { ChevronLeft } from "@mui/icons-material";
 import { DeleteBoardDialog } from "@/features/boards/components/DeleteBoardDialog.tsx";
+import { Controller, useForm } from "react-hook-form";
+import { BoardDetail } from "@/features/boards/types";
+import { useUpdateBoardHeaderMutation } from "@/features/boards/apis/updateBoardHeader.ts";
+import { useSnackbar } from "notistack";
 
 type TabValue = "settings" | "danger";
+
+type UpdateBoardHeaderFormValues = {
+  title: string;
+};
+
+interface UpdateBoardHeaderFormProps {
+  board: BoardDetail;
+}
+
+const UpdateBoardHeaderForm = (props: UpdateBoardHeaderFormProps) => {
+  const { control, handleSubmit } = useForm<UpdateBoardHeaderFormValues>({
+    defaultValues: {
+      title: props.board.title,
+    },
+  });
+  const updateBoardHeaderMutation = useUpdateBoardHeaderMutation();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const onSubmit = handleSubmit(
+    (data) => {
+      if (updateBoardHeaderMutation.isPending) {
+        return;
+      }
+      updateBoardHeaderMutation.mutate(
+        {
+          boardId: props.board.id,
+          body: {
+            title: data.title,
+          },
+        },
+        {
+          onSuccess: () => {
+            enqueueSnackbar("Saved changes!", { variant: "success" });
+          },
+          onError: () => {
+            enqueueSnackbar("An error occurred while saving chages.", { variant: "error" });
+          },
+        },
+      );
+    },
+    (formErrors) => {
+      console.debug(formErrors);
+    },
+  );
+
+  return (
+    <form onSubmit={onSubmit}>
+      <Stack spacing={3}>
+        <Controller
+          control={control}
+          name="title"
+          render={({ field }) => <TextField {...field} label="Title" variant="outlined" size="small" required />}
+        />
+
+        <Button type="submit" variant="contained" size="small">
+          Save Changes
+        </Button>
+      </Stack>
+    </form>
+  );
+};
 
 export const BoardSettings = () => {
   const { boardId } = useParams();
@@ -36,7 +101,12 @@ export const BoardSettings = () => {
                   <Tab label="Danger" value="danger" />
                 </TabList>
               </Box>
-              <TabPanel value="settings">Update Board Settings Form</TabPanel>
+              <TabPanel value="settings">
+                <Stack spacing={3}>
+                  <Typography>Info</Typography>
+                  <UpdateBoardHeaderForm board={boardQuery.data} />
+                </Stack>
+              </TabPanel>
 
               <TabPanel value="danger">
                 <Button variant="outlined" color="error" onClick={() => setShowDeleteBoardDialog(true)}>

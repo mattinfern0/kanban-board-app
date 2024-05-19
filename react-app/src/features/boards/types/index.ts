@@ -35,3 +35,7 @@ export type CreateBoardBody = {
   organizationId: string;
   title: string;
 };
+
+export type UpdateBoardHeaderBody = {
+  title: string;
+};
