@@ -53,7 +53,12 @@ public class Task {
     @NotNull
     TaskStatus taskStatus;
 
-    @ManyToMany(mappedBy = "task_assignees", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "task_assignees",
+        joinColumns = @JoinColumn(name = "task_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<User> assignees;
 
     public UUID getId() {
