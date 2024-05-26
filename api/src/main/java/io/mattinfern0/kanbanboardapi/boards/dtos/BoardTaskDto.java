@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.boards.dtos;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 public record BoardTaskDto(
@@ -15,6 +16,8 @@ public record BoardTaskDto(
     String description,
 
     @NotNull
-    TaskStatusCode status
+    TaskStatusCode status,
+
+    List<BoardTaskAssigneeDto> assignees
 ) {
 }
