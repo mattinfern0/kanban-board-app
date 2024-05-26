@@ -225,43 +225,51 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
         <DialogContent>
           <Grid container spacing={3}>
             <Grid item md={9}>
-              <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
-                Description
-              </Typography>
-              <Controller
-                control={control}
-                name="description"
-                render={({ field }) => (
-                  <HoverTextField
-                    {...field}
-                    id="task-detail-description"
-                    fullWidth
-                    multiline
-                    minRows={5}
-                    hiddenLabel
-                    onBlur={onSubmit}
-                  />
-                )}
-              />
+              <Stack>
+                <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
+                  Description
+                </Typography>
+                <Controller
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <HoverTextField
+                      {...field}
+                      id="task-detail-description"
+                      sx={{ width: "75%" }}
+                      multiline
+                      minRows={5}
+                      hiddenLabel
+                      onBlur={onSubmit}
+                    />
+                  )}
+                />
+              </Stack>
             </Grid>
             <Grid item md={3}>
               <Stack spacing={3}>
                 <TaskStatusChip status={task.status} />
-                <Controller
-                  control={control}
-                  name="assignees"
-                  render={({ field }) => (
-                    <AssigneeSelect
-                      labelId="assignee-select-label"
-                      onBlur={onAssigneeBlur}
-                      onChange={(value) => {
-                        setValue("assignees", value, { shouldDirty: true, shouldTouch: true });
-                      }}
-                      value={field.value}
-                      options={assigneeOptions}
-                    />
-                  )}
-                />
+
+                <Stack>
+                  <Typography component="label" htmlFor={"assignee-select"} fontWeight="bold">
+                    Assignees
+                  </Typography>
+                  <Controller
+                    control={control}
+                    name="assignees"
+                    render={({ field }) => (
+                      <AssigneeSelect
+                        inputLabel="assignee-select"
+                        onBlur={onAssigneeBlur}
+                        onChange={(value) => {
+                          setValue("assignees", value, { shouldDirty: true, shouldTouch: true });
+                        }}
+                        value={field.value}
+                        options={assigneeOptions}
+                      />
+                    )}
+                  />
+                </Stack>
               </Stack>
             </Grid>
           </Grid>

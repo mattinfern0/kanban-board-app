@@ -1,22 +1,10 @@
 import { Theme, useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
 import { Stack } from "@mui/material";
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
 
 function getStyles(name: string, personName: readonly string[], theme: Theme) {
   return {
@@ -31,7 +19,7 @@ export interface AssigneeSelectOption {
 }
 
 export interface AssigneeSelectProps {
-  labelId: string;
+  inputLabel: string;
   value: string[];
   options: AssigneeSelectOption[];
   onChange: (value: string[]) => void;
@@ -56,14 +44,13 @@ export const AssigneeSelect = (props: AssigneeSelectProps) => {
 
   return (
     <FormControl>
-      <InputLabel id={props.labelId}>Assignees</InputLabel>
       <Select
-        labelId={props.labelId}
+        id={props.inputLabel}
         multiple
         value={props.value}
         onChange={handleChange}
         onBlur={props.onBlur}
-        input={<OutlinedInput label="Chip" />}
+        input={<OutlinedInput />}
         renderValue={(selected) => (
           <Stack spacing={1}>
             {selected.map((value) => (
@@ -71,7 +58,6 @@ export const AssigneeSelect = (props: AssigneeSelectProps) => {
             ))}
           </Stack>
         )}
-        MenuProps={MenuProps}
       >
         {props.options.map((option) => (
           <MenuItem key={option.value} value={option.value} style={getStyles(option.label, props.value, theme)}>
