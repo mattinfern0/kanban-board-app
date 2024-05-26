@@ -1,5 +1,5 @@
 import { BoardColumn as BoardColumnType, BoardDetail, BoardTask } from "@/features/boards/types";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Active,
   closestCorners,
@@ -27,20 +27,20 @@ interface BoardColumnWorkspaceProps {
   handleTaskCardClick: (task: BoardTask) => void;
 }
 
-export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
-  const { board, handleTaskCardClick } = props;
+interface UseBoardColumnWorkspaceReturn {
+  draggingTask: BoardTask | null;
+  handleDragStart: (event: DragStartEvent) => void;
+  handleDragOver: (event: DragOverEvent) => void;
+  handleDragEnd: (event: DragEndEvent) => void;
+  boardColumns: BoardColumnType[];
+}
+
+const useBoardColumnWorkspace = (board: BoardDetail): UseBoardColumnWorkspaceReturn => {
   const [draggingTaskId, setDraggingTaskId] = useState<UniqueIdentifier | null>(null);
   const { enqueueSnackbar } = useSnackbar();
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      // Differentiate between dragging a task vs. clicking to open the task detail dialog
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-  );
   const updateTaskColumnPositionMutation = useUpdateTaskColumnPositionMutation();
 
+  // Need to have a separate local state to make the DND UI work properly
   const [localBoardColumns, setLocalBoardColumns] = useState<BoardColumnType[]>(board.boardColumns);
 
   const previousBoardColumns = usePrevious(board.boardColumns);
@@ -50,13 +50,6 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
     }
     setLocalBoardColumns(board.boardColumns);
   }, [board.boardColumns, previousBoardColumns]);
-
-  const gridColumnSize = 12 / localBoardColumns.length;
-  const columnElements = localBoardColumns.map((c) => (
-    <Grid key={c.id} item md={gridColumnSize}>
-      <BoardColumn boardColumn={c} onTaskCardClick={handleTaskCardClick} />
-    </Grid>
-  ));
 
   const taskIdToTasks: Record<string, BoardTask> = {};
   const taskIdToBoardColumn: Record<string, BoardColumnType> = {};
@@ -187,6 +180,40 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
     }
   };
 
+  return {
+    boardColumns: localBoardColumns,
+
+    draggingTask: (draggingTaskId ? taskIdToTasks[draggingTaskId] : null) || null,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+  };
+};
+
+export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
+  const { board, handleTaskCardClick } = props;
+  const { draggingTask, handleDragStart, handleDragOver, handleDragEnd, boardColumns } = useBoardColumnWorkspace(board);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // Differentiate between dragging a task vs. clicking to open the task detail dialog
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
+
+  const gridColumnSize = 12 / boardColumns.length;
+  const columnElements = boardColumns.map((c) => (
+    <Grid key={c.id} item md={gridColumnSize}>
+      <BoardColumn boardColumn={c} onTaskCardClick={handleTaskCardClick} />
+    </Grid>
+  ));
+
+  let dragOverlayElement: React.ReactNode | null = null;
+  if (draggingTask) {
+    dragOverlayElement = <BoardTaskCard boardTask={draggingTask} onClick={() => {}} />;
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -198,9 +225,7 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
       <Grid container spacing={3} height="75vh">
         {columnElements}
       </Grid>
-      <DragOverlay>
-        {draggingTaskId ? <BoardTaskCard boardTask={taskIdToTasks[draggingTaskId]} onClick={() => {}} /> : null}
-      </DragOverlay>
+      <DragOverlay>{dragOverlayElement}</DragOverlay>
     </DndContext>
   );
 };
