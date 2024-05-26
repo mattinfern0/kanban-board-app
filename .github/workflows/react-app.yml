@@ -26,6 +26,7 @@ jobs:
       with:
         node-version-file: ./react-app/.nvmrc
         cache: 'npm'
+        cache-dependency-path: ./react-app/package-lock.json
     - name: Install dependencies
       working-directory: ./react-app
       run: npm ci
