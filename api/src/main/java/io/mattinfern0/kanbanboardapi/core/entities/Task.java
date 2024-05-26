@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -52,10 +53,8 @@ public class Task {
     @NotNull
     TaskStatus taskStatus;
 
-    @ManyToOne
-    @JoinColumn(name = "assignee_id")
-    @Nullable
-    User assignee;
+    @ManyToMany(mappedBy = "task_assignees", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<User> assignees;
 
     public UUID getId() {
         return id;
@@ -133,12 +132,11 @@ public class Task {
         this.createdAt = createdAt;
     }
 
-    @Nullable
-    public User getAssignee() {
-        return assignee;
+    public List<User> getAssignees() {
+        return assignees;
     }
 
-    public void setAssignee(@Nullable User assignee) {
-        this.assignee = assignee;
+    public void setAssignees(List<User> assignees) {
+        this.assignees = assignees;
     }
 }

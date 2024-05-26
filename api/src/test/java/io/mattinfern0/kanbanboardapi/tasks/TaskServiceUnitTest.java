@@ -1,14 +1,12 @@
 package io.mattinfern0.kanbanboardapi.tasks;
 
-import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
-import io.mattinfern0.kanbanboardapi.core.entities.Organization;
-import io.mattinfern0.kanbanboardapi.core.entities.Task;
-import io.mattinfern0.kanbanboardapi.core.entities.TaskStatus;
+import io.mattinfern0.kanbanboardapi.core.entities.*;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
+import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
@@ -22,9 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -43,6 +39,9 @@ class TaskServiceUnitTest {
 
     @Mock
     TaskRepository taskRepository;
+
+    @Mock
+    UserRepository userRepository;
 
     @Mock
     TaskStatusService taskStatusService;
@@ -401,6 +400,63 @@ class TaskServiceUnitTest {
 
         assertThrows(ResourceNotFoundException.class, () -> {
             taskService.deleteTask(testTaskId);
+        });
+    }
+
+    @Test
+    void updateTaskAssignees_works_with_validTaskId_and_assigneeIds() {
+        UUID testTaskId = UUID.randomUUID();
+        List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        List<User> testUsers = new ArrayList<>();
+        for (UUID assigneeId : testAssigneeIds) {
+            User user = new User();
+            user.setId(assigneeId);
+            testUsers.add(user);
+        }
+        Task testTask = new Task();
+        testTask.setId(testTaskId);
+        Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+        Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
+        taskService.updateTaskAssignees(testTaskId, testAssigneeIds);
+
+        assert testTask.getAssignees().equals(testUsers);
+    }
+
+    @Test
+    void updateTaskAssignees_clears_assignees_when_assigneeIds_is_empty() {
+        UUID testTaskId = UUID.randomUUID();
+        List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        List<User> testUsers = new ArrayList<>();
+        for (UUID assigneeId : testAssigneeIds) {
+            User user = new User();
+            user.setId(assigneeId);
+            testUsers.add(user);
+        }
+        Task testTask = new Task();
+        testTask.setId(testTaskId);
+        testTask.setAssignees(testUsers);
+        Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+        taskService.updateTaskAssignees(testTaskId, new ArrayList<>());
+
+        assert testTask.getAssignees().isEmpty();
+    }
+
+    @Test
+    void updateTaskAssignees_throws_exception_if_at_least_one_of_users_with_assignee_id_not_found() {
+        UUID testTaskId = UUID.randomUUID();
+        List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        List<User> testUsers = new ArrayList<>();
+        User testUser = new User();
+        testUser.setId(testAssigneeIds.getFirst());
+        testUsers.add(testUser);
+
+        Task testTask = new Task();
+        testTask.setId(testTaskId);
+        Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+        Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            taskService.updateTaskAssignees(testTaskId, testAssigneeIds);
         });
     }
 }

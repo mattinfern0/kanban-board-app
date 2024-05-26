@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER, ElementType.TYPE_USE})
 @Constraint(validatedBy = {EntityWithIdExistsUUIDValidator.class})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EntityWithIdExists {

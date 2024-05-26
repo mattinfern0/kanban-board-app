@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record TaskDetailDto(
@@ -26,6 +27,8 @@ public record TaskDetailDto(
     @Nullable
     Integer boardColumnOrder,
 
-    TaskStatusCode status
+    TaskStatusCode status,
+
+    List<TaskAssigneeDto> assignees
 ) {
 }

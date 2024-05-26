@@ -11,10 +11,8 @@ import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
-import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskAssigneeDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.UpdateTaskColumnPositionDTO;
-import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskAssigneeDtoMapper;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +34,22 @@ public class TaskService {
     final TaskStatusService taskStatusService;
 
     final TaskDtoMapper taskDtoMapper;
-    final TaskAssigneeDtoMapper taskAssigneeDtoMapper;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, UserRepository userRepository, TaskStatusService taskStatusService, TaskDtoMapper taskDtoMapper, TaskAssigneeDtoMapper taskAssigneeDtoMapper) {
+    public TaskService(
+        TaskRepository taskRepository,
+        BoardColumnRepository boardColumnRepository,
+        OrganizationRepository organizationRepository,
+        UserRepository userRepository,
+        TaskStatusService taskStatusService,
+        TaskDtoMapper taskDtoMapper
+    ) {
         this.taskRepository = taskRepository;
         this.boardColumnRepository = boardColumnRepository;
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
         this.taskStatusService = taskStatusService;
         this.taskDtoMapper = taskDtoMapper;
-        this.taskAssigneeDtoMapper = taskAssigneeDtoMapper;
     }
 
     public List<TaskDetailDto> getTaskList() {
@@ -115,6 +118,24 @@ public class TaskService {
         return taskDtoMapper.taskToTaskDetailDto(task);
     }
 
+    @Transactional
+    public void updateTaskAssignees(UUID taskId, List<UUID> assigneeIds) {
+        Task task = taskRepository
+            .findById(taskId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
+
+        if (assigneeIds.isEmpty()) {
+            task.getAssignees().clear();
+        } else {
+            List<User> assignees = userRepository.findAllById(assigneeIds);
+            if (assignees.size() != assigneeIds.size()) {
+                throw new ResourceNotFoundException("One or more assignees not found");
+            }
+            task.setAssignees(assignees);
+        }
+        taskRepository.saveAndFlush(task);
+    }
+
     public void deleteTask(UUID taskId) {
         if (!taskRepository.existsById(taskId)) {
             throw new ResourceNotFoundException(String.format("Task with id %s not found", taskId));
@@ -122,29 +143,6 @@ public class TaskService {
         taskRepository.deleteById(taskId);
     }
 
-    public TaskAssigneeDto assignUserToTask(UUID taskId, UUID userId) {
-        Task task = taskRepository
-            .findById(taskId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
-
-        User user = userRepository
-            .findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format("User with id %s not found", userId)));
-
-        task.setAssignee(user);
-
-        taskRepository.save(task);
-        return taskAssigneeDtoMapper.userToTaskAssigneeDto(user);
-    }
-
-    public void removeTaskAssignee(UUID taskId) {
-        Task task = taskRepository
-            .findById(taskId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format("Task with id %s not found", taskId)));
-
-        task.setAssignee(null);
-        taskRepository.save(task);
-    }
 
     @Transactional
     public void updateTaskColumnPosition(UUID taskId, UpdateTaskColumnPositionDTO dto) {
