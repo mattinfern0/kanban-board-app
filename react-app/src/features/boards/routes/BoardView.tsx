@@ -7,9 +7,11 @@ import { BoardColumn as BoardColumnType, BoardDetail, BoardTask } from "@/featur
 import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
 import {
+  Active,
   closestCorners,
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -78,25 +80,29 @@ const BoardColumns = (props: BoardColumnsProps) => {
     return taskIdToBoardColumn[dragElementId] || board.boardColumns.find((c) => c.id === dragElementId);
   };
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    setDraggingTaskId(active.id);
+  const isDragElementTask = (active: Active): boolean => {
+    return typeof active.id === "string" && Object.keys(taskIdToTasks).includes(active.id);
   };
 
-  const handleDragOver = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
 
-    if (!active || !over) {
+    if (isDragElementTask(active)) {
+      setDraggingTaskId(active.id);
+    }
+  };
+
+  const handleDragTaskOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over || typeof active.id !== "string") {
       return;
     }
 
-    console.debug("DragOver", active, over);
-
-    const activeBoardColumn = getContainingBoardColumn(active.id);
-    const overContainingBoardColumn = getContainingBoardColumn(over.id);
+    const originalColumn = getContainingBoardColumn(active.id);
+    const overColumn = getContainingBoardColumn(over.id);
 
     // If the task is not being dragged over to a different column, do nothing
-    if (!activeBoardColumn || !overContainingBoardColumn || activeBoardColumn.id === overContainingBoardColumn.id) {
+    if (!originalColumn || !overColumn || originalColumn.id === overColumn.id) {
       return;
     }
 
@@ -106,19 +112,27 @@ const BoardColumns = (props: BoardColumnsProps) => {
     setLocalBoardColumns((oldData) => {
       const newData = structuredClone(oldData);
 
-      const newDataActiveColumn = newData.find((c) => c.id === activeBoardColumn.id);
-      if (newDataActiveColumn != null) {
-        newDataActiveColumn.tasks = newDataActiveColumn.tasks.filter((t) => t.id !== active.id);
+      const newDataOriginalColumn = newData.find((c) => c.id === originalColumn.id);
+      if (newDataOriginalColumn != null) {
+        newDataOriginalColumn.tasks = newDataOriginalColumn.tasks.filter((t) => t.id !== active.id);
       }
 
-      const newDataOverColumn = newData.find((c) => c.id === overContainingBoardColumn.id);
+      const newDataOverColumn = newData.find((c) => c.id === overColumn.id);
       if (newDataOverColumn != null) {
-        const overIndex = newDataOverColumn.tasks.findIndex((t) => t.id === over?.id);
-        newDataOverColumn.tasks.splice(overIndex, 0, taskIdToTasks[active.id as string]);
+        const overIndex = newDataOverColumn.tasks.findIndex((t) => t.id === over.id);
+        newDataOverColumn.tasks.splice(overIndex, 0, taskIdToTasks[active.id]);
       }
 
       return newData;
     });
+  };
+
+  const handleDragOver = (event: DragEndEvent) => {
+    const { active } = event;
+
+    if (isDragElementTask(active)) {
+      handleDragTaskOver(event);
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -171,7 +185,9 @@ const BoardColumns = (props: BoardColumnsProps) => {
       );
     }
 
-    setDraggingTaskId(null);
+    if (isDragElementTask(active)) {
+      setDraggingTaskId(null);
+    }
   };
 
   return (
