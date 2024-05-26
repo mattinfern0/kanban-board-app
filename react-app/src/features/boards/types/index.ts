@@ -5,6 +5,13 @@ export type BoardTask = {
   title: string;
   description: string;
   status: TaskStatus;
+  assignees: BoardTaskAssignee[];
+};
+
+export type BoardTaskAssignee = {
+  userId: string;
+  firstName: string;
+  lastName: string;
 };
 
 export type BoardColumn = {
