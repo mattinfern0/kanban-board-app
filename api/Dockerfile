@@ -1,5 +1,5 @@
 # Builder
-FROM eclipse-temurin:21-jdk-jammy as build
+FROM eclipse-temurin:21-jdk-alpine as build
 WORKDIR /workspace/app
 
 COPY mvnw .
@@ -12,7 +12,7 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar) && ls
 
 
 # Production
-FROM eclipse-temurin:21-jre-jammy as production
+FROM eclipse-temurin:21-jre-alpine as production
 VOLUME /tmp
 ARG DEPENDENCY=/workspace/app/target/dependency
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
