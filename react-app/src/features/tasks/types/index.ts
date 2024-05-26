@@ -49,7 +49,7 @@ export interface UpdateTaskColumnPositionBody {
 }
 
 export type TaskAssigneeSummary = {
-  id: string;
+  userId: string;
   firstName: string;
   lastName: string;
 };

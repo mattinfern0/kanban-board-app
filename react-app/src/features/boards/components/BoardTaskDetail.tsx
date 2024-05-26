@@ -23,6 +23,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
 import { AssigneeSelect, AssigneeSelectOption } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
+import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
 
 const HoverTextField = styled(TextField)({
   "& label.Mui-focused": {
@@ -74,22 +75,21 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const taskDetailQuery = useTaskDetailQuery(taskId);
   const organizationUsersQuery = useGetUsersQuery({ organizationId: props.organizationId });
   const updateTaskMutation = useUpdateTaskMutation();
+  const updateTaskAssigneesMutation = useUpdateTaskAssigneesMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
-  const { control, reset, handleSubmit, watch, setValue } = useForm<UpdateTaskFormValues>();
+  const { control, reset, handleSubmit, setValue, watch } = useForm<UpdateTaskFormValues>();
 
   useEffect(() => {
     reset({
       title: taskDetailQuery.data?.title || "",
       description: taskDetailQuery.data?.description || "",
-      assignees: taskDetailQuery.data?.assignees.map((assignee) => assignee.id) || [],
+      assignees: taskDetailQuery.data?.assignees.map((assignee) => assignee.userId) || [],
     });
   }, [reset, taskDetailQuery.data]);
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
-
-  console.debug("assignee values", watch("assignees"));
 
   // TODO figure how to only call this if the form data is different.
   const onSubmit = handleSubmit(
@@ -131,6 +131,24 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     },
   );
 
+  const onAssigneeBlur = () => {
+    if (taskId == null || updateTaskAssigneesMutation.isPending) {
+      return;
+    }
+
+    updateTaskAssigneesMutation.mutate(
+      {
+        taskId: taskId,
+        assigneeIds: watch("assignees"),
+      },
+      {
+        onError: () => {
+          enqueueSnackbar("An error occurred while updating the assignees.", { variant: "error" });
+        },
+      },
+    );
+  };
+
   const handleMenuButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
   };
@@ -164,8 +182,6 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
       value: user.id,
       label: `${user.firstName} ${user.lastName}`,
     })) || [];
-
-  const onAssigneeBlur = () => {};
 
   if (taskDetailQuery.isPending) {
     dialogContent = <Typography>Loading...</Typography>;
@@ -207,8 +223,8 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
           </Stack>
         </DialogTitle>
         <DialogContent>
-          <Grid container>
-            <Grid item md={8}>
+          <Grid container spacing={3}>
+            <Grid item md={9}>
               <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
                 Description
               </Typography>
