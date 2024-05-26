@@ -9,10 +9,35 @@ services:
       - POSTGRES_DB=${DB_DATABASE_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
+  api:
+    profiles:
+      - prod-test
+    image: kanban-app-api:latest
+    build:
+      context: .
+      target: production
+    ports:
+      - "8080:8080"
+    links:
+      - db:db
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_DATABASE_NAME=${DB_DATABASE_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
 
 volumes:
   postgres-data:
