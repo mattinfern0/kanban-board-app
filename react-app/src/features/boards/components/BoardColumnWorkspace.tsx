@@ -143,33 +143,30 @@ const useBoardColumnWorkspace = (board: BoardDetail): UseBoardColumnWorkspaceRet
     const activeIndex = overColumn.tasks.findIndex((task) => task.id === active.id);
     const overIndex = overColumn.tasks.findIndex((task) => task.id === over.id);
 
-    if (activeIndex !== overIndex) {
-      const oldLocalBoardColumns = localBoardColumns;
+    const oldLocalBoardColumns = localBoardColumns;
+    setLocalBoardColumns((oldData) => {
+      const newData = structuredClone(oldData);
 
-      setLocalBoardColumns((oldData) => {
-        const newData = structuredClone(oldData);
+      const newDataOverColumn = newData.find((c) => c.id === overColumn.id);
+      if (newDataOverColumn != null) {
+        newDataOverColumn.tasks = arrayMove(newDataOverColumn.tasks, activeIndex, overIndex);
+      }
 
-        const newDataOverColumn = newData.find((c) => c.id === overColumn.id);
-        if (newDataOverColumn != null) {
-          newDataOverColumn.tasks = arrayMove(newDataOverColumn.tasks, activeIndex, overIndex);
-        }
+      return newData;
+    });
 
-        return newData;
-      });
-
-      updateTaskColumnPositionMutation.mutate(
-        {
-          taskId: active.id,
-          body: { boardColumnId: overColumn.id, orderIndex: overIndex },
+    updateTaskColumnPositionMutation.mutate(
+      {
+        taskId: active.id,
+        body: { boardColumnId: overColumn.id, orderIndex: overIndex },
+      },
+      {
+        onError: () => {
+          enqueueSnackbar("Failed to move task.", { variant: "error" });
+          setLocalBoardColumns(oldLocalBoardColumns);
         },
-        {
-          onError: () => {
-            enqueueSnackbar("Failed to move task.", { variant: "error" });
-            setLocalBoardColumns(oldLocalBoardColumns);
-          },
-        },
-      );
-    }
+      },
+    );
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
