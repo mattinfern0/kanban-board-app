@@ -71,6 +71,13 @@ const BoardColumns = (props: BoardColumnsProps) => {
     }
   }
 
+  const getContainingBoardColumn = (dragElementId: UniqueIdentifier): BoardColumnType | undefined => {
+    if (dragElementId == undefined) {
+      return undefined;
+    }
+    return taskIdToBoardColumn[dragElementId] || board.boardColumns.find((c) => c.id === dragElementId);
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     setDraggingTaskId(active.id);
@@ -79,8 +86,14 @@ const BoardColumns = (props: BoardColumnsProps) => {
   const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    const activeBoardColumn = taskIdToBoardColumn[active.id as string];
-    const overContainingBoardColumn = taskIdToBoardColumn[over?.id as string];
+    if (!active || !over) {
+      return;
+    }
+
+    console.debug("DragOver", active, over);
+
+    const activeBoardColumn = getContainingBoardColumn(active.id);
+    const overContainingBoardColumn = getContainingBoardColumn(over.id);
 
     // If the task is not being dragged over to a different column, do nothing
     if (!activeBoardColumn || !overContainingBoardColumn || activeBoardColumn.id === overContainingBoardColumn.id) {
@@ -112,10 +125,16 @@ const BoardColumns = (props: BoardColumnsProps) => {
     console.log(event);
     const { active, over } = event;
 
-    console.debug(active, over);
+    if (!active || !over) {
+      return;
+    }
 
-    const activeBoardColumn = taskIdToBoardColumn[active.id as string];
-    const overBoardColumn = taskIdToBoardColumn[over?.id as string];
+    console.debug("Drag End", active, over);
+
+    const activeBoardColumn = getContainingBoardColumn(active.id);
+    const overBoardColumn = getContainingBoardColumn(over.id);
+
+    console.debug("Drag End", activeBoardColumn, overBoardColumn);
 
     if (!activeBoardColumn || !overBoardColumn || activeBoardColumn.id !== overBoardColumn.id) {
       return;

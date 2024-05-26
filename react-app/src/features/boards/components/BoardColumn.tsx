@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Card, CardContent, Stack, Typography } from "@mui/material";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
 import { BoardColumn as BoardColumnType, BoardTask } from "../types";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -31,12 +31,13 @@ export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) 
         </Stack>
 
         <SortableContext id={boardColumn.id} items={boardColumn.tasks} strategy={verticalListSortingStrategy}>
-          <Box
+          <Stack
             ref={setNodeRef}
             sx={{ height: "60vh", backgroundColor: "lightgray", padding: "3px", overflowY: "scroll" }}
+            spacing={3}
           >
-            <Stack spacing={3}>{cardElements}</Stack>
-          </Box>
+            {cardElements}
+          </Stack>
         </SortableContext>
       </CardContent>
     </Card>
