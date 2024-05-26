@@ -21,6 +21,8 @@ import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
 import { UpdateTaskFormValues } from "@/features/tasks/types";
 import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
+import { AssigneeSelect, AssigneeSelectOption } from "@/features/tasks/components/AssigneeSelect.tsx";
+import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 
 const HoverTextField = styled(TextField)({
   "& label.Mui-focused": {
@@ -70,6 +72,7 @@ const DetailMenu = (props: DetailMenuProps) => {
 export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
+  const organizationUsersQuery = useGetUsersQuery({ organizationId: props.organizationId });
   const updateTaskMutation = useUpdateTaskMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
@@ -79,6 +82,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     reset({
       title: taskDetailQuery.data?.title || "",
       description: taskDetailQuery.data?.description || "",
+      assignees: taskDetailQuery.data?.assignees.map((assignee) => assignee.id) || [],
     });
   }, [reset, taskDetailQuery.data]);
 
@@ -153,6 +157,14 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
 
   let dialogContent: React.ReactNode;
 
+  const assigneeOptions: AssigneeSelectOption[] =
+    organizationUsersQuery.data?.map((user) => ({
+      value: user.id,
+      label: `${user.firstName} ${user.lastName}`,
+    })) || [];
+
+  const onAssigneeBlur = () => {};
+
   if (taskDetailQuery.isPending) {
     dialogContent = <Typography>Loading...</Typography>;
   } else if (taskDetailQuery.isError) {
@@ -194,7 +206,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
         </DialogTitle>
         <DialogContent>
           <Grid container>
-            <Grid item md={9}>
+            <Grid item md={8}>
               <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
                 Description
               </Typography>
@@ -214,8 +226,23 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
                 )}
               />
             </Grid>
-            <Grid item>
-              <TaskStatusChip status={task.status} />
+            <Grid item md={3}>
+              <Stack spacing={3}>
+                <TaskStatusChip status={task.status} />
+                <Controller
+                  control={control}
+                  name="assignees"
+                  render={({ field }) => (
+                    <AssigneeSelect
+                      labelId="assignee-select-label"
+                      onBlur={onAssigneeBlur}
+                      onChange={field.onChange}
+                      value={field.value}
+                      options={assigneeOptions}
+                    />
+                  )}
+                />
+              </Stack>
             </Grid>
           </Grid>
         </DialogContent>

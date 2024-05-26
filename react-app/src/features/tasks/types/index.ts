@@ -18,6 +18,7 @@ export interface CreateTaskFormValues {
 export interface UpdateTaskFormValues {
   title: string;
   description: string;
+  assignees: string[];
 }
 
 export interface CreateTaskBody {
@@ -47,6 +48,12 @@ export interface UpdateTaskColumnPositionBody {
   orderIndex: number;
 }
 
+export type TaskAssigneeSummary = {
+  id: string;
+  firstName: string;
+  lastName: string;
+};
+
 export type TaskDetail = {
   id: string;
   organizationId: string;
@@ -56,4 +63,5 @@ export type TaskDetail = {
   boardColumnId: string | null;
   boardColumnOrder: number | null;
   status: TaskStatus;
+  assignees: TaskAssigneeSummary[];
 };
