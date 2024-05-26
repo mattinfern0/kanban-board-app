@@ -76,7 +76,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const updateTaskMutation = useUpdateTaskMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
-  const { control, reset, handleSubmit } = useForm<UpdateTaskFormValues>();
+  const { control, reset, handleSubmit, watch, setValue } = useForm<UpdateTaskFormValues>();
 
   useEffect(() => {
     reset({
@@ -88,6 +88,8 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
+
+  console.debug("assignee values", watch("assignees"));
 
   // TODO figure how to only call this if the form data is different.
   const onSubmit = handleSubmit(
@@ -236,7 +238,9 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
                     <AssigneeSelect
                       labelId="assignee-select-label"
                       onBlur={onAssigneeBlur}
-                      onChange={field.onChange}
+                      onChange={(value) => {
+                        setValue("assignees", value, { shouldDirty: true, shouldTouch: true });
+                      }}
                       value={field.value}
                       options={assigneeOptions}
                     />

@@ -1,11 +1,11 @@
 import { Theme, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
+import { Stack } from "@mui/material";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -65,11 +65,11 @@ export const AssigneeSelect = (props: AssigneeSelectProps) => {
         onBlur={props.onBlur}
         input={<OutlinedInput label="Chip" />}
         renderValue={(selected) => (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          <Stack spacing={1}>
             {selected.map((value) => (
               <Chip key={value} label={valueToLabel[value]} />
             ))}
-          </Box>
+          </Stack>
         )}
         MenuProps={MenuProps}
       >
