@@ -4,7 +4,8 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
-import { Stack } from "@mui/material";
+import { Avatar, Stack } from "@mui/material";
+import { stringToColor } from "@/lib/utils.ts";
 
 function getStyles(name: string, personName: readonly string[], theme: Theme) {
   return {
@@ -13,15 +14,30 @@ function getStyles(name: string, personName: readonly string[], theme: Theme) {
   };
 }
 
-export interface AssigneeSelectOption {
+interface AssigneeOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface SelectOption {
   value: string;
   label: string;
 }
 
+const UserAvatar = (props: { user: AssigneeOption }) => {
+  return (
+    <Avatar sx={{ width: 32, height: 32, fontSize: "1rem", bgcolor: stringToColor(props.user.id) }}>
+      {props.user.firstName[0]}
+      {props.user.lastName[0]}
+    </Avatar>
+  );
+};
+
 export interface AssigneeSelectProps {
   inputLabel: string;
   value: string[];
-  options: AssigneeSelectOption[];
+  assigneeOptions: AssigneeOption[];
   onChange: (value: string[]) => void;
   onBlur: () => void;
 }
@@ -37,8 +53,18 @@ export const AssigneeSelect = (props: AssigneeSelectProps) => {
     props.onChange(parsedValue);
   };
 
+  const selectOptions: SelectOption[] = props.assigneeOptions.map((assignee) => ({
+    value: assignee.id,
+    label: `${assignee.firstName} ${assignee.lastName}`,
+  }));
+
+  const usersById: Record<string, AssigneeOption> = {};
+  props.assigneeOptions.forEach((user) => {
+    usersById[user.id] = user;
+  });
+
   const valueToLabel: Record<string, string> = {};
-  props.options.forEach((option) => {
+  selectOptions.forEach((option) => {
     valueToLabel[option.value] = option.label;
   });
 
@@ -52,16 +78,17 @@ export const AssigneeSelect = (props: AssigneeSelectProps) => {
         onBlur={props.onBlur}
         input={<OutlinedInput />}
         renderValue={(selected) => (
-          <Stack spacing={1}>
+          <Stack spacing={1} alignItems="flex-start">
             {selected.map((value) => (
-              <Chip key={value} label={valueToLabel[value]} />
+              <Chip key={value} avatar={<UserAvatar user={usersById[value]} />} label={valueToLabel[value]} />
             ))}
           </Stack>
         )}
       >
-        {props.options.map((option) => (
+        {selectOptions.map((option) => (
           <MenuItem key={option.value} value={option.value} style={getStyles(option.label, props.value, theme)}>
-            {option.label}
+            <UserAvatar user={usersById[option.value]} />
+            <span style={{ marginLeft: "1rem" }}>{option.label}</span>
           </MenuItem>
         ))}
       </Select>

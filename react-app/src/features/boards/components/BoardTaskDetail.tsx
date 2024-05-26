@@ -21,7 +21,7 @@ import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
 import { UpdateTaskFormValues } from "@/features/tasks/types";
 import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
-import { AssigneeSelect, AssigneeSelectOption } from "@/features/tasks/components/AssigneeSelect.tsx";
+import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
 
@@ -177,11 +177,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
 
   let dialogContent: React.ReactNode;
 
-  const assigneeOptions: AssigneeSelectOption[] =
-    organizationUsersQuery.data?.map((user) => ({
-      value: user.id,
-      label: `${user.firstName} ${user.lastName}`,
-    })) || [];
+  const assigneeOptions = organizationUsersQuery.data || [];
 
   if (taskDetailQuery.isPending) {
     dialogContent = <Typography>Loading...</Typography>;
@@ -274,7 +270,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
                           setValue("assignees", value, { shouldDirty: true, shouldTouch: true });
                         }}
                         value={field.value}
-                        options={assigneeOptions}
+                        assigneeOptions={assigneeOptions}
                       />
                     )}
                   />
