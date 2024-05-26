@@ -189,6 +189,13 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     dialogContent = <Typography>An error occurred</Typography>;
   } else {
     const task = taskDetailQuery.data;
+    const onTitleInputKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Prevent newlines in the title
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
     dialogContent = (
       <form onSubmit={onSubmit}>
         <DialogTitle>
@@ -199,13 +206,15 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
               render={({ field }) => (
                 <HoverTextField
                   {...field}
-                  sx={{ width: "50vw" }}
+                  sx={{ width: "90%" }}
                   InputProps={{
                     style: {
                       fontSize: "1.5rem",
                       fontWeight: "bold",
                     },
                   }}
+                  multiline
+                  onKeyDown={onTitleInputKeyDown}
                   onBlur={onSubmit}
                 />
               )}
