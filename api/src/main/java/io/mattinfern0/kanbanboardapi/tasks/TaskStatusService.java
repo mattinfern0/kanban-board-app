@@ -21,7 +21,7 @@ public class TaskStatusService {
         return taskStatusRepository.findByCodename(taskStatusCode).orElseGet(() -> {
             TaskStatus newRecord = new TaskStatus();
             newRecord.setCodename(taskStatusCode);
-            taskStatusRepository.save(newRecord);
+            taskStatusRepository.saveAndFlush(newRecord);
             return newRecord;
         });
     }
