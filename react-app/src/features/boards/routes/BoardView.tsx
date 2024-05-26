@@ -87,14 +87,14 @@ const BoardColumns = (props: BoardColumnsProps) => {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
 
-    if (isDragElementTask(active)) {
+    if (isDragElementTask(active) && !updateTaskColumnPositionMutation.isPending) {
       setDraggingTaskId(active.id);
     }
   };
 
   const handleDragTaskOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over || typeof active.id !== "string") {
+    if (!over || typeof active.id !== "string" || updateTaskColumnPositionMutation.isPending) {
       return;
     }
 
@@ -135,35 +135,33 @@ const BoardColumns = (props: BoardColumnsProps) => {
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    console.log(event);
+  const handleTaskDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (!active || !over) {
+    setDraggingTaskId(null);
+
+    if (!over || typeof active.id !== "string" || updateTaskColumnPositionMutation.isPending) {
       return;
     }
 
-    console.debug("Drag End", active, over);
+    const originalColumn = getContainingBoardColumn(active.id);
+    const overColumn = getContainingBoardColumn(over.id);
 
-    const activeBoardColumn = getContainingBoardColumn(active.id);
-    const overBoardColumn = getContainingBoardColumn(over.id);
-
-    console.debug("Drag End", activeBoardColumn, overBoardColumn);
-
-    if (!activeBoardColumn || !overBoardColumn || activeBoardColumn.id !== overBoardColumn.id) {
+    // If the columns are different, do nothing
+    if (!originalColumn || !overColumn || originalColumn.id !== overColumn.id) {
       return;
     }
 
-    const activeIndex = activeBoardColumn.tasks.findIndex((t) => t.id === active.id);
-    const overIndex = overBoardColumn.tasks.findIndex((t) => t.id === over?.id);
+    const activeIndex = overColumn.tasks.findIndex((task) => task.id === active.id);
+    const overIndex = overColumn.tasks.findIndex((task) => task.id === over.id);
 
-    if (activeIndex !== overIndex && !updateTaskColumnPositionMutation.isPending) {
+    if (activeIndex !== overIndex) {
       const oldLocalBoardColumns = localBoardColumns;
 
       setLocalBoardColumns((oldData) => {
         const newData = structuredClone(oldData);
 
-        const newDataOverColumn = newData.find((c) => c.id === overBoardColumn.id);
+        const newDataOverColumn = newData.find((c) => c.id === overColumn.id);
         if (newDataOverColumn != null) {
           newDataOverColumn.tasks = arrayMove(newDataOverColumn.tasks, activeIndex, overIndex);
         }
@@ -173,8 +171,8 @@ const BoardColumns = (props: BoardColumnsProps) => {
 
       updateTaskColumnPositionMutation.mutate(
         {
-          taskId: active.id as string,
-          body: { boardColumnId: overBoardColumn.id, orderIndex: overIndex },
+          taskId: active.id,
+          body: { boardColumnId: overColumn.id, orderIndex: overIndex },
         },
         {
           onError: () => {
@@ -184,9 +182,13 @@ const BoardColumns = (props: BoardColumnsProps) => {
         },
       );
     }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active } = event;
 
     if (isDragElementTask(active)) {
-      setDraggingTaskId(null);
+      handleTaskDragEnd(event);
     }
   };
 
@@ -220,7 +222,6 @@ export const BoardView = () => {
   }
 
   if (boardQuery.isError) {
-    console.error(boardQuery.error);
     return <Typography>Error!</Typography>;
   }
 
