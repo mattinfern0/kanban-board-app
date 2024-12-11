@@ -1,6 +1,6 @@
 import { SignUpFormValues } from "@/features/auth/types";
-import { Card, CardContent, CardHeader } from "@mui/material";
 import { SignUpForm } from "@/features/auth/components/SignUpForm.tsx";
+import { Card, Title } from "@mantine/core";
 
 export const SignUpView = () => {
   const onSubmit = (data: SignUpFormValues) => {
@@ -8,11 +8,11 @@ export const SignUpView = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>Sign Up</CardHeader>
-      <CardContent>
-        <SignUpForm onSubmit={onSubmit} />
-      </CardContent>
+    <Card withBorder>
+      <Title order={3} mb="1rem">
+        Sign Up
+      </Title>
+      <SignUpForm onSubmit={onSubmit} />
     </Card>
   );
 };

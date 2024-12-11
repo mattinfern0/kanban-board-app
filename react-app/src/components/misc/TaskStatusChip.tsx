@@ -1,19 +1,12 @@
 import { TaskStatus } from "@/types";
-import { Chip } from "@mui/material";
-import { OverridableStringUnion } from "@mui/types";
-import { ChipPropsColorOverrides } from "@mui/material/Chip/Chip";
+import { Badge } from "@mantine/core";
 
-type ChipColor = OverridableStringUnion<
-  "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning",
-  ChipPropsColorOverrides
->;
-
-const statusToColor: Record<TaskStatus, ChipColor> = {
-  BACKLOG: "secondary",
-  COMPLETED: "success",
-  IN_PROGRESS: "primary",
-  OTHER: "secondary",
-  TODO: "secondary",
+const statusToColor: Record<TaskStatus, string> = {
+  BACKLOG: "gray",
+  COMPLETED: "green",
+  IN_PROGRESS: "blue",
+  OTHER: "gray",
+  TODO: "gray",
 };
 
 const statusToLabel: Record<TaskStatus, string> = {
@@ -27,5 +20,9 @@ const statusToLabel: Record<TaskStatus, string> = {
 export const TaskStatusChip = (props: { status: TaskStatus }) => {
   const { status } = props;
 
-  return <Chip label={statusToLabel[status]} variant="filled" color={statusToColor[status]} />;
+  return (
+    <Badge variant="filled" color={statusToColor[status]} size="xl" radius="sm">
+      {statusToLabel[status]}
+    </Badge>
+  );
 };

@@ -1,9 +1,9 @@
 import { Controller, useForm } from "react-hook-form";
-import { Button, Dialog, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
 import { CreateBoardFormValues } from "@/features/boards/types";
 import { useSnackbar } from "notistack";
 import { useCreateBoardMutation } from "@/features/boards/apis/createBoard.ts";
 import { useNavigate } from "react-router-dom";
+import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -53,28 +53,29 @@ export const CreateBoardDialog = (props: CreateTaskDialogProps) => {
   );
 
   return (
-    <Dialog open={open} maxWidth="md" fullWidth onClose={handleClose}>
-      <DialogTitle>Create Board</DialogTitle>
-      <DialogContent>
-        <form onSubmit={onSubmit}>
-          <Stack spacing={3}>
-            <Controller
-              control={control}
-              name="title"
-              render={({ field }) => <TextField {...field} label="Title" required />}
-            />
+    <Modal
+      opened={open}
+      onClose={handleClose}
+      size="xl"
+      title="Create Board"
+      styles={{ title: { fontSize: "1.5em" }, close: { display: "none" } }}
+    >
+      <form onSubmit={onSubmit}>
+        <Stack>
+          <Controller
+            control={control}
+            name="title"
+            render={({ field }) => <TextInput {...field} label="Title" required size="md" />}
+          />
 
-            <Stack direction="row-reverse" spacing={3}>
-              <Button variant="contained" type="submit">
-                Create
-              </Button>
-              <Button variant="contained" color="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Stack>
-          </Stack>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <Group justify="flex-end">
+            <Button color="gray" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Create</Button>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
   );
 };

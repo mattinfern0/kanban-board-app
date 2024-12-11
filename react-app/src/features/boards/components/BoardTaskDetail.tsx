@@ -1,49 +1,16 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  Menu,
-  MenuItem,
-  Stack,
-  styled,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { useTaskDetailQuery } from "@/features/boards/apis/getTaskDetail.ts";
 import React, { useEffect } from "react";
 import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
 import { MoreVertRounded } from "@mui/icons-material";
-import { PopoverProps } from "@mui/material/Popover";
 import { useSnackbar } from "notistack";
 import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
 import { UpdateTaskFormValues } from "@/features/tasks/types";
 import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
-import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
-
-const HoverTextField = styled(TextField)({
-  "& label.Mui-focused": {
-    color: "#A0AAB4",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: "#B2BAC2",
-  },
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: "rgba(255,255,255,0)",
-    },
-    "&:hover fieldset": {
-      borderColor: "#B2BAC2",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#6F7E8C",
-    },
-  },
-});
+import { ActionIcon, Grid, Group, Menu, Modal, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
+import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -53,20 +20,15 @@ interface BoardTaskDetailProps {
 }
 
 interface DetailMenuProps {
-  anchorEl: PopoverProps["anchorEl"];
-
-  open: boolean;
-  onClose: () => void;
-
   onDeleteClick: () => void;
 }
 
 const DetailMenu = (props: DetailMenuProps) => {
-  const { open, onClose, onDeleteClick, anchorEl } = props;
+  const { onDeleteClick } = props;
   return (
-    <Menu open={open} onClose={onClose} anchorEl={anchorEl}>
-      <MenuItem onClick={onDeleteClick}>Delete</MenuItem>
-    </Menu>
+    <Menu.Dropdown>
+      <Menu.Item onClick={onDeleteClick}>Delete</Menu.Item>
+    </Menu.Dropdown>
   );
 };
 
@@ -87,9 +49,6 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
       assignees: taskDetailQuery.data?.assignees.map((assignee) => assignee.userId) || [],
     });
   }, [reset, taskDetailQuery.data]);
-
-  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(menuAnchorEl);
 
   // TODO figure how to only call this if the form data is different.
   const onSubmit = handleSubmit(
@@ -149,15 +108,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     );
   };
 
-  const handleMenuButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setMenuAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-  };
-
   const handleDialogClose = () => {
-    handleMenuClose();
     onClose();
   };
 
@@ -180,9 +131,9 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const assigneeOptions = organizationUsersQuery.data || [];
 
   if (taskDetailQuery.isPending) {
-    dialogContent = <Typography>Loading...</Typography>;
+    dialogContent = <Title>Loading...</Title>;
   } else if (taskDetailQuery.isError) {
-    dialogContent = <Typography>An error occurred</Typography>;
+    dialogContent = <Title>An error occurred</Title>;
   } else {
     const task = taskDetailQuery.data;
     const onTitleInputKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -194,98 +145,99 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     };
     dialogContent = (
       <form onSubmit={onSubmit}>
-        <DialogTitle>
-          <Stack direction="row" justifyContent="space-between">
-            <Controller
-              control={control}
-              name="title"
-              render={({ field }) => (
-                <HoverTextField
-                  {...field}
-                  sx={{ width: "90%" }}
-                  InputProps={{
-                    style: {
-                      fontSize: "1.5rem",
-                      fontWeight: "bold",
-                    },
-                  }}
-                  multiline
-                  onKeyDown={onTitleInputKeyDown}
-                  onBlur={onSubmit}
-                />
-              )}
-            />
+        <Group justify="space-between" align="center">
+          <Controller
+            control={control}
+            name="title"
+            render={({ field }) => (
+              <TextInput
+                {...field}
+                style={{ width: "90%", fontWeight: "bold" }}
+                size="xl"
+                onKeyDown={onTitleInputKeyDown}
+                onBlur={onSubmit}
+                variant="unstyled"
+              />
+            )}
+          />
 
-            <IconButton onClick={handleMenuButtonClick}>
-              <MoreVertRounded />
-            </IconButton>
-            <DetailMenu
-              open={menuOpen}
-              anchorEl={menuAnchorEl}
-              onClose={handleMenuClose}
-              onDeleteClick={handleTaskDelete}
-            />
-          </Stack>
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3}>
-            <Grid item md={9}>
+          <Menu>
+            <Menu.Target>
+              <ActionIcon variant="transparent" color="gray">
+                <MoreVertRounded />
+              </ActionIcon>
+            </Menu.Target>
+            <DetailMenu onDeleteClick={handleTaskDelete} />
+          </Menu>
+        </Group>
+
+        <Grid>
+          <Grid.Col span={9}>
+            <Stack>
+              <Text component="label" htmlFor="task-detail-description" fw="bold">
+                Description
+              </Text>
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    id="task-detail-description"
+                    autosize
+                    minRows={5}
+                    onBlur={onSubmit}
+                    variant="unstyled"
+                  />
+                )}
+              />
+            </Stack>
+          </Grid.Col>
+          <Grid.Col span={3}>
+            <Stack>
+              <TaskStatusChip status={task.status} />
+
               <Stack>
-                <Typography component="label" htmlFor={"task-detail-description"} fontWeight="bold">
-                  Description
-                </Typography>
+                <Text component="label" htmlFor="assignee-select" fw="bold">
+                  Assignees
+                </Text>
                 <Controller
                   control={control}
-                  name="description"
+                  name="assignees"
                   render={({ field }) => (
-                    <HoverTextField
-                      {...field}
-                      id="task-detail-description"
-                      sx={{ width: "75%" }}
-                      multiline
-                      minRows={5}
-                      hiddenLabel
-                      onBlur={onSubmit}
+                    <AssigneeSelect
+                      inputLabel="assignee-select"
+                      onBlur={onAssigneeBlur}
+                      onChange={(value) => {
+                        setValue("assignees", value, { shouldDirty: true, shouldTouch: true });
+                      }}
+                      value={field.value}
+                      assigneeOptions={assigneeOptions}
                     />
                   )}
                 />
               </Stack>
-            </Grid>
-            <Grid item md={3}>
-              <Stack spacing={3}>
-                <TaskStatusChip status={task.status} />
-
-                <Stack>
-                  <Typography component="label" htmlFor={"assignee-select"} fontWeight="bold">
-                    Assignees
-                  </Typography>
-                  <Controller
-                    control={control}
-                    name="assignees"
-                    render={({ field }) => (
-                      <AssigneeSelect
-                        inputLabel="assignee-select"
-                        onBlur={onAssigneeBlur}
-                        onChange={(value) => {
-                          setValue("assignees", value, { shouldDirty: true, shouldTouch: true });
-                        }}
-                        value={field.value}
-                        assigneeOptions={assigneeOptions}
-                      />
-                    )}
-                  />
-                </Stack>
-              </Stack>
-            </Grid>
-          </Grid>
-        </DialogContent>
+            </Stack>
+          </Grid.Col>
+        </Grid>
       </form>
     );
   }
 
   return (
-    <Dialog open={open} onClose={handleDialogClose} maxWidth="lg" fullWidth>
+    <Modal
+      opened={open}
+      onClose={handleDialogClose}
+      size="75%"
+      withCloseButton={false}
+      transitionProps={{ transition: "fade" }}
+      styles={{
+        body: {
+          padding: "1.5rem",
+        },
+      }}
+    >
       {dialogContent}
-    </Dialog>
+    </Modal>
   );
 };

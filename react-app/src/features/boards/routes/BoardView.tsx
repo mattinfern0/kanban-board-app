@@ -1,5 +1,4 @@
 import { useBoardQuery } from "../apis/getBoard.ts";
-import { Button, IconButton, Stack, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import { BoardTask } from "@/features/boards/types";
@@ -7,6 +6,7 @@ import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.ts
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
 import { Settings } from "@mui/icons-material";
 import { BoardColumnWorkspace } from "@/features/boards/components/BoardColumnWorkspace.tsx";
+import { ActionIcon, Button, Group, Title } from "@mantine/core";
 
 export const BoardView = () => {
   const { boardId } = useParams();
@@ -16,11 +16,11 @@ export const BoardView = () => {
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState<boolean>(false);
 
   if (boardQuery.isPending) {
-    return <Typography>Loading...</Typography>;
+    return <Title>Loading...</Title>;
   }
 
   if (boardQuery.isError) {
-    return <Typography>Error!</Typography>;
+    return <Title>Error!</Title>;
   }
 
   const board = boardQuery.data;
@@ -47,20 +47,25 @@ export const BoardView = () => {
         boardId={board.id}
       />
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" mb={0}>
-          {boardQuery.data.title}
-        </Typography>
+      <Group justify="space-between" align="center" mb="1rem">
+        <Title order={2}>{boardQuery.data.title}</Title>
 
-        <Stack direction="row" spacing={3}>
-          <Button variant="contained" onClick={() => setShowCreateTaskDialog(true)}>
+        <Group>
+          <Button variant="filled" onClick={() => setShowCreateTaskDialog(true)}>
             Create Task
           </Button>
-          <IconButton component={Link} to={`/boards/${boardId}/settings`}>
+          <ActionIcon
+            color="gray"
+            component={Link}
+            to={`/boards/${boardId}/settings`}
+            variant="outline"
+            aria-label="Board Settings"
+            size="lg"
+          >
             <Settings />
-          </IconButton>
-        </Stack>
-      </Stack>
+          </ActionIcon>
+        </Group>
+      </Group>
 
       <BoardColumnWorkspace board={board} handleTaskCardClick={onTaskCardClick} />
     </>

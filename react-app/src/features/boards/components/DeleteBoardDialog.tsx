@@ -1,19 +1,8 @@
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  InputLabel,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import { useDeleteBoardMutation } from "@/features/boards/apis/deleteBoard.ts";
+import { Button, Checkbox, Group, Modal, Stack, Text, TextInput } from "@mantine/core";
 
 interface DeleteBoardDialogProps {
   open: boolean;
@@ -71,48 +60,49 @@ export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
   const deleteButtonDisabled = confirmTitleValue !== boardTitle;
 
   return (
-    <Dialog open={open} maxWidth="md" fullWidth onClose={onClose}>
-      <DialogTitle>Delete Board</DialogTitle>
-      <DialogContent>
-        <Stack spacing={4}>
-          <Typography variant="body1">Are you sure you want to delete this board?</Typography>
-          <form onSubmit={onSubmit} id={DELETE_FORM_ID}>
-            <Stack spacing={1}>
-              <InputLabel htmlFor="confirmTitle">Enter the board's title ({boardTitle}) to confirm</InputLabel>
-              <Controller
-                control={control}
-                name="confirmTitle"
-                render={({ field }) => <TextField {...field} fullWidth size="small" required />}
-              />
+    <Modal
+      opened={open}
+      size="xl"
+      onClose={onClose}
+      title="Delete Board"
+      styles={{ title: { fontSize: "1.5em" }, close: { display: "none" } }}
+    >
+      <Stack>
+        <Text>Are you sure you want to delete this board?</Text>
+        <form onSubmit={onSubmit} id={DELETE_FORM_ID}>
+          <Stack>
+            <Text component="label" htmlFor="confirmTitleInput">
+              Enter the board's title ({boardTitle}) to confirm
+            </Text>
+            <Controller
+              control={control}
+              name="confirmTitle"
+              render={({ field }) => <TextInput {...field} id="confirmTitleInput" w="100%" required />}
+            />
 
-              <Controller
-                control={control}
-                name="deleteTasks"
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={<Checkbox {...field} checked={field.value} color="error" />}
-                    label="Delete All Tasks in This Board"
-                  />
-                )}
-              />
-            </Stack>
-          </form>
-          <Stack direction="row" justifyContent="space-between">
-            <Button variant="contained" onClick={onClose} color="secondary">
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              type="submit"
-              form={DELETE_FORM_ID}
-              disabled={deleteButtonDisabled}
-            >
-              Delete
-            </Button>
+            <Controller
+              control={control}
+              name="deleteTasks"
+              render={({ field }) => (
+                <Checkbox
+                  onChange={field.onChange}
+                  checked={field.value}
+                  label="Delete All Tasks in This Board"
+                  color="red"
+                />
+              )}
+            />
           </Stack>
-        </Stack>
-      </DialogContent>
-    </Dialog>
+        </form>
+        <Group justify="space-between">
+          <Button variant="filled" onClick={onClose} color="gray">
+            Cancel
+          </Button>
+          <Button variant="filled" color="red" type="submit" form={DELETE_FORM_ID} disabled={deleteButtonDisabled}>
+            Delete
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
   );
 };

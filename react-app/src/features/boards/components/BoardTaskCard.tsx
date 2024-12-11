@@ -1,6 +1,5 @@
 import { BoardTask } from "../types";
-import { Avatar, Card, CardContent, Stack, Typography } from "@mui/material";
-import { stringToColor } from "@/lib/utils.ts";
+import { Avatar, Card, Group, Text } from "@mantine/core";
 
 interface BoardTaskCardProps {
   boardTask: BoardTask;
@@ -12,22 +11,14 @@ export const BoardTaskCard = ({ boardTask, onClick }: BoardTaskCardProps) => {
     onClick(boardTask);
   };
   const assigneeAvatars = boardTask.assignees.map((assignee) => (
-    <Avatar
-      key={assignee.userId}
-      sx={{ width: 32, height: 32, fontSize: "1rem", bgcolor: stringToColor(assignee.userId) }}
-    >
-      {assignee.firstName[0]}
-      {assignee.lastName[0]}
-    </Avatar>
+    <Avatar key={assignee.userId} name={`${assignee.firstName} ${assignee.lastName}`} color="initials"></Avatar>
   ));
   return (
-    <Card onClick={handleClick} sx={{ "&:hover": { cursor: "pointer" } }}>
-      <CardContent>
-        <Typography mb={1}>{boardTask.title}</Typography>
-        <Stack direction="row" spacing={1}>
-          {assigneeAvatars}
-        </Stack>
-      </CardContent>
+    <Card onClick={handleClick} withBorder shadow="sm" style={{ cursor: "pointer" }}>
+      <Text size="lg" mb="1rem">
+        {boardTask.title}
+      </Text>
+      <Group>{assigneeAvatars}</Group>
     </Card>
   );
 };

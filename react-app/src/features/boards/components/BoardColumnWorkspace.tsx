@@ -17,10 +17,10 @@ import { useSnackbar } from "notistack";
 import { useUpdateTaskColumnPositionMutation } from "@/features/tasks/apis/updateTaskColumnPosition.ts";
 import { usePrevious } from "@/lib/hooks.ts";
 import deepEqual from "deep-equal";
-import { Grid } from "@mui/material";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { arrayMove } from "@dnd-kit/sortable";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
+import { Grid } from "@mantine/core";
 
 interface BoardColumnWorkspaceProps {
   board: BoardDetail;
@@ -201,9 +201,9 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
 
   const gridColumnSize = 12 / boardColumns.length;
   const columnElements = boardColumns.map((c) => (
-    <Grid key={c.id} item md={gridColumnSize}>
+    <Grid.Col key={c.id} span={gridColumnSize}>
       <BoardColumn boardColumn={c} onTaskCardClick={handleTaskCardClick} />
-    </Grid>
+    </Grid.Col>
   ));
 
   let dragOverlayElement: React.ReactNode | null = null;
@@ -219,9 +219,7 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <Grid container spacing={3} height="75vh">
-        {columnElements}
-      </Grid>
+      <Grid>{columnElements}</Grid>
       <DragOverlay>{dragOverlayElement}</DragOverlay>
     </DndContext>
   );

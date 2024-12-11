@@ -1,19 +1,20 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { routes } from "@/routes";
-import { CssBaseline } from "@mui/material";
+import { MantineProvider } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import "@mantine/core/styles.css";
 
 const router = createBrowserRouter(routes);
 const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <>
-      <CssBaseline />
+    <MantineProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </>
+    </MantineProvider>
   );
 };
 

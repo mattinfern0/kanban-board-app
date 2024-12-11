@@ -1,4 +1,4 @@
-import { Button, Card, CardActionArea, CardContent, Stack, Typography } from "@mui/material";
+import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { useBoardListQuery } from "@/features/boards/apis/getBoardList.ts";
 import { ReactNode, useState } from "react";
 import { Link } from "react-router-dom";
@@ -12,23 +12,17 @@ export const BoardListView = () => {
 
   let listElement: ReactNode;
   if (boardListQuery.isPending) {
-    listElement = <Typography>Loading...</Typography>;
+    listElement = <Text>Loading...</Text>;
   } else if (boardListQuery.isError) {
-    listElement = <Typography>Error loading boards</Typography>;
+    listElement = <Text>Error loading boards</Text>;
   } else {
     const boardCards = boardListQuery.data.map((board) => (
-      <Card key={board.id} sx={{ cursor: "pointer" }}>
-        <CardActionArea component={Link} to={`/boards/${board.id}`}>
-          <CardContent>
-            <Typography variant="h5">{board.title}</Typography>
-          </CardContent>
-        </CardActionArea>
+      <Card key={board.id} component={Link} to={`/boards/${board.id}`} style={{ cursor: "pointer" }} withBorder>
+        <Text size="xl">{board.title}</Text>
       </Card>
     ));
     listElement = (
-      <Stack spacing={5} bgcolor="lightgray" padding={3} borderRadius={3} minHeight="75vh">
-        {boardCards}
-      </Stack>
+      <Stack style={{ backgroundColor: "lightgray", padding: "1rem", minHeight: "75vh" }}>{boardCards}</Stack>
     );
   }
 
@@ -40,12 +34,12 @@ export const BoardListView = () => {
         organizationId={MOCK_ORGANIZATION_ID}
       />
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Boards</Typography>
-        <Button variant="contained" onClick={() => setShowCreateBoardDialog(true)}>
+      <Group justify="space-between" align="center" mb="1rem">
+        <Title order={1}>Boards</Title>
+        <Button variant="filled" onClick={() => setShowCreateBoardDialog(true)}>
           Create Board
         </Button>
-      </Stack>
+      </Group>
 
       {listElement}
     </>

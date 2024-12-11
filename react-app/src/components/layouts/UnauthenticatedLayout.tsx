@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Container } from "@mantine/core";
 import React from "react";
 import { SnackbarProvider } from "notistack";
 
@@ -10,9 +10,7 @@ export const UnauthenticatedLayout = ({ children }: UnauthenticatedLayoutProps) 
   return (
     <>
       <SnackbarProvider>
-        <Container sx={{ paddingTop: "3rem" }} maxWidth="md">
-          {children}
-        </Container>
+        <Container pt="3rem">{children}</Container>
       </SnackbarProvider>
     </>
   );

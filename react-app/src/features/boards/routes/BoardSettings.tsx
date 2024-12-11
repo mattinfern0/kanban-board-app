@@ -1,16 +1,13 @@
-import { Box, Button, Card, CardContent, Stack, Tab, TextField, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
-import React, { useState } from "react";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { useState } from "react";
 import { ChevronLeft } from "@mui/icons-material";
 import { DeleteBoardDialog } from "@/features/boards/components/DeleteBoardDialog.tsx";
 import { Controller, useForm } from "react-hook-form";
 import { BoardDetail } from "@/features/boards/types";
 import { useUpdateBoardHeaderMutation } from "@/features/boards/apis/updateBoardHeader.ts";
 import { useSnackbar } from "notistack";
-
-type TabValue = "settings" | "danger";
+import { Button, Card, Group, Stack, Tabs, Text, TextInput, Title } from "@mantine/core";
 
 type UpdateBoardHeaderFormValues = {
   title: string;
@@ -58,14 +55,14 @@ const UpdateBoardHeaderForm = (props: UpdateBoardHeaderFormProps) => {
 
   return (
     <form onSubmit={onSubmit}>
-      <Stack spacing={3}>
+      <Stack>
         <Controller
           control={control}
           name="title"
-          render={({ field }) => <TextField {...field} label="Title" variant="outlined" size="small" required />}
+          render={({ field }) => <TextInput {...field} label="Title" required />}
         />
 
-        <Button type="submit" variant="contained" size="small">
+        <Button type="submit" variant="filled">
           Save Changes
         </Button>
       </Stack>
@@ -76,45 +73,34 @@ const UpdateBoardHeaderForm = (props: UpdateBoardHeaderFormProps) => {
 export const BoardSettings = () => {
   const { boardId } = useParams();
   const boardQuery = useBoardQuery(boardId || "");
-  const [activeTab, setActiveTab] = useState<TabValue>("settings");
   const [showDeleteBoardDialog, setShowDeleteBoardDialog] = useState<boolean>(false);
 
   let element;
 
   if (boardQuery.isLoading) {
-    element = <Typography>Loading...</Typography>;
+    element = <Text>Loading...</Text>;
   } else if (boardQuery.isError) {
-    element = <Typography>Error loading board</Typography>;
+    element = <Text>Error loading board</Text>;
   } else if (boardId != null && boardQuery.isSuccess) {
-    const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
-      setActiveTab(newValue);
-    };
-
     element = (
       <>
         <Card>
-          <CardContent>
-            <TabContext value={activeTab}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <TabList onChange={handleTabChange}>
-                  <Tab label="Info" value="settings" />
-                  <Tab label="Danger" value="danger" />
-                </TabList>
-              </Box>
-              <TabPanel value="settings">
-                <Stack spacing={3}>
-                  <Typography>Info</Typography>
-                  <UpdateBoardHeaderForm board={boardQuery.data} />
-                </Stack>
-              </TabPanel>
+          <Tabs defaultValue="settings">
+            <Tabs.List mb="1.5rem">
+              <Tabs.Tab value="settings">Info</Tabs.Tab>
+              <Tabs.Tab value="danger">Danger</Tabs.Tab>
+            </Tabs.List>
 
-              <TabPanel value="danger">
-                <Button variant="outlined" color="error" onClick={() => setShowDeleteBoardDialog(true)}>
-                  Delete Board
-                </Button>
-              </TabPanel>
-            </TabContext>
-          </CardContent>
+            <Tabs.Panel value="settings">
+              <UpdateBoardHeaderForm board={boardQuery.data} />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="danger">
+              <Button variant="outline" color="red" onClick={() => setShowDeleteBoardDialog(true)}>
+                Delete Board
+              </Button>
+            </Tabs.Panel>
+          </Tabs>
         </Card>
         <DeleteBoardDialog
           open={showDeleteBoardDialog}
@@ -128,18 +114,12 @@ export const BoardSettings = () => {
 
   return (
     <>
-      <Stack direction="row" mb={3} alignItems="center" spacing={3}>
-        <Button
-          component={Link}
-          to={`/boards/${boardId}`}
-          startIcon={<ChevronLeft />}
-          variant="contained"
-          sx={{ mb: 3 }}
-        >
+      <Group mb="1rem" align="center">
+        <Button component={Link} to={`/boards/${boardId}`} leftSection={<ChevronLeft />} variant="filled">
           Back
         </Button>
-        <Typography variant="h4">Board Settings</Typography>
-      </Stack>
+        <Title order={3}>Board Settings</Title>
+      </Group>
       {element}
     </>
   );

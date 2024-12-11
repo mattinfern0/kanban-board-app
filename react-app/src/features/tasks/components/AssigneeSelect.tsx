@@ -1,38 +1,10 @@
-import { Theme, useTheme } from "@mui/material/styles";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import Chip from "@mui/material/Chip";
-import { Avatar, Stack } from "@mui/material";
-import { stringToColor } from "@/lib/utils.ts";
-
-function getStyles(name: string, personName: readonly string[], theme: Theme) {
-  return {
-    fontWeight:
-      personName.indexOf(name) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
-  };
-}
+import { Avatar, CheckIcon, Combobox, Group, Input, Pill, PillsInput, Stack, useCombobox } from "@mantine/core";
 
 interface AssigneeOption {
   id: string;
   firstName: string;
   lastName: string;
 }
-
-export interface SelectOption {
-  value: string;
-  label: string;
-}
-
-const UserAvatar = (props: { user: AssigneeOption }) => {
-  return (
-    <Avatar sx={{ width: 32, height: 32, fontSize: "1rem", bgcolor: stringToColor(props.user.id) }}>
-      {props.user.firstName[0]}
-      {props.user.lastName[0]}
-    </Avatar>
-  );
-};
 
 export interface AssigneeSelectProps {
   inputLabel: string;
@@ -42,56 +14,92 @@ export interface AssigneeSelectProps {
   onBlur: () => void;
 }
 
-export const AssigneeSelect = (props: AssigneeSelectProps) => {
-  const theme = useTheme();
+export function AssigneeSelect(props: Readonly<AssigneeSelectProps>) {
+  const { assigneeOptions, value, onChange } = props;
 
-  const handleChange = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    const parsedValue = typeof value === "string" ? value.split(",") : value;
-    props.onChange(parsedValue);
-  };
-
-  const selectOptions: SelectOption[] = props.assigneeOptions.map((assignee) => ({
-    value: assignee.id,
-    label: `${assignee.firstName} ${assignee.lastName}`,
-  }));
+  const combobox = useCombobox({
+    onDropdownClose: () => combobox.resetSelectedOption(),
+    onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
+  });
 
   const usersById: Record<string, AssigneeOption> = {};
-  props.assigneeOptions.forEach((user) => {
+  assigneeOptions.forEach((user) => {
     usersById[user.id] = user;
   });
 
-  const valueToLabel: Record<string, string> = {};
-  selectOptions.forEach((option) => {
-    valueToLabel[option.value] = option.label;
+  const handleValueSelect = (option: string) =>
+    onChange(value.includes(option) ? value.filter((v) => v !== option) : [...value, option]);
+
+  const handleValueRemove = (option: string) => onChange(value.filter((v) => v !== option));
+
+  const sortedValues = value.sort((a, b) => {
+    const userA = usersById[a];
+    const userB = usersById[b];
+
+    const firstNameComparison = userA.firstName.localeCompare(userB.firstName);
+    if (firstNameComparison !== 0) {
+      return firstNameComparison;
+    }
+    return userA.lastName.localeCompare(userB.lastName);
+  });
+
+  const valueElements = sortedValues.map((item) => {
+    const user = usersById[item];
+    const name = `${user.firstName} ${user.lastName}`;
+
+    return (
+      <Pill key={item} onRemove={() => handleValueRemove(item)} styles={{ root: { paddingLeft: 0 } }}>
+        <Group align="center">
+          <Avatar name={name} color="initials" />
+          {name}
+        </Group>
+      </Pill>
+    );
+  });
+
+  const options = assigneeOptions.map((item) => {
+    return (
+      <Combobox.Option value={item.id} key={item.id} active={value.includes(item.id)}>
+        <Group gap="sm">
+          {value.includes(item.id) ? <CheckIcon size={12} /> : null}
+          <span>
+            {item.firstName} {item.lastName}
+          </span>
+        </Group>
+      </Combobox.Option>
+    );
   });
 
   return (
-    <FormControl>
-      <Select
-        id={props.inputLabel}
-        multiple
-        value={props.value}
-        onChange={handleChange}
-        onBlur={props.onBlur}
-        input={<OutlinedInput />}
-        renderValue={(selected) => (
-          <Stack spacing={1} alignItems="flex-start">
-            {selected.map((value) => (
-              <Chip key={value} avatar={<UserAvatar user={usersById[value]} />} label={valueToLabel[value]} />
-            ))}
-          </Stack>
-        )}
-      >
-        {selectOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value} style={getStyles(option.label, props.value, theme)}>
-            <UserAvatar user={usersById[option.value]} />
-            <span style={{ marginLeft: "1rem" }}>{option.label}</span>
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Combobox store={combobox} onOptionSubmit={handleValueSelect} withinPortal={false}>
+      <Combobox.DropdownTarget>
+        <PillsInput pointer onClick={() => combobox.toggleDropdown()}>
+          <Pill.Group>
+            {valueElements.length > 0 ? (
+              <Stack>{valueElements}</Stack>
+            ) : (
+              <Input.Placeholder>No Assignees</Input.Placeholder>
+            )}
+
+            <Combobox.EventsTarget>
+              <PillsInput.Field
+                type="hidden"
+                onBlur={() => combobox.closeDropdown()}
+                onKeyDown={(event) => {
+                  if (event.key === "Backspace") {
+                    event.preventDefault();
+                    handleValueRemove(value[value.length - 1]);
+                  }
+                }}
+              />
+            </Combobox.EventsTarget>
+          </Pill.Group>
+        </PillsInput>
+      </Combobox.DropdownTarget>
+
+      <Combobox.Dropdown>
+        <Combobox.Options>{options}</Combobox.Options>
+      </Combobox.Dropdown>
+    </Combobox>
   );
-};
+}

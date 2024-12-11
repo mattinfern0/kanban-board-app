@@ -1,7 +1,7 @@
 import { Controller, useForm, UseFormReturn } from "react-hook-form";
 import { SignUpFormSchema, SignUpFormValues } from "@/features/auth/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, PasswordInput, Stack, TextInput } from "@mantine/core";
 
 interface UseSignUpFormReturn {
   formMethods: UseFormReturn<SignUpFormValues>;
@@ -37,12 +37,12 @@ export const SignUpForm = (props: SignUpFormProps) => {
 
   return (
     <form onSubmit={onSubmit}>
-      <Stack spacing={3}>
+      <Stack>
         <Controller
           control={control}
           name="email"
           render={({ field, fieldState }) => (
-            <TextField {...field} error={!!fieldState.error} helperText={fieldState.error?.message} label="Email" />
+            <TextInput {...field} error={fieldState.error?.message} label="Email" required />
           )}
         />
 
@@ -50,13 +50,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
           control={control}
           name="password1"
           render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              label="Password"
-              type="password"
-            />
+            <PasswordInput {...field} error={fieldState.error?.message} label="Password" type="password" required />
           )}
         />
 
@@ -64,12 +58,12 @@ export const SignUpForm = (props: SignUpFormProps) => {
           control={control}
           name="password2"
           render={({ field, fieldState }) => (
-            <TextField
+            <PasswordInput
               {...field}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
+              error={fieldState.error?.message}
               label="Confirm Password"
               type="password"
+              required
             />
           )}
         />
@@ -78,12 +72,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
           control={control}
           name="firstName"
           render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              label="First Name"
-            />
+            <TextInput {...field} error={fieldState.error?.message} label="First Name" required />
           )}
         />
 
@@ -91,11 +80,11 @@ export const SignUpForm = (props: SignUpFormProps) => {
           control={control}
           name="lastName"
           render={({ field, fieldState }) => (
-            <TextField {...field} error={!!fieldState.error} helperText={fieldState.error?.message} label="Last Name" />
+            <TextInput {...field} error={fieldState.error?.message} label="Last Name" required />
           )}
         />
 
-        <Button type="submit" variant="contained" size="large">
+        <Button type="submit" variant="filled" size="lg">
           Sign Up
         </Button>
       </Stack>

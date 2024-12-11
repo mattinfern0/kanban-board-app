@@ -1,21 +1,10 @@
 import { Controller, useForm } from "react-hook-form";
 import { CreateTaskBody, CreateTaskFormValues } from "@/features/tasks/types";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-} from "@mui/material";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
+import { Button, Grid, Group, Modal, Select, Stack, Textarea, TextInput } from "@mantine/core";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -45,11 +34,10 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
     });
   }, [boardId, defaultBoardColumnId, reset]);
 
-  const columnSelectOptions = boardColumns.map((column) => (
-    <MenuItem key={column.id} value={column.id}>
-      {column.title}
-    </MenuItem>
-  ));
+  const columnSelectOptions = boardColumns.map((column) => ({
+    value: column.id,
+    label: column.title,
+  }));
   const isSubmitting = createTaskMutation.isPending;
 
   const handleClose = () => {
@@ -86,52 +74,43 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
   );
 
   return (
-    <Dialog open={open} maxWidth="lg" fullWidth onClose={handleClose}>
-      <DialogContent>
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={3} mb={3}>
-            <Grid item md={8}>
-              <TextField value={boardTitle} InputProps={{ readOnly: true }} label="Board" fullWidth />
-            </Grid>
-            <Grid item md={4}>
-              <FormControl fullWidth>
-                <InputLabel id="column-select-label">Column</InputLabel>
-                <Controller
-                  control={control}
-                  name="column_id"
-                  render={({ field }) => (
-                    <Select {...field} labelId="column-select-label" label="Column">
-                      {columnSelectOptions}
-                    </Select>
-                  )}
-                />
-              </FormControl>
-            </Grid>
-          </Grid>
-          <Stack spacing={3}>
+    <Modal opened={open} onClose={handleClose} size="xl" title="Create Task">
+      <form onSubmit={onSubmit}>
+        <Grid>
+          <Grid.Col span={8}>
+            <TextInput value={boardTitle} label="Board" width="100%" readOnly />
+          </Grid.Col>
+          <Grid.Col span={4}>
             <Controller
               control={control}
-              name="title"
-              render={({ field }) => <TextField {...field} label="Title" required />}
+              name="column_id"
+              render={({ field }) => <Select {...field} label="Column" data={columnSelectOptions} />}
             />
+          </Grid.Col>
+        </Grid>
+        <Stack>
+          <Controller
+            control={control}
+            name="title"
+            render={({ field }) => <TextInput {...field} label="Title" required />}
+          />
 
-            <Controller
-              control={control}
-              name="description"
-              render={({ field }) => <TextField {...field} multiline minRows={5} label="Description" />}
-            />
+          <Controller
+            control={control}
+            name="description"
+            render={({ field }) => <Textarea {...field} autosize minRows={5} label="Description" />}
+          />
 
-            <Stack direction="row-reverse" spacing={3}>
-              <Button variant="contained" type="submit" disabled={isSubmitting}>
-                Create
-              </Button>
-              <Button variant="contained" color="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Stack>
-          </Stack>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <Group justify="flex-end">
+            <Button variant="filled" color="gray" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="filled" type="submit" disabled={isSubmitting}>
+              Create
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
   );
 };
