@@ -13,7 +13,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       <SnackbarProvider>
         <AppShell header={{ height: 60 }} navbar={{ width: 200, breakpoint: "sm" }} padding="md">
           <AppShell.Header>
-            <Group justify="space-between">
+            <Group h="100%" justify="space-between" px="md">
               <Title variant="h6">Kanban App</Title>
               <Avatar />
             </Group>
