@@ -62,7 +62,7 @@ const UpdateBoardHeaderForm = (props: UpdateBoardHeaderFormProps) => {
           render={({ field }) => <TextInput {...field} label="Title" required />}
         />
 
-        <Button type="submit" variant="filled">
+        <Button type="submit" variant="filled" color="primary">
           Save Changes
         </Button>
       </Stack>
@@ -96,7 +96,7 @@ export const BoardSettings = () => {
             </Tabs.Panel>
 
             <Tabs.Panel value="danger">
-              <Button variant="outline" color="red" onClick={() => setShowDeleteBoardDialog(true)}>
+              <Button variant="outline" color="danger" onClick={() => setShowDeleteBoardDialog(true)}>
                 Delete Board
               </Button>
             </Tabs.Panel>
@@ -115,7 +115,13 @@ export const BoardSettings = () => {
   return (
     <>
       <Group mb="1rem" align="center">
-        <Button component={Link} to={`/boards/${boardId}`} leftSection={<ChevronLeft />} variant="filled">
+        <Button
+          component={Link}
+          to={`/boards/${boardId}`}
+          leftSection={<ChevronLeft />}
+          variant="filled"
+          color="secondary"
+        >
           Back
         </Button>
         <Title order={3}>Board Settings</Title>

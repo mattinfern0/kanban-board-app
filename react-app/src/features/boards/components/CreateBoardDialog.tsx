@@ -69,10 +69,12 @@ export const CreateBoardDialog = (props: CreateTaskDialogProps) => {
           />
 
           <Group justify="flex-end">
-            <Button color="gray" onClick={handleClose}>
+            <Button color="secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit">Create</Button>
+            <Button type="submit" color="primary">
+              Create
+            </Button>
           </Group>
         </Stack>
       </form>

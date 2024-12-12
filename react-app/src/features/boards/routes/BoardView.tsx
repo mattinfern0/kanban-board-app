@@ -51,11 +51,11 @@ export const BoardView = () => {
         <Title order={2}>{boardQuery.data.title}</Title>
 
         <Group>
-          <Button variant="filled" onClick={() => setShowCreateTaskDialog(true)}>
+          <Button variant="filled" onClick={() => setShowCreateTaskDialog(true)} color="primary">
             Create Task
           </Button>
           <ActionIcon
-            color="gray"
+            color="secondary"
             component={Link}
             to={`/boards/${boardId}/settings`}
             variant="outline"

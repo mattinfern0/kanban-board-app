@@ -84,7 +84,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
           )}
         />
 
-        <Button type="submit" variant="filled" size="lg">
+        <Button type="submit" variant="filled" color="primary">
           Sign Up
         </Button>
       </Stack>

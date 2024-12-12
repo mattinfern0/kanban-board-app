@@ -102,10 +102,10 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
           />
 
           <Group justify="flex-end">
-            <Button variant="filled" color="gray" onClick={handleClose}>
+            <Button variant="filled" color="secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="filled" type="submit" disabled={isSubmitting}>
+            <Button variant="filled" type="submit" color="primary" disabled={isSubmitting}>
               Create
             </Button>
           </Group>

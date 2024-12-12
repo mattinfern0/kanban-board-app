@@ -36,7 +36,7 @@ export const BoardListView = () => {
 
       <Group justify="space-between" align="center" mb="1rem">
         <Title order={1}>Boards</Title>
-        <Button variant="filled" onClick={() => setShowCreateBoardDialog(true)}>
+        <Button variant="filled" onClick={() => setShowCreateBoardDialog(true)} color="primary">
           Create Board
         </Button>
       </Group>

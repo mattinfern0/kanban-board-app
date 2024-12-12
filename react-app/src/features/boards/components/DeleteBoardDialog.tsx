@@ -95,10 +95,10 @@ export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
           </Stack>
         </form>
         <Group justify="space-between">
-          <Button variant="filled" onClick={onClose} color="gray">
+          <Button variant="filled" onClick={onClose} color="secondary">
             Cancel
           </Button>
-          <Button variant="filled" color="red" type="submit" form={DELETE_FORM_ID} disabled={deleteButtonDisabled}>
+          <Button variant="filled" color="danger" type="submit" form={DELETE_FORM_ID} disabled={deleteButtonDisabled}>
             Delete
           </Button>
         </Group>
