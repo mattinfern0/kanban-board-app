@@ -22,7 +22,12 @@ const STATUS_ENUM_TO_TEXT: Record<TaskStatus, string> = {
 
 const columns: DataTableColumn<TableRowValues>[] = [
   { accessor: "title", title: "Title", sortable: true, width: "50%" },
-  { accessor: "status", title: "Status", render: ({ status }) => STATUS_ENUM_TO_TEXT[status as TaskStatus] },
+  {
+    accessor: "status",
+    title: "Status",
+    sortable: true,
+    render: ({ status }) => STATUS_ENUM_TO_TEXT[status as TaskStatus],
+  },
   {
     accessor: "createdAt",
     title: "Created At",
@@ -41,7 +46,11 @@ const sortRows = (rows: TableRowValues[], sortStatus: DataTableSortStatus<TableR
   return result;
 };
 
-export const TaskListTable = () => {
+interface Props {
+  onRowClick: (taskId: string) => void;
+}
+
+export const TaskListTable = (props: Readonly<Props>) => {
   const taskListQuery = useTaskListQuery();
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[0]);
@@ -69,7 +78,7 @@ export const TaskListTable = () => {
 
   return (
     <DataTable
-      height={500}
+      height="75vh"
       columns={columns}
       records={visibleRecords}
       striped
@@ -83,6 +92,8 @@ export const TaskListTable = () => {
       onRecordsPerPageChange={(newPageSize) => setPageSize(newPageSize)}
       sortStatus={sortStatus}
       onSortStatusChange={setSortStatus}
+      textSelectionDisabled
+      onRowClick={({ record }) => props.onRowClick(record.id)}
     />
   );
 };
