@@ -48,20 +48,25 @@ export interface UpdateTaskColumnPositionBody {
   orderIndex: number;
 }
 
-export type TaskAssigneeSummary = {
-  userId: string;
-  firstName: string;
-  lastName: string;
-};
+export const TaskAssigneeSummarySchema = z.object({
+  userId: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+});
 
-export type TaskDetail = {
-  id: string;
-  organizationId: string;
-  title: string;
-  description: string;
+export type TaskAssigneeSummary = z.infer<typeof TaskAssigneeSummarySchema>;
 
-  boardColumnId: string | null;
-  boardColumnOrder: number | null;
-  status: TaskStatus;
-  assignees: TaskAssigneeSummary[];
-};
+export const TaskDetailSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  title: z.string(),
+  description: z.string(),
+
+  boardColumnId: z.string().nullable(),
+  boardColumnOrder: z.number().nullable(),
+  status: z.nativeEnum(TaskStatus),
+  assignees: z.array(TaskAssigneeSummarySchema),
+  createdAt: z.coerce.date(),
+});
+
+export type TaskDetail = z.infer<typeof TaskDetailSchema>;

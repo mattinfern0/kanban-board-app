@@ -1,1 +1,7 @@
-export type TaskStatus = "BACKLOG" | "TODO" | "IN_PROGRESS" | "COMPLETED" | "OTHER";
+export enum TaskStatus {
+  BACKLOG = "BACKLOG",
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  OTHER = "OTHER",
+}
