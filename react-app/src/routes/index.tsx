@@ -5,6 +5,7 @@ import { BoardListView } from "@/features/boards/routes/BoardListView.tsx";
 import { BoardSettings } from "@/features/boards/routes/BoardSettings.tsx";
 import { UnauthenticatedLayout } from "@/components/layouts/UnauthenticatedLayout.tsx";
 import { SignUpView } from "@/features/auth/routes/SignUpView.tsx";
+import { TaskListView } from "@/features/tasks/routes/TaskListView.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -13,6 +14,14 @@ export const routes: RouteObject[] = [
       <UnauthenticatedLayout>
         <SignUpView />
       </UnauthenticatedLayout>
+    ),
+  },
+  {
+    path: "/tasks",
+    element: (
+      <MainLayout>
+        <TaskListView />
+      </MainLayout>
     ),
   },
   {

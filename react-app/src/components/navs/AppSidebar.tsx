@@ -5,7 +5,7 @@ export const AppSidebar = () => {
   return (
     <>
       <NavLink component={Link} to="/boards" label="Boards" />
-      <NavLink component={Link} to="#" label="Tasks" />
+      <NavLink component={Link} to="/tasks" label="Tasks" />
     </>
   );
 };
