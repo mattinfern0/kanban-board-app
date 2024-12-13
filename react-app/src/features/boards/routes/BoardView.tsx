@@ -6,7 +6,7 @@ import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.ts
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
 import { Settings } from "@mui/icons-material";
 import { BoardColumnWorkspace } from "@/features/boards/components/BoardColumnWorkspace.tsx";
-import { ActionIcon, Button, Group, Title } from "@mantine/core";
+import { ActionIcon, Breadcrumbs, Button, Group, Text, Title } from "@mantine/core";
 
 export const BoardView = () => {
   const { boardId } = useParams();
@@ -48,7 +48,14 @@ export const BoardView = () => {
       />
 
       <Group justify="space-between" align="center" mb="1rem">
-        <Title order={2}>{boardQuery.data.title}</Title>
+        <Breadcrumbs>
+          {[
+            <Text component={Link} to="/boards">
+              Boards
+            </Text>,
+            <Title order={2}>{boardQuery.data.title}</Title>,
+          ]}
+        </Breadcrumbs>
 
         <Group>
           <Button variant="filled" onClick={() => setShowCreateTaskDialog(true)} color="primary">
