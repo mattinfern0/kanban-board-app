@@ -25,7 +25,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           <AppShell.Header>
             <Group h="100%" justify="space-between" px="md">
               <Title variant="h6">Kanban App</Title>
-              <Avatar />
+              <Avatar variant="filled" />
             </Group>
           </AppShell.Header>
           <AppShell.Navbar p="md">
