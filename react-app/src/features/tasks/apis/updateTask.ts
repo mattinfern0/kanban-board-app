@@ -14,12 +14,12 @@ export const useUpdateTaskMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (args: { taskId: string; body: UpdateTaskBody }) => await updateTask(args.taskId, args.body),
-    onSuccess: (_data, args) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["boards"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tasks", args.taskId],
+        queryKey: ["tasks"],
       });
     },
   });

@@ -13,11 +13,12 @@ export const getUsers = async (params: GetUsersQueryParams): Promise<UserDetail[
   return await client.get(url).json();
 };
 
-export const useGetUsersQuery = (params: GetUsersQueryParams) => {
+export const useGetUsersQuery = (params: GetUsersQueryParams, options?: { enabled: boolean }) => {
   return useQuery({
     queryFn: async () => {
       return await getUsers(params);
     },
     queryKey: ["users", params],
+    enabled: options?.enabled ?? true,
   });
 };

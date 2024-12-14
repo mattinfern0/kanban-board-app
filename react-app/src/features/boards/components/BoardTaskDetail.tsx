@@ -15,7 +15,6 @@ import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 interface BoardTaskDetailProps {
   open: boolean;
   taskId: string | null;
-  organizationId: string;
   onClose: () => void;
 }
 
@@ -35,7 +34,10 @@ const DetailMenu = (props: DetailMenuProps) => {
 export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
-  const organizationUsersQuery = useGetUsersQuery({ organizationId: props.organizationId });
+  const organizationUsersQuery = useGetUsersQuery(
+    { organizationId: taskDetailQuery.data?.organizationId },
+    { enabled: !!taskDetailQuery.data?.organizationId },
+  );
   const updateTaskMutation = useUpdateTaskMutation();
   const updateTaskAssigneesMutation = useUpdateTaskAssigneesMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
@@ -71,7 +73,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
           body: {
             title: data.title,
             description: data.description,
-            organizationId: props.organizationId,
+            organizationId: taskDetailQuery.data.organizationId,
             boardColumnId: oldTaskData.boardColumnId,
             boardColumnOrder: oldTaskData.boardColumnOrder,
             status: oldTaskData.status,

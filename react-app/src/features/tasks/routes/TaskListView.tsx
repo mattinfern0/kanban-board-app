@@ -17,7 +17,6 @@ export const TaskListView = () => {
       <BoardTaskDetail
         open={showTaskDetailDialog}
         taskId={taskDetailDialogTaskId}
-        organizationId={""} // TODO: Get organization ID from context
         onClose={() => {
           setShowTaskDetailDialog(false);
         }}
