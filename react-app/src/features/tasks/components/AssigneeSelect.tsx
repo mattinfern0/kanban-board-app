@@ -43,19 +43,23 @@ export function AssigneeSelect(props: Readonly<AssigneeSelectProps>) {
     return userA.lastName.localeCompare(userB.lastName);
   });
 
-  const valueElements = sortedValues.map((item) => {
+  const valueElements = [];
+  for (const item of sortedValues) {
     const user = usersById[item];
+    if (!user) {
+      continue;
+    }
     const name = `${user.firstName} ${user.lastName}`;
 
-    return (
+    valueElements.push(
       <Pill key={item} onRemove={() => handleValueRemove(item)} styles={{ root: { paddingLeft: 0 } }}>
         <Group align="center">
           <Avatar name={name} color="initials" />
           {name}
         </Group>
-      </Pill>
+      </Pill>,
     );
-  });
+  }
 
   const options = assigneeOptions.map((item) => {
     return (

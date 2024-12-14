@@ -48,12 +48,10 @@ export const BoardView = () => {
 
       <Group justify="space-between" align="center" mb="1rem">
         <Breadcrumbs>
-          {[
-            <Text component={Link} to="/boards">
-              Boards
-            </Text>,
-            <Title order={2}>{boardQuery.data.title}</Title>,
-          ]}
+          <Text component={Link} to="/boards">
+            Boards
+          </Text>
+          <Title order={2}>{boardQuery.data.title}</Title>
         </Breadcrumbs>
 
         <Group>
