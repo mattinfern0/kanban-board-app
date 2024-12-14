@@ -1,7 +1,7 @@
 import React from "react";
 import { AppSidebar } from "@/components/navs/AppSidebar.tsx";
 import { SnackbarProvider } from "notistack";
-import { AppShell, Avatar, Group, Title, useMantineTheme } from "@mantine/core";
+import { AppShell, Avatar, Group, Menu, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -25,7 +25,14 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           <AppShell.Header>
             <Group h="100%" justify="space-between" px="md">
               <Title variant="h6">Kanban App</Title>
-              <Avatar variant="filled" />
+              <Menu>
+                <Menu.Target>
+                  <Avatar component={UnstyledButton} variant="filled" />
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item>Logout</Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             </Group>
           </AppShell.Header>
           <AppShell.Navbar p="md">
