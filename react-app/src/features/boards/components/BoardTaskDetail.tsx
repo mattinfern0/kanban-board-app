@@ -50,7 +50,6 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
     });
   }, [reset, taskDetailQuery.data]);
 
-  // TODO figure how to only call this if the form data is different.
   const onSubmit = handleSubmit(
     (data) => {
       if (!taskDetailQuery.data) {
@@ -155,7 +154,11 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
                 style={{ width: "90%", fontWeight: "bold" }}
                 size="xl"
                 onKeyDown={onTitleInputKeyDown}
-                onBlur={onSubmit}
+                onBlur={async (e) => {
+                  if (field.value !== task.title) {
+                    await onSubmit(e);
+                  }
+                }}
                 variant="unstyled"
               />
             )}
@@ -186,7 +189,11 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
                     id="task-detail-description"
                     autosize
                     minRows={5}
-                    onBlur={onSubmit}
+                    onBlur={async (e) => {
+                      if (field.value !== task.description) {
+                        await onSubmit(e);
+                      }
+                    }}
                     variant="unstyled"
                   />
                 )}
