@@ -9,6 +9,7 @@ import "@mantine/core/styles.css";
 import "mantine-datatable/styles.layer.css";
 
 import { theme } from "@/theme.ts";
+import { AuthProvider } from "@/features/auth/components/AuthProvider.tsx";
 
 const router = createBrowserRouter(routes);
 const queryClient = new QueryClient();
@@ -19,7 +20,9 @@ const App = () => {
   return (
     <MantineProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
       </QueryClientProvider>
     </MantineProvider>
   );

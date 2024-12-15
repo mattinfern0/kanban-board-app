@@ -1,9 +1,11 @@
 import { Controller, useForm } from "react-hook-form";
-import { LoginFormValues } from "@/features/auth/types";
+import { LoginFormSchema, LoginFormValues } from "@/features/auth/types";
 import { Button, PasswordInput, Stack, TextInput } from "@mantine/core";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Props {
   onSubmit: (data: LoginFormValues) => void;
+  isSubmitting?: boolean;
 }
 
 export const LoginForm = (props: Readonly<Props>) => {
@@ -14,6 +16,7 @@ export const LoginForm = (props: Readonly<Props>) => {
       email: "",
       password: "",
     },
+    resolver: zodResolver(LoginFormSchema),
   });
 
   const { control, handleSubmit } = formMethods;
@@ -46,7 +49,7 @@ export const LoginForm = (props: Readonly<Props>) => {
           )}
         />
 
-        <Button type="submit" variant="filled" color="primary">
+        <Button type="submit" variant="filled" color="primary" disabled={props.isSubmitting}>
           Login
         </Button>
       </Stack>

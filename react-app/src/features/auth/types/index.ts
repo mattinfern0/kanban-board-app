@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { User as FirebaseUser } from "firebase/auth";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -19,8 +20,16 @@ export const SignUpFormSchema = z
 export type SignUpFormValues = z.infer<typeof SignUpFormSchema>;
 
 export const LoginFormSchema = z.object({
-  email: z.string(),
-  password: z.string(),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(1, "Required"),
 });
 
 export type LoginFormValues = z.infer<typeof LoginFormSchema>;
+
+export interface AuthContextValues {
+  user: FirebaseUser | null;
+  isInitialized: boolean;
+  signUp: (data: SignUpFormValues) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
