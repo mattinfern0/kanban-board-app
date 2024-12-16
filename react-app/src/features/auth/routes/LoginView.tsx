@@ -6,14 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
 import { IconAlertTriangle } from "@tabler/icons-react";
 
-const ERROR_CODE_INVALID_CREDENTIALS = "auth/invalid-credential";
+const INVALID_CREDENTIAL_ERROR_CODES = ["auth/invalid-credential", "auth/user-not-found"];
 
 const getLoginErrorMessage = (error: unknown) => {
-  if (error instanceof FirebaseError && error.code === ERROR_CODE_INVALID_CREDENTIALS) {
+  if (error instanceof FirebaseError && INVALID_CREDENTIAL_ERROR_CODES.includes(error.code)) {
     return "Invalid email or password";
   }
 
-  return "An uknowwn error occurred";
+  return "An uknown error occurred";
 };
 
 export const LoginView = () => {
