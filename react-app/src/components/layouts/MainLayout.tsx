@@ -2,6 +2,8 @@ import React from "react";
 import { AppSidebar } from "@/components/navs/AppSidebar.tsx";
 import { SnackbarProvider } from "notistack";
 import { AppShell, Avatar, Group, Menu, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -9,6 +11,15 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   const theme = useMantineTheme();
+
+  const auth = useAuth();
+  const navigate = useNavigate();
+
+  const onLogoutClick = async () => {
+    await auth.logout();
+    navigate("/login");
+  };
+
   return (
     <>
       <SnackbarProvider>
@@ -30,7 +41,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
                   <Avatar component={UnstyledButton} variant="filled" />
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Menu.Item>Logout</Menu.Item>
+                  <Menu.Item onClick={onLogoutClick}>Logout</Menu.Item>
                 </Menu.Dropdown>
               </Menu>
             </Group>
