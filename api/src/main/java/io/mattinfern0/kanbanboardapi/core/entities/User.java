@@ -22,6 +22,9 @@ public class User {
     @NotEmpty
     private String lastName;
 
+    @Column(name = "firebase_id")
+    private UUID firebaseId;
+
     public User() {
         this.id = UUID.randomUUID();
     }
@@ -48,5 +51,13 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public UUID getFirebaseId() {
+        return firebaseId;
+    }
+
+    public void setFirebaseId(UUID firebaseId) {
+        this.firebaseId = firebaseId;
     }
 }
