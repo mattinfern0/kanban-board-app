@@ -4,6 +4,7 @@ import { SnackbarProvider } from "notistack";
 import { AppShell, Avatar, Group, Menu, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
+import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   };
 
   return (
-    <>
+    <AuthGuard>
       <SnackbarProvider>
         <AppShell
           header={{ height: 60 }}
@@ -52,6 +53,6 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           <AppShell.Main>{children}</AppShell.Main>
         </AppShell>
       </SnackbarProvider>
-    </>
+    </AuthGuard>
   );
 };

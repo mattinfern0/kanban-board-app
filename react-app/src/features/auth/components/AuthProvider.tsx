@@ -16,13 +16,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    const unsubscribe = firebaseAuth.onAuthStateChanged((firebaseUser) => {
-      console.log("User state changed", firebaseUser);
+    return firebaseAuth.onAuthStateChanged((firebaseUser) => {
       setUser(firebaseUser);
+      setIsInitialized(true);
     });
-
-    setIsInitialized(true);
-    return unsubscribe;
   }, []);
 
   const login = async (email: string, password: string) => {
