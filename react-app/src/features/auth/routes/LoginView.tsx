@@ -1,8 +1,8 @@
 import { LoginFormValues } from "@/features/auth/types";
-import { Alert, Card, Title } from "@mantine/core";
+import { Alert, Button, Card, Divider, Stack, Title } from "@mantine/core";
 import { LoginForm } from "@/features/auth/components/LoginForm.tsx";
 import { useLoginMutation } from "@/features/auth/api/login.ts";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
 import { IconAlertTriangle } from "@tabler/icons-react";
 
@@ -40,13 +40,17 @@ export const LoginView = () => {
 
   return (
     <Card withBorder>
-      <Title order={3} mb="1rem">
-        Login
-      </Title>
-      {errorMessage && (
-        <Alert variant="filled" color="danger" icon={<IconAlertTriangle />} title={errorMessage} mb="1rem" />
-      )}
-      <LoginForm onSubmit={onSubmit} />
+      <Stack>
+        <Title order={3}>Login</Title>
+        {errorMessage && <Alert variant="filled" color="danger" icon={<IconAlertTriangle />} title={errorMessage} />}
+        <LoginForm onSubmit={onSubmit} />
+
+        <Divider label="Or" />
+
+        <Button component={Link} to="/sign-up" color="secondary" variant="outline">
+          Sign Up
+        </Button>
+      </Stack>
     </Card>
   );
 };

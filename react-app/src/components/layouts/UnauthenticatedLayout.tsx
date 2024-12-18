@@ -10,7 +10,9 @@ export const UnauthenticatedLayout = ({ children }: UnauthenticatedLayoutProps) 
   return (
     <>
       <SnackbarProvider>
-        <Container pt="3rem">{children}</Container>
+        <Container pt="3rem" size="xs">
+          {children}
+        </Container>
       </SnackbarProvider>
     </>
   );
