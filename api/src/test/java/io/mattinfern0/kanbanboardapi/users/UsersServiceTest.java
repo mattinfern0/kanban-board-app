@@ -30,7 +30,7 @@ class UsersServiceTest {
 
     @Test
     void signUpUser_works_correctly() {
-        UUID firebaseId = UUID.randomUUID();
+        String firebaseId = UUID.randomUUID().toString();
         SignUpDto signUpDto = new SignUpDto("John", "Doe");
 
         Mockito.when(userRepository.existsByFirebaseId(firebaseId)).thenReturn(false);
@@ -41,7 +41,7 @@ class UsersServiceTest {
 
     @Test
     void signUpUser_throws_error_if_user_with_firebase_id_already_exists() {
-        UUID firebaseId = UUID.randomUUID();
+        String firebaseId = UUID.randomUUID().toString();
         SignUpDto signUpDto = new SignUpDto("John", "Doe");
 
         Mockito.when(userRepository.existsByFirebaseId(firebaseId)).thenReturn(true);
