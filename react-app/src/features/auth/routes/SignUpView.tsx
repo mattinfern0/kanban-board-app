@@ -11,7 +11,7 @@ export const SignUpView = () => {
   return (
     <Card withBorder>
       <Stack>
-        <Title order={3}>Sign Up</Title>
+        <Title order={2}>Sign Up</Title>
         <SignUpForm onSubmit={onSubmit} />
         <Divider label="Or" />
 

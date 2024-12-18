@@ -2,6 +2,7 @@ import { Controller, useForm, UseFormReturn } from "react-hook-form";
 import { SignUpFormSchema, SignUpFormValues } from "@/features/auth/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, PasswordInput, Stack, TextInput } from "@mantine/core";
+import { IconLockPassword, IconMail } from "@tabler/icons-react";
 
 interface UseSignUpFormReturn {
   formMethods: UseFormReturn<SignUpFormValues>;
@@ -42,7 +43,14 @@ export const SignUpForm = (props: SignUpFormProps) => {
           control={control}
           name="email"
           render={({ field, fieldState }) => (
-            <TextInput {...field} error={fieldState.error?.message} label="Email" required />
+            <TextInput
+              {...field}
+              error={fieldState.error?.message}
+              label="Email"
+              required
+              leftSectionPointerEvents="none"
+              leftSection={<IconMail />}
+            />
           )}
         />
 
@@ -50,7 +58,15 @@ export const SignUpForm = (props: SignUpFormProps) => {
           control={control}
           name="password1"
           render={({ field, fieldState }) => (
-            <PasswordInput {...field} error={fieldState.error?.message} label="Password" type="password" required />
+            <PasswordInput
+              {...field}
+              error={fieldState.error?.message}
+              label="Password"
+              type="password"
+              required
+              leftSectionPointerEvents="none"
+              leftSection={<IconLockPassword />}
+            />
           )}
         />
 
@@ -64,6 +80,8 @@ export const SignUpForm = (props: SignUpFormProps) => {
               label="Confirm Password"
               type="password"
               required
+              leftSectionPointerEvents="none"
+              leftSection={<IconLockPassword />}
             />
           )}
         />

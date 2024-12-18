@@ -41,7 +41,7 @@ export const LoginView = () => {
   return (
     <Card withBorder>
       <Stack>
-        <Title order={3}>Login</Title>
+        <Title order={2}>Login</Title>
         {errorMessage && <Alert variant="filled" color="danger" icon={<IconAlertTriangle />} title={errorMessage} />}
         <LoginForm onSubmit={onSubmit} />
 

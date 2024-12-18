@@ -2,6 +2,7 @@ import { Controller, useForm } from "react-hook-form";
 import { LoginFormSchema, LoginFormValues } from "@/features/auth/types";
 import { Button, PasswordInput, Stack, TextInput } from "@mantine/core";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { IconLockPassword, IconMail } from "@tabler/icons-react";
 
 interface Props {
   onSubmit: (data: LoginFormValues) => void;
@@ -37,7 +38,14 @@ export const LoginForm = (props: Readonly<Props>) => {
           control={control}
           name="email"
           render={({ field, fieldState }) => (
-            <TextInput {...field} error={fieldState.error?.message} label="Email" required />
+            <TextInput
+              {...field}
+              leftSectionPointerEvents="none"
+              leftSection={<IconMail />}
+              error={fieldState.error?.message}
+              label="Email"
+              required
+            />
           )}
         />
 
@@ -45,7 +53,15 @@ export const LoginForm = (props: Readonly<Props>) => {
           control={control}
           name="password"
           render={({ field, fieldState }) => (
-            <PasswordInput {...field} error={fieldState.error?.message} label="Password" type="password" required />
+            <PasswordInput
+              {...field}
+              error={fieldState.error?.message}
+              label="Password"
+              type="password"
+              required
+              leftSectionPointerEvents="none"
+              leftSection={<IconLockPassword />}
+            />
           )}
         />
 
