@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByFirebaseId(UUID firebaseId);
+    Optional<User> findByFirebaseId(String firebaseId);
 
-    Boolean existsByFirebaseId(UUID firebaseId);
+    Boolean existsByFirebaseId(String firebaseId);
 }

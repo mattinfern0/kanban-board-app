@@ -23,7 +23,7 @@ public class User {
     private String lastName;
 
     @Column(name = "firebase_id")
-    private UUID firebaseId;
+    private String firebaseId;
 
     public User() {
         this.id = UUID.randomUUID();
@@ -53,11 +53,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public UUID getFirebaseId() {
+    public String getFirebaseId() {
         return firebaseId;
     }
 
-    public void setFirebaseId(UUID firebaseId) {
+    public void setFirebaseId(String firebaseId) {
         this.firebaseId = firebaseId;
     }
 }

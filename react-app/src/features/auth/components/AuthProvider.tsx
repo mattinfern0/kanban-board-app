@@ -16,7 +16,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    return firebaseAuth.onAuthStateChanged((firebaseUser) => {
+    return firebaseAuth.onAuthStateChanged(async (firebaseUser) => {
+      console.debug("new user state", firebaseUser);
+      const idToken = await firebaseUser?.getIdToken();
+      console.debug("idToken", `"${idToken}"`);
       setUser(firebaseUser);
       setIsInitialized(true);
     });

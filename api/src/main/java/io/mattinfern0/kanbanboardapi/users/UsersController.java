@@ -5,8 +5,8 @@ import io.mattinfern0.kanbanboardapi.users.dtos.UserDto;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -29,9 +29,9 @@ public class UsersController {
     }
 
     @GetMapping("/me")
-    public UserDto getCurrentUserDetails() {
+    public UserDto getCurrentUserDetails(Principal principal) {
         // TODO get firebaseId from auth token
-        UUID firebaseId = UUID.randomUUID();
+        String firebaseId = principal.getName();
         return usersService.getUserByFirebaseId(firebaseId);
     }
 }

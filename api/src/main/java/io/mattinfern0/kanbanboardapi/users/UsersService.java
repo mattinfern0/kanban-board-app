@@ -8,7 +8,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UsersService {
@@ -26,7 +25,7 @@ public class UsersService {
     }
 
     @Transactional
-    UserDto signUpUser(UUID firebaseId, SignUpDto signUpDto) {
+    UserDto signUpUser(String firebaseId, SignUpDto signUpDto) {
         if (userRepository.existsByFirebaseId(firebaseId)) {
             throw new RuntimeException("User already exists");
         }
@@ -39,7 +38,7 @@ public class UsersService {
         return userDTOMapper.entityToDto(user);
     }
 
-    UserDto getUserByFirebaseId(UUID firebaseId) {
+    UserDto getUserByFirebaseId(String firebaseId) {
         User user = userRepository.findByFirebaseId(firebaseId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         return userDTOMapper.entityToDto(user);
