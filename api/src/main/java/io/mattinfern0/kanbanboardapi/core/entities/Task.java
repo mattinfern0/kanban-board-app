@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
+import io.mattinfern0.kanbanboardapi.core.enums.TaskPriority;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -52,6 +53,9 @@ public class Task {
     @JoinColumn(name = "task_status_id")
     @NotNull
     TaskStatus taskStatus;
+
+    @Column(name = "priority_id")
+    TaskPriority priority;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -127,6 +131,14 @@ public class Task {
         }
 
         this.taskStatus = taskStatus;
+    }
+
+    public TaskPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
     }
 
     public ZonedDateTime getCreatedAt() {

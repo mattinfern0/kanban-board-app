@@ -1,6 +1,8 @@
 package io.mattinfern0.kanbanboardapi.boards.dtos;
 
+import io.mattinfern0.kanbanboardapi.core.enums.TaskPriority;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -17,6 +19,9 @@ public record BoardTaskDto(
 
     @NotNull
     TaskStatusCode status,
+
+    @Nullable
+    TaskPriority priority,
 
     List<BoardTaskAssigneeDto> assignees
 ) {
