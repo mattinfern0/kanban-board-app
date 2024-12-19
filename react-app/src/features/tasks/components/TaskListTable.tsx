@@ -4,10 +4,14 @@ import { useMemo, useState } from "react";
 import { sortBy } from "lodash-es";
 import dayjs, { Dayjs } from "dayjs";
 import { TaskStatus } from "@/types";
+import { TaskPriority } from "@/features/tasks/types";
+import { Group } from "@mantine/core";
+import { TaskPriorityIcon } from "@/features/tasks/components/TaskPriorityIcon.tsx";
 
 interface TableRowValues {
   id: string;
   title: string;
+  priority: TaskPriority | null;
   status: string;
   createdAt: Dayjs;
 }
@@ -20,8 +24,31 @@ const STATUS_ENUM_TO_TEXT: Record<TaskStatus, string> = {
   OTHER: "Other",
 };
 
+const PRIORITY_ENUM_TO_TEXT: Record<TaskPriority, string> = {
+  LOW: "Low",
+  MEDIUM: "Medium",
+  HIGH: "High",
+};
+
 const columns: DataTableColumn<TableRowValues>[] = [
   { accessor: "title", title: "Title", sortable: true, width: "50%" },
+  {
+    accessor: "priority",
+    title: "Priority",
+    sortable: true,
+    render: ({ priority }) => {
+      if (!priority) {
+        return "-";
+      }
+
+      return (
+        <Group align="center">
+          <TaskPriorityIcon priority={priority} />
+          {PRIORITY_ENUM_TO_TEXT[priority] || priority}
+        </Group>
+      );
+    },
+  },
   {
     accessor: "status",
     title: "Status",
@@ -64,6 +91,7 @@ export const TaskListTable = (props: Readonly<Props>) => {
       taskListQuery.data?.map((task) => ({
         id: task.id,
         title: task.title,
+        priority: task.priority,
         status: task.status,
         createdAt: dayjs(task.createdAt),
       })) || []
