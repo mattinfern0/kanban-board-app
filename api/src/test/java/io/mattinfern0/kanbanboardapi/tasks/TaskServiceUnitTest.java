@@ -236,13 +236,14 @@ class TaskServiceUnitTest {
             "New Description",
             null,
             newStatusCode,
-            null
+            TaskPriority.LOW
         );
 
         TaskDetailDto result = taskService.updateTask(existingTask.getId(), updateDTO);
         assert result.organizationId().equals(updateDTO.organizationId());
         assert result.title().equals(updateDTO.title());
         assert result.description().equals(updateDTO.description());
+        assert Objects.equals(result.priority(), TaskPriority.LOW);
     }
 
     @Test

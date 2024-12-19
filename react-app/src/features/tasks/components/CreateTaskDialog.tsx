@@ -1,10 +1,11 @@
 import { Controller, useForm } from "react-hook-form";
-import { CreateTaskBody, CreateTaskFormValues, TaskPriority } from "@/features/tasks/types";
+import { CreateTaskBody, CreateTaskFormValues } from "@/features/tasks/types";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { Button, Grid, Group, Modal, Select, Stack, Textarea, TextInput } from "@mantine/core";
+import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -13,12 +14,6 @@ interface CreateTaskDialogProps {
   organizationId: string;
   boardId: string | null;
 }
-
-const selectPriorityOptions: { value: TaskPriority; label: string }[] = [
-  { value: "LOW", label: "Low" },
-  { value: "MEDIUM", label: "Medium" },
-  { value: "HIGH", label: "High" },
-];
 
 export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
   const { open, onClose, boardId } = props;
@@ -112,7 +107,7 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
           <Controller
             control={control}
             name="priority"
-            render={({ field }) => <Select {...field} label="Priority" data={selectPriorityOptions} />}
+            render={({ field }) => <TaskPrioritySelect {...field} label="Priority" />}
           />
 
           <Group justify="flex-end">

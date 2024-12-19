@@ -16,12 +16,16 @@ export const CreateTaskFormSchema = z.object({
 
 export type CreateTaskFormValues = z.infer<typeof CreateTaskFormSchema>;
 
-export interface UpdateTaskFormValues {
-  title: string;
-  description: string;
-  priority: TaskPriority | null;
-  assignees: string[];
-}
+export const UpdateTaskFormSchema = z.object({
+  title: z.string({
+    required_error: "Title is required.",
+  }),
+  description: z.string(),
+  priority: z.nullable(TaskPrioritySchema),
+  assignees: z.array(z.string()),
+});
+
+export type UpdateTaskFormValues = z.infer<typeof UpdateTaskFormSchema>;
 
 export interface CreateTaskBody {
   organizationId: string;
@@ -44,6 +48,7 @@ export interface UpdateTaskBody {
   boardColumnOrder: number | null;
 
   status: TaskStatus | null;
+  priority: TaskPriority | null;
 }
 
 export interface UpdateTaskColumnPositionBody {
@@ -68,6 +73,7 @@ export const TaskDetailSchema = z.object({
   status: z.nativeEnum(TaskStatus),
   assignees: z.array(TaskAssigneeSummarySchema),
   createdAt: z.coerce.date(),
+  priority: z.nullable(TaskPrioritySchema),
 });
 
 export type TaskDetail = z.infer<typeof TaskDetailSchema>;

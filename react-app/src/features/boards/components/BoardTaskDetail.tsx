@@ -4,13 +4,15 @@ import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
 import { MoreVertRounded } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
-import { UpdateTaskFormValues } from "@/features/tasks/types";
+import { TaskPriority, UpdateTaskFormSchema, UpdateTaskFormValues } from "@/features/tasks/types";
 import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
 import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
 import { ActionIcon, Grid, Group, Menu, Modal, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
 import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
+import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -42,14 +44,19 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
   const updateTaskAssigneesMutation = useUpdateTaskAssigneesMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
-  const { control, reset, handleSubmit, setValue, watch } = useForm<UpdateTaskFormValues>();
+  const { control, reset, handleSubmit, setValue, watch } = useForm<UpdateTaskFormValues>({
+    resolver: zodResolver(UpdateTaskFormSchema),
+  });
 
   useEffect(() => {
-    reset({
+    const newValues: UpdateTaskFormValues = {
       title: taskDetailQuery.data?.title || "",
       description: taskDetailQuery.data?.description || "",
+      priority: taskDetailQuery.data?.priority || null,
       assignees: taskDetailQuery.data?.assignees.map((assignee) => assignee.userId) || [],
-    });
+    };
+
+    reset(newValues);
   }, [reset, taskDetailQuery.data]);
 
   const onSubmit = handleSubmit(
@@ -77,6 +84,7 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
             boardColumnId: oldTaskData.boardColumnId,
             boardColumnOrder: oldTaskData.boardColumnOrder,
             status: oldTaskData.status,
+            priority: data.priority,
           },
         },
         {
@@ -205,6 +213,29 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
           <Grid.Col span={3}>
             <Stack>
               <TaskStatusChip status={task.status} />
+
+              <Stack>
+                <Text component="label" fw="bold">
+                  Priority
+                </Text>
+                <Controller
+                  control={control}
+                  name="priority"
+                  render={({ field }) => (
+                    <TaskPrioritySelect
+                      onBlur={async (e) => {
+                        if (field.value !== task.priority) {
+                          await onSubmit(e);
+                        }
+                      }}
+                      onChange={(value) => {
+                        setValue("priority", value as TaskPriority | null, { shouldDirty: true, shouldTouch: true });
+                      }}
+                      value={field.value}
+                    />
+                  )}
+                />
+              </Stack>
 
               <Stack>
                 <Text component="label" htmlFor="assignee-select" fw="bold">

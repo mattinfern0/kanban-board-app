@@ -85,7 +85,7 @@ public class TaskService {
         task.setDescription(dto.description());
         task.setTitle(dto.title());
         task.setOrganization(targetOrganization);
-
+        task.setPriority(dto.priority());
 
         if (dto.boardColumnId() == null && task.getBoardColumn() != null) {
             task.getBoardColumn().removeTask(task);
