@@ -70,6 +70,12 @@ export const TaskDetailSchema = z.object({
 
   boardColumnId: z.string().nullable(),
   boardColumnOrder: z.number().nullable(),
+
+  board: z.object({
+    id: z.string(),
+    title: z.string(),
+  }),
+
   status: z.nativeEnum(TaskStatus),
   assignees: z.array(TaskAssigneeSummarySchema),
   createdAt: z.coerce.date(),

@@ -9,15 +9,17 @@ import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
 import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
-import { ActionIcon, Grid, Group, Menu, Modal, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Badge, Grid, Group, Menu, Modal, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
 import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "react-router-dom";
 
 interface BoardTaskDetailProps {
   open: boolean;
   taskId: string | null;
   onClose: () => void;
+  showBoardName?: boolean;
 }
 
 interface DetailMenuProps {
@@ -34,7 +36,7 @@ const DetailMenu = (props: DetailMenuProps) => {
 };
 
 export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
-  const { open, taskId, onClose } = props;
+  const { open, taskId, onClose, showBoardName } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
   const organizationUsersQuery = useGetUsersQuery(
     { organizationId: taskDetailQuery.data?.organizationId },
@@ -212,6 +214,20 @@ export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
           </Grid.Col>
           <Grid.Col span={3}>
             <Stack>
+              {showBoardName && (
+                <Badge
+                  component={Link}
+                  color="primary"
+                  size="xl"
+                  radius="md"
+                  variant="filled"
+                  to={`/boards/${task.board.id}`}
+                  styles={{ root: { cursor: "pointer" } }}
+                >
+                  {task.board.title}
+                </Badge>
+              )}
+
               <TaskStatusChip status={task.status} />
 
               <Stack>

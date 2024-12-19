@@ -25,6 +25,8 @@ public record TaskDetailDto(
     @Nullable
     UUID boardColumnId,
 
+    TaskDetailBoardInfo board,
+
     @Nullable
     Integer boardColumnOrder,
 

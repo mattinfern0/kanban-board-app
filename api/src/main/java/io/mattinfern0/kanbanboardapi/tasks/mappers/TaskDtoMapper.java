@@ -14,6 +14,7 @@ public interface TaskDtoMapper {
     @Mapping(target = "organizationId", source = "organization.id")
     @Mapping(target = "boardColumnId", source = "boardColumn.id")
     @Mapping(target = "status", source = "taskStatus.codename")
+    @Mapping(target = "board", source = "boardColumn.board")
     TaskDetailDto taskToTaskDetailDto(Task taskEntity);
 
     List<TaskDetailDto> taskListToTaskDetailDtoList(List<Task> tasks);

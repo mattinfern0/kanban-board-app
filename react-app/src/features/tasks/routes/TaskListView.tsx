@@ -20,6 +20,7 @@ export const TaskListView = () => {
         onClose={() => {
           setShowTaskDetailDialog(false);
         }}
+        showBoardName
       />
       <Stack>
         <Title order={1}>Tasks</Title>
