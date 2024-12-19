@@ -1,23 +1,25 @@
 import { z } from "zod";
 import { TaskStatus } from "@/types";
 
+const TaskPrioritySchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
+export type TaskPriority = z.infer<typeof TaskPrioritySchema>;
+
 export const CreateTaskFormSchema = z.object({
   title: z.string({
     required_error: "Title is required.",
   }),
   description: z.string(),
+  board_id: z.string(),
+  column_id: z.string(),
+  priority: z.nullable(TaskPrioritySchema),
 });
 
-export interface CreateTaskFormValues {
-  title: string;
-  description: string;
-  board_id: string;
-  column_id: string;
-}
+export type CreateTaskFormValues = z.infer<typeof CreateTaskFormSchema>;
 
 export interface UpdateTaskFormValues {
   title: string;
   description: string;
+  priority: TaskPriority | null;
   assignees: string[];
 }
 
@@ -29,6 +31,7 @@ export interface CreateTaskBody {
 
   boardColumnId?: string;
   status?: TaskStatus;
+  priority: TaskPriority | null;
 }
 
 export interface UpdateTaskBody {
@@ -53,8 +56,6 @@ export const TaskAssigneeSummarySchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
 });
-
-export type TaskAssigneeSummary = z.infer<typeof TaskAssigneeSummarySchema>;
 
 export const TaskDetailSchema = z.object({
   id: z.string(),

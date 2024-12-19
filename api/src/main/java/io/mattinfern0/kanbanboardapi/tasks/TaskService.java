@@ -173,6 +173,7 @@ public class TaskService {
         newTask.setId(UUID.randomUUID());
         newTask.setTitle(dto.title());
         newTask.setDescription(dto.description());
+        newTask.setPriority(dto.priority());
 
         Organization organization = organizationRepository
             .findById(dto.organizationId())

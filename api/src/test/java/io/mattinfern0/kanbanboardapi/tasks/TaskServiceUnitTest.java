@@ -1,6 +1,7 @@
 package io.mattinfern0.kanbanboardapi.tasks;
 
 import io.mattinfern0.kanbanboardapi.core.entities.*;
+import io.mattinfern0.kanbanboardapi.core.enums.TaskPriority;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardColumnRepository;
@@ -64,7 +65,7 @@ class TaskServiceUnitTest {
             "Test Description",
             null,
             testStatusCode,
-            null
+            TaskPriority.HIGH
         );
 
         Mockito.when(
@@ -79,6 +80,7 @@ class TaskServiceUnitTest {
         assert result.organizationId().equals(testCreateDto.organizationId());
         assert result.title().equals(testCreateDto.title());
         assert result.description().equals(testCreateDto.description());
+        assert Objects.equals(result.priority(), testCreateDto.priority());
     }
 
     @Test

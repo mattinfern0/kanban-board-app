@@ -1,5 +1,5 @@
 import { Controller, useForm } from "react-hook-form";
-import { CreateTaskBody, CreateTaskFormValues } from "@/features/tasks/types";
+import { CreateTaskBody, CreateTaskFormValues, TaskPriority } from "@/features/tasks/types";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
 import { useEffect } from "react";
@@ -13,6 +13,12 @@ interface CreateTaskDialogProps {
   organizationId: string;
   boardId: string | null;
 }
+
+const selectPriorityOptions: { value: TaskPriority; label: string }[] = [
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
+];
 
 export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
   const { open, onClose, boardId } = props;
@@ -31,6 +37,7 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
       description: "",
       board_id: boardId || "",
       column_id: defaultBoardColumnId,
+      priority: null,
     });
   }, [boardId, defaultBoardColumnId, reset]);
 
@@ -56,6 +63,7 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
         title: data.title,
         description: data.description,
         boardColumnId: data.column_id,
+        priority: data.priority || null,
       };
 
       createTaskMutation.mutate(taskBody, {
@@ -99,6 +107,12 @@ export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
             control={control}
             name="description"
             render={({ field }) => <Textarea {...field} autosize minRows={5} label="Description" />}
+          />
+
+          <Controller
+            control={control}
+            name="priority"
+            render={({ field }) => <Select {...field} label="Priority" data={selectPriorityOptions} />}
           />
 
           <Group justify="flex-end">
