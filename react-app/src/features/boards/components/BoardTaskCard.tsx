@@ -1,5 +1,6 @@
 import { BoardTask } from "../types";
-import { Avatar, Card, Text } from "@mantine/core";
+import { Avatar, Card, Group, Stack, Text } from "@mantine/core";
+import { TaskPriorityIcon } from "@/features/tasks/components/TaskPriorityIcon.tsx";
 
 interface BoardTaskCardProps {
   boardTask: BoardTask;
@@ -18,13 +19,17 @@ export const BoardTaskCard = ({ boardTask, onClick }: BoardTaskCardProps) => {
   const numberExtraAssignees = boardTask.assignees.length - visibleAssignees.length;
   return (
     <Card onClick={handleClick} withBorder shadow="sm" style={{ cursor: "pointer" }}>
-      <Text size="lg" mb="1rem">
-        {boardTask.title}
-      </Text>
-      <Avatar.Group>
-        {assigneeAvatars}
-        {numberExtraAssignees > 0 && <Avatar color="gray">+{numberExtraAssignees}</Avatar>}
-      </Avatar.Group>
+      <Stack>
+        <Group align="center">
+          {boardTask.priority && <TaskPriorityIcon priority={boardTask.priority} />}
+          <Text size="lg">{boardTask.title}</Text>
+        </Group>
+
+        <Avatar.Group>
+          {assigneeAvatars}
+          {numberExtraAssignees > 0 && <Avatar color="gray">+{numberExtraAssignees}</Avatar>}
+        </Avatar.Group>
+      </Stack>
     </Card>
   );
 };

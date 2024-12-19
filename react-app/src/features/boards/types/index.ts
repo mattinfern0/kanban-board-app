@@ -1,4 +1,5 @@
 import { TaskStatus } from "@/types";
+import { TaskPriority } from "@/features/tasks/types";
 
 export type BoardTask = {
   id: string;
@@ -6,6 +7,7 @@ export type BoardTask = {
   description: string;
   status: TaskStatus;
   assignees: BoardTaskAssignee[];
+  priority: TaskPriority;
 };
 
 export type BoardTaskAssignee = {
