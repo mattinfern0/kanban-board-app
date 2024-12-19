@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.tasks.dtos;
 import io.mattinfern0.kanbanboardapi.core.constraints.EntityWithIdExists;
 import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.enums.TaskPriority;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,9 @@ public record CreateUpdateTaskDto(
 
     // If column and status are both not null, system should prioritize column's status
     @Nullable
-    TaskStatusCode status
+    TaskStatusCode status,
+
+    @Nullable
+    TaskPriority priority
 ) {
 }

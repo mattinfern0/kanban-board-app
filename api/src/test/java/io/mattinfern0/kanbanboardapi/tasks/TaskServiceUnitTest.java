@@ -63,7 +63,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             null,
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         Mockito.when(
@@ -94,7 +95,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             null,
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         Mockito.when(
@@ -127,7 +129,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             testColumn.getId(),
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         Mockito.when(
@@ -150,6 +153,7 @@ class TaskServiceUnitTest {
             testOrganization.getId(),
             "Test Task",
             "Test Description",
+            null,
             null,
             null
         );
@@ -189,7 +193,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             testColumn.getId(),
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         Mockito.when(organizationRepository.findById(testOrganization.getId()))
@@ -228,7 +233,8 @@ class TaskServiceUnitTest {
             "New Title",
             "New Description",
             null,
-            newStatusCode
+            newStatusCode,
+            null
         );
 
         TaskDetailDto result = taskService.updateTask(existingTask.getId(), updateDTO);
@@ -261,7 +267,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             null,
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         TaskDetailDto result = taskService.updateTask(existingTask.getId(), testUpdateDto);
@@ -294,7 +301,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             testColumn.getId(),
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         TaskDetailDto result = taskService.updateTask(testTask.getId(), testUpdateDto);
@@ -313,6 +321,7 @@ class TaskServiceUnitTest {
             testOrganization.getId(),
             "Test Task",
             "Test Description",
+            null,
             null,
             null
         );
@@ -356,7 +365,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             testColumn.getId(),
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
@@ -385,7 +395,8 @@ class TaskServiceUnitTest {
             "Test Task",
             "Test Description",
             null,
-            testStatusCode
+            testStatusCode,
+            null
         );
 
         assertThrows(ResourceNotFoundException.class, () -> {

@@ -1,6 +1,7 @@
 package io.mattinfern0.kanbanboardapi.core.converters;
 
 import io.mattinfern0.kanbanboardapi.core.enums.TaskPriority;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -8,7 +9,10 @@ import jakarta.persistence.Converter;
 public class TaskPriorityConverter implements AttributeConverter<TaskPriority, Integer> {
 
     @Override
-    public Integer convertToDatabaseColumn(TaskPriority taskPriority) {
+    public Integer convertToDatabaseColumn(@Nullable TaskPriority taskPriority) {
+        if (taskPriority == null) {
+            return null;
+        }
         return taskPriority.getDatabaseId();
     }
 
