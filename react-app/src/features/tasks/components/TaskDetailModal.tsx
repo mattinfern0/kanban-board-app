@@ -14,6 +14,7 @@ import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySele
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
 import { IconDotsVertical } from "@tabler/icons-react";
+import { TaskDescriptionEditor } from "@/features/tasks/components/TaskDescriptionEditor.tsx";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -192,6 +193,7 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
               <Text component="label" htmlFor="task-detail-description" fw="bold">
                 Description
               </Text>
+              <TaskDescriptionEditor />
               <Controller
                 control={control}
                 name="description"
