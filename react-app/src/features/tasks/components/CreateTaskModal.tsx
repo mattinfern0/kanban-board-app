@@ -4,8 +4,9 @@ import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useCreateTaskMutation } from "@/features/tasks/apis/createTask.ts";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { Button, Grid, Group, Modal, Select, Stack, Textarea, TextInput } from "@mantine/core";
+import { Button, Grid, Group, Modal, Select, Stack, Text, TextInput } from "@mantine/core";
 import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
+import { TaskDescriptionEditor } from "@/features/tasks/components/TaskDescriptionEditor.tsx";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -98,11 +99,14 @@ export const CreateTaskModal = (props: CreateTaskDialogProps) => {
             render={({ field }) => <TextInput {...field} label="Title" required />}
           />
 
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => <Textarea {...field} autosize minRows={5} label="Description" />}
-          />
+          <Stack gap={0}>
+            <Text size="sm">Description</Text>
+            <Controller
+              control={control}
+              name="description"
+              render={({ field }) => <TaskDescriptionEditor onChange={(v) => field.onChange(v)} value={field.value} />}
+            />
+          </Stack>
 
           <Controller
             control={control}

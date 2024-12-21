@@ -64,7 +64,7 @@ const DescriptionView = (props: Readonly<DescriptionViewProps>) => {
       <RichTextEditor
         editor={readOnlyEditor}
         onClick={() => setIsEditing(true)}
-        styles={{ root: { cursor: "pointer" } }}
+        styles={{ root: { cursor: "pointer" }, content: { minHeight: "10rem" } }}
       >
         <RichTextEditor.Content />
       </RichTextEditor>
@@ -83,7 +83,7 @@ const DescriptionView = (props: Readonly<DescriptionViewProps>) => {
 
   return (
     <Stack>
-      <TaskDescriptionEditor value={internalValue} onChange={(v) => setInternalValue(v)} editable={isEditing} />
+      <TaskDescriptionEditor value={internalValue} onChange={(v) => setInternalValue(v)} />
       <Group justify="end">
         <ActionIcon onClick={onCancelClick} color="secondary">
           <IconCancel />

@@ -5,15 +5,13 @@ import { RichTextEditor } from "@mantine/tiptap";
 interface Props {
   onChange: (value: string) => void;
   value: string;
-  editable?: boolean;
 }
 
 export const TaskDescriptionEditor = (props: Readonly<Props>) => {
-  const { value, onChange, editable = true } = props;
+  const { value, onChange } = props;
 
   const editor = useEditor({
     extensions: [StarterKit],
-    editable: editable,
     content: value,
     onUpdate({ editor }) {
       onChange(editor.getHTML());
@@ -21,7 +19,15 @@ export const TaskDescriptionEditor = (props: Readonly<Props>) => {
   });
 
   return (
-    <RichTextEditor editor={editor} variant="subtle">
+    <RichTextEditor
+      editor={editor}
+      variant="subtle"
+      styles={{
+        content: {
+          minHeight: "10rem",
+        },
+      }}
+    >
       <RichTextEditor.Toolbar sticky stickyOffset={60}>
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />
