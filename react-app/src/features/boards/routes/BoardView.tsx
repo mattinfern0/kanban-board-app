@@ -4,9 +4,9 @@ import { useState } from "react";
 import { BoardTask } from "@/features/boards/types";
 import { TaskDetailModal } from "@/features/tasks/components/TaskDetailModal.tsx";
 import { CreateTaskModal } from "@/features/tasks/components/CreateTaskModal.tsx";
-import { Settings } from "@mui/icons-material";
 import { BoardColumnWorkspace } from "@/features/boards/components/BoardColumnWorkspace.tsx";
 import { ActionIcon, Breadcrumbs, Button, Group, Text, Title } from "@mantine/core";
+import { IconSettingsFilled } from "@tabler/icons-react";
 
 export const BoardView = () => {
   const { boardId } = useParams();
@@ -66,7 +66,7 @@ export const BoardView = () => {
             aria-label="Board Settings"
             size="lg"
           >
-            <Settings />
+            <IconSettingsFilled />
           </ActionIcon>
         </Group>
       </Group>

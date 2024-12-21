@@ -1,7 +1,6 @@
 import { useTaskDetailQuery } from "@/features/boards/apis/getTaskDetail.ts";
 import React, { useEffect } from "react";
 import { TaskStatusChip } from "@/components/misc/TaskStatusChip.tsx";
-import { MoreVertRounded } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
 import { TaskPriority, UpdateTaskFormSchema, UpdateTaskFormValues } from "@/features/tasks/types";
@@ -14,6 +13,7 @@ import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
+import { IconDotsVertical } from "@tabler/icons-react";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -179,7 +179,7 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
           <Menu>
             <Menu.Target>
               <ActionIcon variant="transparent" color="gray">
-                <MoreVertRounded />
+                <IconDotsVertical />
               </ActionIcon>
             </Menu.Target>
             <DetailMenu onDeleteClick={handleTaskDelete} />

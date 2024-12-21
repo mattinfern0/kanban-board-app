@@ -3,7 +3,6 @@ import { BoardColumn as BoardColumnType, BoardTask } from "../types";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableDraggable } from "@/components/dragging/SortableDraggable.tsx";
 import { useDroppable } from "@dnd-kit/core";
-import { DragHandle } from "@mui/icons-material";
 import { Card, Group, Stack, Text } from "@mantine/core";
 
 interface BoardColumnProps {
@@ -26,7 +25,6 @@ export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) 
     <Card withBorder>
       <Group justify="space-between" mb="1rem" align="center">
         <Text size="xl">{boardColumn.title}</Text>
-        <DragHandle />
       </Group>
 
       <SortableContext id={boardColumn.id} items={boardColumn.tasks} strategy={verticalListSortingStrategy}>
