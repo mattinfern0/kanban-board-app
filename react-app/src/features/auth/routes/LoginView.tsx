@@ -2,7 +2,7 @@ import { LoginFormValues } from "@/features/auth/types";
 import { Alert, Button, Card, Divider, Stack, Title } from "@mantine/core";
 import { LoginForm } from "@/features/auth/components/LoginForm.tsx";
 import { useLoginMutation } from "@/features/auth/api/login.ts";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { FirebaseError } from "firebase/app";
 import { IconAlertTriangle } from "@tabler/icons-react";
 

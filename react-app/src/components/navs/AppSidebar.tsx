@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { NavLink } from "@mantine/core";
 import { IconColumns3, IconListCheck } from "@tabler/icons-react";
 

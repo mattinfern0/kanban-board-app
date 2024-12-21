@@ -1,7 +1,7 @@
 import { SignUpFormValues } from "@/features/auth/types";
 import { SignUpForm } from "@/features/auth/components/SignUpForm.tsx";
 import { Button, Card, Divider, Stack, Title } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export const SignUpView = () => {
   const onSubmit = (data: SignUpFormValues) => {

@@ -13,7 +13,7 @@ import { ActionIcon, Badge, Grid, Group, Menu, Modal, Stack, Text, Textarea, Tex
 import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 interface BoardTaskDetailProps {
   open: boolean;

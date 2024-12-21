@@ -1,6 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useDeleteBoardMutation } from "@/features/boards/apis/deleteBoard.ts";
 import { Button, Checkbox, Group, Modal, Stack, Text, TextInput } from "@mantine/core";
 

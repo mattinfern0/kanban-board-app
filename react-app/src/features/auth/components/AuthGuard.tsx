@@ -1,5 +1,5 @@
 import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import React from "react";
 
 export const AuthGuard = ({ children }: { children: React.ReactNode }) => {

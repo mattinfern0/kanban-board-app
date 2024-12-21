@@ -1,5 +1,5 @@
 import { useBoardQuery } from "../apis/getBoard.ts";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import { useState } from "react";
 import { BoardTask } from "@/features/boards/types";
 import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";

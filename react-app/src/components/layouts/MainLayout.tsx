@@ -2,7 +2,7 @@ import React from "react";
 import { AppSidebar } from "@/components/navs/AppSidebar.tsx";
 import { SnackbarProvider } from "notistack";
 import { AppShell, Avatar, Group, Menu, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
 import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
 

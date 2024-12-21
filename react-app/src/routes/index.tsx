@@ -1,4 +1,4 @@
-import { RouteObject } from "react-router-dom";
+import { RouteObject } from "react-router";
 import { MainLayout } from "@/components/layouts/MainLayout.tsx";
 import { BoardView } from "@/features/boards/routes/BoardView.tsx";
 import { BoardListView } from "@/features/boards/routes/BoardListView.tsx";

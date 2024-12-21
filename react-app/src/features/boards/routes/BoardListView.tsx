@@ -1,7 +1,7 @@
 import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { useBoardListQuery } from "@/features/boards/apis/getBoardList.ts";
 import { ReactNode, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { CreateBoardDialog } from "@/features/boards/components/CreateBoardDialog.tsx";
 
 const MOCK_ORGANIZATION_ID = "846ba4b8-5556-4855-8fa6-b274dea3a3cc";

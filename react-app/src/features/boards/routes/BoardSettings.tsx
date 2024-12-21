@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useState } from "react";
 import { ChevronLeft } from "@mui/icons-material";

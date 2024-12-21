@@ -2,7 +2,7 @@ import { Controller, useForm } from "react-hook-form";
 import { CreateBoardFormValues } from "@/features/boards/types";
 import { useSnackbar } from "notistack";
 import { useCreateBoardMutation } from "@/features/boards/apis/createBoard.ts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 
 interface CreateTaskDialogProps {
