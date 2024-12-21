@@ -5,13 +5,15 @@ import { RichTextEditor } from "@mantine/tiptap";
 interface Props {
   onChange: (value: string) => void;
   value: string;
+  editable?: boolean;
 }
 
 export const TaskDescriptionEditor = (props: Readonly<Props>) => {
-  const { value, onChange } = props;
+  const { value, onChange, editable = true } = props;
 
   const editor = useEditor({
     extensions: [StarterKit],
+    editable: editable,
     content: value,
     onUpdate({ editor }) {
       onChange(editor.getHTML());

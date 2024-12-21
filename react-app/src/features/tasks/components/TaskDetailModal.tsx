@@ -13,8 +13,11 @@ import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
-import { IconDotsVertical } from "@tabler/icons-react";
+import { IconCancel, IconDeviceFloppy, IconDotsVertical } from "@tabler/icons-react";
 import { TaskDescriptionEditor } from "@/features/tasks/components/TaskDescriptionEditor.tsx";
+import { RichTextEditor } from "@mantine/tiptap";
+import { Editor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -33,6 +36,63 @@ const DetailMenu = (props: DetailMenuProps) => {
     <Menu.Dropdown>
       <Menu.Item onClick={onDeleteClick}>Delete</Menu.Item>
     </Menu.Dropdown>
+  );
+};
+
+interface DescriptionViewProps {
+  value: string;
+  onSave: (value: string) => void;
+}
+
+const DescriptionView = (props: Readonly<DescriptionViewProps>) => {
+  const { value, onSave } = props;
+
+  const [isEditing, setIsEditing] = React.useState<boolean>(false);
+  const [internalValue, setInternalValue] = React.useState<string>(value);
+
+  useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
+
+  if (!isEditing) {
+    const readOnlyEditor = new Editor({
+      extensions: [StarterKit],
+      editable: false,
+      content: internalValue,
+    });
+    return (
+      <RichTextEditor
+        editor={readOnlyEditor}
+        onClick={() => setIsEditing(true)}
+        styles={{ root: { cursor: "pointer" } }}
+      >
+        <RichTextEditor.Content />
+      </RichTextEditor>
+    );
+  }
+
+  const onSaveClick = () => {
+    onSave(internalValue);
+    setIsEditing(false);
+  };
+
+  const onCancelClick = () => {
+    setInternalValue(value);
+    setIsEditing(false);
+  };
+
+  return (
+    <Stack>
+      <TaskDescriptionEditor value={internalValue} onChange={(v) => setInternalValue(v)} editable={isEditing} />
+      <Group justify="end">
+        <ActionIcon onClick={onCancelClick} color="secondary">
+          <IconCancel />
+        </ActionIcon>
+        <ActionIcon onClick={onSaveClick} color="primary">
+          <IconDeviceFloppy />
+        </ActionIcon>
+      </Group>
+    </Stack>
   );
 };
 
@@ -193,7 +253,7 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
               <Text component="label" htmlFor="task-detail-description" fw="bold">
                 Description
               </Text>
-              <TaskDescriptionEditor />
+              <DescriptionView value={taskDetailQuery.data.description} onSave={() => null} />
               <Controller
                 control={control}
                 name="description"
