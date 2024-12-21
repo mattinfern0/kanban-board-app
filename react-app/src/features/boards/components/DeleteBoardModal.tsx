@@ -19,7 +19,7 @@ type DeleteFormValues = {
   deleteTasks: boolean;
 };
 
-export const DeleteBoardDialog = (props: DeleteBoardDialogProps) => {
+export const DeleteBoardModal = (props: DeleteBoardDialogProps) => {
   const { open, onClose, boardId, boardTitle } = props;
   const deleteBoardMutation = useDeleteBoardMutation();
   const { control, handleSubmit, watch } = useForm<DeleteFormValues>({

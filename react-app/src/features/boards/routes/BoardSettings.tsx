@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 import { useState } from "react";
 import { ChevronLeft } from "@mui/icons-material";
-import { DeleteBoardDialog } from "@/features/boards/components/DeleteBoardDialog.tsx";
+import { DeleteBoardModal } from "@/features/boards/components/DeleteBoardModal.tsx";
 import { Controller, useForm } from "react-hook-form";
 import { BoardDetail } from "@/features/boards/types";
 import { useUpdateBoardHeaderMutation } from "@/features/boards/apis/updateBoardHeader.ts";
@@ -102,7 +102,7 @@ export const BoardSettings = () => {
             </Tabs.Panel>
           </Tabs>
         </Card>
-        <DeleteBoardDialog
+        <DeleteBoardModal
           open={showDeleteBoardDialog}
           onClose={() => setShowDeleteBoardDialog(false)}
           boardId={boardId}

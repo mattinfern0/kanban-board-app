@@ -15,7 +15,7 @@ interface CreateTaskDialogProps {
   boardId: string | null;
 }
 
-export const CreateTaskDialog = (props: CreateTaskDialogProps) => {
+export const CreateTaskModal = (props: CreateTaskDialogProps) => {
   const { open, onClose, boardId } = props;
   const boardQuery = useBoardQuery(boardId);
   const createTaskMutation = useCreateTaskMutation();

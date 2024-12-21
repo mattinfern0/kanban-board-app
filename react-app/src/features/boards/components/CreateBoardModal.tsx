@@ -12,7 +12,7 @@ interface CreateTaskDialogProps {
   organizationId: string;
 }
 
-export const CreateBoardDialog = (props: CreateTaskDialogProps) => {
+export const CreateBoardModal = (props: CreateTaskDialogProps) => {
   const { open, onClose } = props;
   const { enqueueSnackbar } = useSnackbar();
   const createBoardMutation = useCreateBoardMutation();
