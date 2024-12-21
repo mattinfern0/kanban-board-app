@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 
 import "@mantine/core/styles.css";
 import "mantine-datatable/styles.layer.css";
+import "@mantine/tiptap/styles.css";
 
 import { theme } from "@/theme.ts";
 import { AuthProvider } from "@/features/auth/components/AuthProvider.tsx";
