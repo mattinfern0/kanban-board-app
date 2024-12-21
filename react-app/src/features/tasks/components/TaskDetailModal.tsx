@@ -35,7 +35,7 @@ const DetailMenu = (props: DetailMenuProps) => {
   );
 };
 
-export const BoardTaskDetail = (props: BoardTaskDetailProps) => {
+export const TaskDetailModal = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose, showBoardName } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
   const organizationUsersQuery = useGetUsersQuery(

@@ -2,7 +2,7 @@ import { useBoardQuery } from "../apis/getBoard.ts";
 import { Link, useParams } from "react-router";
 import { useState } from "react";
 import { BoardTask } from "@/features/boards/types";
-import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
+import { TaskDetailModal } from "@/features/tasks/components/TaskDetailModal.tsx";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog.tsx";
 import { Settings } from "@mui/icons-material";
 import { BoardColumnWorkspace } from "@/features/boards/components/BoardColumnWorkspace.tsx";
@@ -32,7 +32,7 @@ export const BoardView = () => {
 
   return (
     <>
-      <BoardTaskDetail
+      <TaskDetailModal
         open={showTaskDialog}
         taskId={taskDialogTaskId}
         onClose={() => {

@@ -1,7 +1,7 @@
 import { Stack, Title } from "@mantine/core";
 import { TaskListTable } from "@/features/tasks/components/TaskListTable.tsx";
 import { useState } from "react";
-import { BoardTaskDetail } from "@/features/boards/components/BoardTaskDetail.tsx";
+import { TaskDetailModal } from "@/features/tasks/components/TaskDetailModal.tsx";
 
 export const TaskListView = () => {
   const [taskDetailDialogTaskId, setTaskDetailDialogTaskId] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export const TaskListView = () => {
 
   return (
     <>
-      <BoardTaskDetail
+      <TaskDetailModal
         open={showTaskDetailDialog}
         taskId={taskDetailDialogTaskId}
         onClose={() => {
