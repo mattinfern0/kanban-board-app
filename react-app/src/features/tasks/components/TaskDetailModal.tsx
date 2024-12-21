@@ -8,7 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
 import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
-import { ActionIcon, Badge, Grid, Group, Menu, Modal, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Badge, Grid, Group, Menu, Modal, Stack, Text, TextInput, Title } from "@mantine/core";
 import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
 import { TaskPrioritySelect } from "@/features/tasks/components/TaskPrioritySelect.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -215,6 +215,14 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
         event.stopPropagation();
       }
     };
+    const onDescriptionSave = (value: string) => {
+      if (value === taskDetailQuery.data.description) {
+        return;
+      }
+
+      setValue("description", value, { shouldDirty: true, shouldTouch: true });
+      onSubmit();
+    };
     dialogContent = (
       <form onSubmit={onSubmit}>
         <Group justify="space-between" align="center">
@@ -247,31 +255,11 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
           </Menu>
         </Group>
 
-        <Grid>
+        <Grid gutter="xl">
           <Grid.Col span={9}>
             <Stack>
-              <Text component="label" htmlFor="task-detail-description" fw="bold">
-                Description
-              </Text>
-              <DescriptionView value={taskDetailQuery.data.description} onSave={() => null} />
-              <Controller
-                control={control}
-                name="description"
-                render={({ field }) => (
-                  <Textarea
-                    {...field}
-                    id="task-detail-description"
-                    autosize
-                    minRows={5}
-                    onBlur={async (e) => {
-                      if (field.value !== task.description) {
-                        await onSubmit(e);
-                      }
-                    }}
-                    variant="unstyled"
-                  />
-                )}
-              />
+              <Text fw="bold">Description</Text>
+              <DescriptionView value={taskDetailQuery.data.description} onSave={onDescriptionSave} />
             </Stack>
           </Grid.Col>
           <Grid.Col span={3}>
