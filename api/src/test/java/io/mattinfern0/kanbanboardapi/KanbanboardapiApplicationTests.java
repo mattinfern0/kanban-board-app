@@ -29,6 +29,7 @@ class KanbanboardapiApplicationTests {
         registry.add("spring.datasource.password", postgresContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.liquibase.enabled", () -> false);
+        registry.add("app.cors.allowed-origins", () -> "*");
     }
 
     @Test
