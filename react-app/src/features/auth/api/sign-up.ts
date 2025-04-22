@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { SignUpFormValues, SignUpRequestBody } from "@/features/auth/types";
 import { client } from "@/lib/backendApi.ts";
 
-const backendSignup = async (body: SignUpRequestBody) => {
+export const backendSignup = async (body: SignUpRequestBody) => {
   return await client
     .post(`users/sign-up`, {
       json: body,
@@ -16,10 +16,6 @@ export const useSignUpMutation = () => {
   return useMutation({
     mutationFn: async (args: SignUpFormValues) => {
       await auth.signUp(args);
-      await backendSignup({
-        firstName: args.firstName,
-        lastName: args.lastName,
-      });
     },
   });
 };

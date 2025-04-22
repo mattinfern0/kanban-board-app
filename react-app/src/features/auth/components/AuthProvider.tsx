@@ -3,10 +3,13 @@ import { AuthContextValues, SignUpFormValues } from "@/features/auth/types";
 import { firebaseAuth } from "@/features/auth/lib/firebase.ts";
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  getAuth,
   signInWithEmailAndPassword,
   signOut,
   User as FirebaseUser,
 } from "firebase/auth";
+import { backendSignup } from "@/features/auth/api/sign-up.ts";
 
 const AuthContext = createContext<AuthContextValues>({
   user: null,
@@ -36,6 +39,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const signUp = async (data: SignUpFormValues) => {
     await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password1);
+
+    try {
+      await backendSignup({
+        firstName: data.firstName,
+        lastName: data.lastName,
+      });
+    } catch (e) {
+      console.log("Backend sign-up failed. Rolling back firebase user creation");
+      const auth = getAuth();
+      if (auth && auth.currentUser) {
+        await deleteUser(auth.currentUser);
+      }
+      throw e;
+    }
   };
 
   const logout = async () => {
