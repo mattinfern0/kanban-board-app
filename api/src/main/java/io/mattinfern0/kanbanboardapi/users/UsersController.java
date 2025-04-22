@@ -23,14 +23,13 @@ public class UsersController {
     }
 
     @PostMapping("/sign-up")
-    public UserDto signUpUser(@RequestBody @Valid SignUpDto signUpDto) {
-        // TODO get firebaseId from auth token
-        return usersService.signUpUser(null, signUpDto);
+    public UserDto signUpUser(@RequestBody @Valid SignUpDto signUpDto, Principal principal) {
+        String firebaseId = principal.getName();
+        return usersService.signUpUser(firebaseId, signUpDto);
     }
 
     @GetMapping("/me")
     public UserDto getCurrentUserDetails(Principal principal) {
-        // TODO get firebaseId from auth token
         String firebaseId = principal.getName();
         return usersService.getUserByFirebaseId(firebaseId);
     }

@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContextValues, SignUpFormValues } from "@/features/auth/types";
 import { firebaseAuth } from "@/features/auth/lib/firebase.ts";
-import { signInWithEmailAndPassword, signOut, User as FirebaseUser } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  User as FirebaseUser,
+} from "firebase/auth";
 
 const AuthContext = createContext<AuthContextValues>({
   user: null,
@@ -30,7 +35,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const signUp = async (data: SignUpFormValues) => {
-    await signInWithEmailAndPassword(firebaseAuth, data.email, data.password1);
+    await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password1);
   };
 
   const logout = async () => {

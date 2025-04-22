@@ -33,3 +33,8 @@ export interface AuthContextValues {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+export interface SignUpRequestBody {
+  firstName: string;
+  lastName: string;
+}
