@@ -58,6 +58,15 @@ public class BoardsService {
         return boardDetailDtoMapper.boardToBoardDetailDto(boardEntity);
     }
 
+    List<BoardSummaryDto> getUserBoardList(UUID userId) {
+        Organization userOrganization = organizationRepository
+            .findPersonalOrganization(userId)
+            .orElseThrow(() -> new ResourceNotFoundException(String.format("Personal organization for user id %s not found", userId)));
+
+        List<Board> boardEntities = boardRepository.findAllByOrganizationId(userOrganization.getId());
+        return boardSummaryDtoMapper.boardsToBoardSummaryDtos(boardEntities);
+    }
+
     List<BoardSummaryDto> getBoardList() {
         List<Board> boardEntities = boardRepository.findAll();
         return boardSummaryDtoMapper.boardsToBoardSummaryDtos(boardEntities);

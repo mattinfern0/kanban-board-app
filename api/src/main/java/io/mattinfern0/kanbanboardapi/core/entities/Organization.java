@@ -16,6 +16,10 @@ public class Organization {
     @Column(name = "display_name")
     String displayName;
 
+    @OneToOne
+    @JoinColumn(name = "personal_for_user_id")
+    User personalForUser;
+
     public UUID getId() {
         return id;
     }
@@ -30,5 +34,13 @@ public class Organization {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public User getPersonalForUser() {
+        return personalForUser;
+    }
+
+    public void setPersonalForUser(User personalForUser) {
+        this.personalForUser = personalForUser;
     }
 }

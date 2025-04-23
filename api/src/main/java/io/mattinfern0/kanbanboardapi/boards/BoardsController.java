@@ -23,7 +23,8 @@ public class BoardsController {
     }
 
     @GetMapping("")
-    List<BoardSummaryDto> listBoards() {
+    List<BoardSummaryDto> listBoards(
+    ) {
         return boardsService.getBoardList();
     }
 

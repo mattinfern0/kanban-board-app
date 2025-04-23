@@ -1,9 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.UUID;
@@ -24,6 +21,9 @@ public class User {
 
     @Column(name = "firebase_id")
     private String firebaseId;
+
+    @OneToOne(mappedBy = "personalForUser")
+    private Organization personalOrganization;
 
     public User() {
         this.id = UUID.randomUUID();
@@ -59,5 +59,13 @@ public class User {
 
     public void setFirebaseId(String firebaseId) {
         this.firebaseId = firebaseId;
+    }
+
+    public Organization getPersonalOrganization() {
+        return personalOrganization;
+    }
+
+    public void setPersonalOrganization(Organization personalOrganization) {
+        this.personalOrganization = personalOrganization;
     }
 }

@@ -1,15 +1,16 @@
 package io.mattinfern0.kanbanboardapi.users;
 
+import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.entities.User;
+import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.users.dtos.SignUpDto;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
@@ -25,6 +26,9 @@ class UsersServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private OrganizationRepository organizationRepository;
+
     @Spy
     private UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
 
@@ -39,6 +43,8 @@ class UsersServiceTest {
         Mockito.verify(userRepository).save(Mockito.any());
     }
 
+
+
     @Test
     void signUpUser_throws_error_if_user_with_firebase_id_already_exists() {
         String firebaseId = UUID.randomUUID().toString();
@@ -48,5 +54,25 @@ class UsersServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> usersService.signUpUser(firebaseId, signUpDto));
 
         assert exception.getMessage().equals("User already exists");
+    }
+
+    @Test
+    void signUpUser_creates_personal_organization() {
+        String firebaseId = UUID.randomUUID().toString();
+        SignUpDto signUpDto = new SignUpDto("John", "Doe");
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
+
+        Mockito.when(userRepository.existsByFirebaseId(firebaseId)).thenReturn(false);
+        usersService.signUpUser(firebaseId, signUpDto);
+
+        Mockito.verify(userRepository).save(userCaptor.capture());
+        Mockito.verify(organizationRepository).save(organizationCaptor.capture());
+
+        User savedUser = userCaptor.getValue();
+        Organization savedOrganization = organizationCaptor.getValue();
+
+        Assertions.assertEquals(savedOrganization.getPersonalForUser(), savedUser);
     }
 }
