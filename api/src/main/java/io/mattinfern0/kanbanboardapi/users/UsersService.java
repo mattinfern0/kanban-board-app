@@ -39,7 +39,7 @@ public class UsersService {
         user.setFirebaseId(firebaseId);
         user.setFirstName(signUpDto.firstName());
         user.setLastName(signUpDto.lastName());
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         Organization personalOrganization = new Organization();
         personalOrganization.setPersonalForUser(user);
