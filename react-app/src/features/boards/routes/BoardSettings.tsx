@@ -71,7 +71,7 @@ const UpdateBoardHeaderForm = (props: UpdateBoardHeaderFormProps) => {
 };
 
 export const BoardSettings = () => {
-  const { boardId } = useParams();
+  const { boardId, organizationId } = useParams();
   const boardQuery = useBoardQuery(boardId || "");
   const [showDeleteBoardDialog, setShowDeleteBoardDialog] = useState<boolean>(false);
 
@@ -117,7 +117,7 @@ export const BoardSettings = () => {
       <Group mb="1rem" align="center">
         <Button
           component={Link}
-          to={`/boards/${boardId}`}
+          to={`/${organizationId}/boards/${boardId}`}
           leftSection={<IconChevronLeft />}
           variant="filled"
           color="secondary"

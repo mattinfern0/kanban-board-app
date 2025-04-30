@@ -26,35 +26,40 @@ export const routes: RouteObject[] = [
     ),
   },
   {
-    path: "/tasks",
-    element: (
-      <MainLayout>
-        <TaskListView />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/boards",
-    element: (
-      <MainLayout>
-        <BoardListView />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/boards/:boardId",
-    element: (
-      <MainLayout>
-        <BoardView />
-      </MainLayout>
-    ),
-  },
-  {
-    path: "/boards/:boardId/settings",
-    element: (
-      <MainLayout>
-        <BoardSettings />
-      </MainLayout>
-    ),
+    path: "/:organizationId",
+    children: [
+      {
+        path: "tasks",
+        element: (
+          <MainLayout>
+            <TaskListView />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "boards",
+        element: (
+          <MainLayout>
+            <BoardListView />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "boards/:boardId",
+        element: (
+          <MainLayout>
+            <BoardView />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "boards/:boardId/settings",
+        element: (
+          <MainLayout>
+            <BoardSettings />
+          </MainLayout>
+        ),
+      },
+    ],
   },
 ];

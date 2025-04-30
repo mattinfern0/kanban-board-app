@@ -9,7 +9,7 @@ import { ActionIcon, Breadcrumbs, Button, Group, Text, Title } from "@mantine/co
 import { IconSettingsFilled } from "@tabler/icons-react";
 
 export const BoardView = () => {
-  const { boardId } = useParams();
+  const { boardId, organizationId } = useParams();
   const boardQuery = useBoardQuery(boardId || "");
   const [showTaskDialog, setShowTaskDialog] = useState<boolean>(false);
   const [taskDialogTaskId, setTaskDialogTaskId] = useState<string | null>(null);
@@ -48,7 +48,7 @@ export const BoardView = () => {
 
       <Group justify="space-between" align="center" mb="1rem">
         <Breadcrumbs>
-          <Text component={Link} to="/boards">
+          <Text component={Link} to={`/${organizationId}/boards`}>
             Boards
           </Text>
           <Title order={2}>{boardQuery.data.title}</Title>
@@ -61,7 +61,7 @@ export const BoardView = () => {
           <ActionIcon
             color="secondary"
             component={Link}
-            to={`/boards/${boardId}/settings`}
+            to={`/${organizationId}/boards/${boardId}/settings`}
             variant="outline"
             aria-label="Board Settings"
             size="lg"

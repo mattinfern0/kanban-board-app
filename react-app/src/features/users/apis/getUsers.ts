@@ -1,8 +1,8 @@
-import { GetUsersQueryParams, UserDetail } from "@/features/users/types";
+import { GetUsersQueryParams, UserSummary } from "@/features/users/types";
 import { client } from "@/lib/backendApi.ts";
 import { useQuery } from "@tanstack/react-query";
 
-export const getUsers = async (params: GetUsersQueryParams): Promise<UserDetail[]> => {
+export const getUsers = async (params: GetUsersQueryParams): Promise<UserSummary[]> => {
   let url = "users";
 
   if (Object.keys(params).length !== 0) {

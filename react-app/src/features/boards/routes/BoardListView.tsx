@@ -1,23 +1,52 @@
 import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { useBoardListQuery } from "@/features/boards/apis/getBoardList.ts";
 import { ReactNode, useState } from "react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import { CreateBoardModal } from "@/features/boards/components/CreateBoardModal.tsx";
+import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
 const MOCK_ORGANIZATION_ID = "846ba4b8-5556-4855-8fa6-b274dea3a3cc";
 
+const ORGANIZATION_ID_VALUE_PERSONAL = "personal";
+
 export const BoardListView = () => {
-  const boardListQuery = useBoardListQuery();
+  const params = useParams();
+
+  const userDetailsQuery = useGetCurrentUserDetailsQuery();
+  let organizationId;
+  if (params.organizationId === ORGANIZATION_ID_VALUE_PERSONAL) {
+    organizationId = userDetailsQuery.data?.personalOrganizationId ?? null;
+  } else {
+    organizationId = params?.organizationId || null;
+  }
+
+  const boardListQuery = useBoardListQuery(
+    {
+      organizationId: organizationId || "",
+    },
+    {
+      enabled: organizationId != null,
+    },
+  );
   const [showCreateBoardDialog, setShowCreateBoardDialog] = useState<boolean>(false);
 
+  const isPending = userDetailsQuery.isPending || boardListQuery.isPending;
+  const isError = userDetailsQuery.isError || boardListQuery.isError;
+
   let listElement: ReactNode;
-  if (boardListQuery.isPending) {
+  if (isPending) {
     listElement = <Text>Loading...</Text>;
-  } else if (boardListQuery.isError) {
+  } else if (isError) {
     listElement = <Text>Error loading boards</Text>;
   } else {
     const boardCards = boardListQuery.data.map((board) => (
-      <Card key={board.id} component={Link} to={`/boards/${board.id}`} style={{ cursor: "pointer" }} withBorder>
+      <Card
+        key={board.id}
+        component={Link}
+        to={`/${board.organizationId}/boards/${board.id}`}
+        style={{ cursor: "pointer" }}
+        withBorder
+      >
         <Text size="xl">{board.title}</Text>
       </Card>
     ));

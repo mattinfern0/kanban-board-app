@@ -48,3 +48,7 @@ export type CreateBoardBody = {
 export type UpdateBoardHeaderBody = {
   title: string;
 };
+
+export type GetBoardListQueryParams = {
+  organizationId: string;
+};
