@@ -264,14 +264,14 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
           </Grid.Col>
           <Grid.Col span={3}>
             <Stack>
-              {showBoardName && (
+              {showBoardName && task.board != null && (
                 <Badge
                   component={Link}
                   color="primary"
                   size="xl"
                   radius="md"
                   variant="filled"
-                  to={`/boards/${task.board.id}`}
+                  to={`/${taskDetailQuery.data?.organizationId}/boards/${task.board.id}`}
                   styles={{ root: { cursor: "pointer" } }}
                 >
                   {task.board.title}
