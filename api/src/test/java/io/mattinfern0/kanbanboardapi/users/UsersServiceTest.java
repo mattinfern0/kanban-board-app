@@ -1,7 +1,9 @@
 package io.mattinfern0.kanbanboardapi.users;
 
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
+import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
+import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.users.dtos.SignUpDto;
@@ -29,6 +31,9 @@ class UsersServiceTest {
     @Mock
     private OrganizationRepository organizationRepository;
 
+    @Mock
+    private OrganizationMembershipRepository organizationMembershipRepository;
+
     @Spy
     private UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
 
@@ -40,7 +45,7 @@ class UsersServiceTest {
         Mockito.when(userRepository.existsByFirebaseId(firebaseId)).thenReturn(false);
         usersService.signUpUser(firebaseId, signUpDto);
 
-        Mockito.verify(userRepository).save(Mockito.any());
+        Mockito.verify(userRepository).saveAndFlush(Mockito.any());
     }
 
 
@@ -63,16 +68,22 @@ class UsersServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
+        ArgumentCaptor<OrganizationMembership> organizationMembershipCaptor = ArgumentCaptor.forClass(OrganizationMembership.class);
 
         Mockito.when(userRepository.existsByFirebaseId(firebaseId)).thenReturn(false);
         usersService.signUpUser(firebaseId, signUpDto);
 
-        Mockito.verify(userRepository).save(userCaptor.capture());
-        Mockito.verify(organizationRepository).save(organizationCaptor.capture());
+        Mockito.verify(userRepository).saveAndFlush(userCaptor.capture());
+        Mockito.verify(organizationRepository).saveAndFlush(organizationCaptor.capture());
+        Mockito.verify(organizationMembershipRepository).saveAndFlush(organizationMembershipCaptor.capture());
 
         User savedUser = userCaptor.getValue();
         Organization savedOrganization = organizationCaptor.getValue();
 
         Assertions.assertEquals(savedOrganization.getPersonalForUser(), savedUser);
+
+        OrganizationMembership savedOrganizationMembership = organizationMembershipCaptor.getValue();
+        Assertions.assertEquals(savedOrganizationMembership.getPk().getOrganizationId(), savedOrganization.getId());
+        Assertions.assertEquals(savedOrganizationMembership.getPk().getUserId(), savedUser.getId());
     }
 }
