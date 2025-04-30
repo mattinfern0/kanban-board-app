@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record UserDto(
+public record UserPrivateDetailDto(
     @NotNull
     UUID id,
 
@@ -13,6 +13,9 @@ public record UserDto(
     String firstName,
 
     @NotEmpty
-    String lastName
+    String lastName,
+
+    @NotEmpty
+    UUID personalOrganizationId
 ) {
 }

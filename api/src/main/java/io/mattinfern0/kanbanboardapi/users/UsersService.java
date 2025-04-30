@@ -5,7 +5,8 @@ import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.users.dtos.SignUpDto;
-import io.mattinfern0.kanbanboardapi.users.dtos.UserDto;
+import io.mattinfern0.kanbanboardapi.users.dtos.UserPrivateDetailDto;
+import io.mattinfern0.kanbanboardapi.users.dtos.UserSummaryDto;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,13 @@ public class UsersService {
         this.organizationRepository = organizationRepository;
     }
 
-    List<UserDto> getUserList() {
+    List<UserSummaryDto> getUserList() {
         List<User> entities = userRepository.findAll();
-        return userDTOMapper.entityListtoDtoList(entities);
+        return userDTOMapper.entityListtoSummaryDtoList(entities);
     }
 
     @Transactional
-    UserDto signUpUser(String firebaseId, SignUpDto signUpDto) {
+    UserSummaryDto signUpUser(String firebaseId, SignUpDto signUpDto) {
         if (userRepository.existsByFirebaseId(firebaseId)) {
             throw new RuntimeException("User already exists");
         }
@@ -45,12 +46,12 @@ public class UsersService {
         personalOrganization.setDisplayName(String.format("Personal - User %s", user.getId()));
         organizationRepository.save(personalOrganization);
 
-        return userDTOMapper.entityToDto(user);
+        return userDTOMapper.entityToSummaryDto(user);
     }
 
-    UserDto getUserByFirebaseId(String firebaseId) {
+    UserPrivateDetailDto getUserByFirebaseId(String firebaseId) {
         User user = userRepository.findByFirebaseId(firebaseId)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        return userDTOMapper.entityToDto(user);
+        return userDTOMapper.entityToPrivateDetailDto(user);
     }
 }
