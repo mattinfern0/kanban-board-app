@@ -67,8 +67,10 @@ public class BoardsService {
         return boardSummaryDtoMapper.boardsToBoardSummaryDtos(boardEntities);
     }
 
-    List<BoardSummaryDto> getBoardList() {
-        List<Board> boardEntities = boardRepository.findAll();
+    List<BoardSummaryDto> getBoardList(
+        UUID organizationId
+    ) {
+        List<Board> boardEntities = boardRepository.findAllByOrganizationId(organizationId);
         return boardSummaryDtoMapper.boardsToBoardSummaryDtos(boardEntities);
     }
 

@@ -24,8 +24,12 @@ public class BoardsController {
 
     @GetMapping("")
     List<BoardSummaryDto> listBoards(
+        @RequestParam(required = false) UUID organizationId
     ) {
-        return boardsService.getBoardList();
+        if (organizationId == null) {
+            return List.of();
+        }
+        return boardsService.getBoardList(organizationId);
     }
 
     @PostMapping("")
