@@ -10,6 +10,7 @@ import {
   User as FirebaseUser,
 } from "firebase/auth";
 import { backendSignup } from "@/features/auth/api/sign-up.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AuthContext = createContext<AuthContextValues>({
   user: null,
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextValues>({
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     return firebaseAuth.onAuthStateChanged(async (firebaseUser) => {
@@ -57,6 +59,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const logout = async () => {
     await signOut(firebaseAuth);
+    queryClient.clear();
   };
 
   const values: AuthContextValues = {
