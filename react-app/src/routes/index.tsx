@@ -7,6 +7,8 @@ import { UnauthenticatedLayout } from "@/components/layouts/UnauthenticatedLayou
 import { SignUpView } from "@/features/auth/routes/SignUpView.tsx";
 import { TaskListView } from "@/features/tasks/routes/TaskListView.tsx";
 import { LoginView } from "@/features/auth/routes/LoginView.tsx";
+import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
+import { IndexView } from "@/routes/IndexView.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -23,6 +25,14 @@ export const routes: RouteObject[] = [
       <UnauthenticatedLayout>
         <LoginView />
       </UnauthenticatedLayout>
+    ),
+  },
+  {
+    path: "/",
+    element: (
+      <AuthGuard>
+        <IndexView />
+      </AuthGuard>
     ),
   },
   {

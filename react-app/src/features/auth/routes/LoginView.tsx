@@ -28,7 +28,7 @@ export const LoginView = () => {
     loginMutation.mutate(data, {
       onSuccess: () => {
         console.log("Success");
-        navigate("/boards");
+        navigate("/");
       },
       onError: (error) => {
         console.error(error);

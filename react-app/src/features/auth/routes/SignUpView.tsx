@@ -27,7 +27,7 @@ export const SignUpView = () => {
 
     signUpMutation.mutate(data, {
       onSuccess: () => {
-        navigate("/boards");
+        navigate("/");
       },
       onError: (error) => {
         console.error(error);

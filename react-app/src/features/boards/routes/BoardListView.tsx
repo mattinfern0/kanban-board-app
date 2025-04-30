@@ -7,18 +7,12 @@ import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentU
 
 const MOCK_ORGANIZATION_ID = "846ba4b8-5556-4855-8fa6-b274dea3a3cc";
 
-const ORGANIZATION_ID_VALUE_PERSONAL = "personal";
-
 export const BoardListView = () => {
   const params = useParams();
 
   const userDetailsQuery = useGetCurrentUserDetailsQuery();
-  let organizationId;
-  if (params.organizationId === ORGANIZATION_ID_VALUE_PERSONAL) {
-    organizationId = userDetailsQuery.data?.personalOrganizationId ?? null;
-  } else {
-    organizationId = params?.organizationId || null;
-  }
+
+  const organizationId = params?.organizationId || null;
 
   const boardListQuery = useBoardListQuery(
     {
