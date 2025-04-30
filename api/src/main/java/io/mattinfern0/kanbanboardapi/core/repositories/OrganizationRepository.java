@@ -12,8 +12,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
         SELECT organization
         from Organization organization
         join OrganizationMembership membership ON organization.id = membership.pk.organizationId
-        join OrganizationRole role ON role.id = membership.role.id
-        WHERE role.codename = "OWNER" AND membership.pk.userId = ?1
+        WHERE membership.role = 1 AND membership.pk.userId = ?1
     """)
     Optional<Organization> findPersonalOrganization(UUID userId);
 }

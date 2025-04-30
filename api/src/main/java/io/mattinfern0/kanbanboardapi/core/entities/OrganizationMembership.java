@@ -1,6 +1,10 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
-import jakarta.persistence.*;
+import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "organization_users")
@@ -8,9 +12,8 @@ public class OrganizationMembership {
     @EmbeddedId
     private OrganizationMembershipPk pk;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    private OrganizationRole role;
+    @Column(name = "role_id")
+    OrganizationRole role;
 
     public OrganizationMembershipPk getPk() {
         return pk;

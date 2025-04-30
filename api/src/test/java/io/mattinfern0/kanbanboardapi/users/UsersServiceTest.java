@@ -3,9 +3,8 @@ package io.mattinfern0.kanbanboardapi.users;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
-import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRepository;
-import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
+import io.mattinfern0.kanbanboardapi.organizations.OrganizationService;
 import io.mattinfern0.kanbanboardapi.users.dtos.SignUpDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -15,6 +14,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertThrows;
@@ -29,10 +29,7 @@ class UsersServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private OrganizationRepository organizationRepository;
-
-    @Mock
-    private OrganizationMembershipRepository organizationMembershipRepository;
+    private OrganizationService organizationService;
 
     @Spy
     private UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
@@ -74,10 +71,16 @@ class UsersServiceTest {
         usersService.signUpUser(firebaseId, signUpDto);
 
         Mockito.verify(userRepository).saveAndFlush(userCaptor.capture());
-        Mockito.verify(organizationRepository).saveAndFlush(organizationCaptor.capture());
-        Mockito.verify(organizationMembershipRepository).saveAndFlush(organizationMembershipCaptor.capture());
+        Mockito.verify(organizationService).createPersonalOrganization(userCaptor.capture());
 
-        User savedUser = userCaptor.getValue();
+        List<User> capturedUsers = userCaptor.getAllValues();
+
+        User savedUser = capturedUsers.getFirst();
+        User passedUser = capturedUsers.get(1);
+
+        Assertions.assertEquals(savedUser.getId(), passedUser.getId());
+
+        /*
         Organization savedOrganization = organizationCaptor.getValue();
 
         Assertions.assertEquals(savedOrganization.getPersonalForUser(), savedUser);
@@ -85,5 +88,7 @@ class UsersServiceTest {
         OrganizationMembership savedOrganizationMembership = organizationMembershipCaptor.getValue();
         Assertions.assertEquals(savedOrganizationMembership.getPk().getOrganizationId(), savedOrganization.getId());
         Assertions.assertEquals(savedOrganizationMembership.getPk().getUserId(), savedUser.getId());
+
+         */
     }
 }
