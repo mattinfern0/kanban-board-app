@@ -1,7 +1,5 @@
 package io.mattinfern0.kanbanboardapi.users;
 
-import io.mattinfern0.kanbanboardapi.core.entities.Organization;
-import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.organizations.OrganizationService;
@@ -64,8 +62,6 @@ class UsersServiceTest {
         SignUpDto signUpDto = new SignUpDto("John", "Doe");
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
-        ArgumentCaptor<OrganizationMembership> organizationMembershipCaptor = ArgumentCaptor.forClass(OrganizationMembership.class);
 
         Mockito.when(userRepository.existsByFirebaseId(firebaseId)).thenReturn(false);
         usersService.signUpUser(firebaseId, signUpDto);
@@ -79,16 +75,5 @@ class UsersServiceTest {
         User passedUser = capturedUsers.get(1);
 
         Assertions.assertEquals(savedUser.getId(), passedUser.getId());
-
-        /*
-        Organization savedOrganization = organizationCaptor.getValue();
-
-        Assertions.assertEquals(savedOrganization.getPersonalForUser(), savedUser);
-
-        OrganizationMembership savedOrganizationMembership = organizationMembershipCaptor.getValue();
-        Assertions.assertEquals(savedOrganizationMembership.getPk().getOrganizationId(), savedOrganization.getId());
-        Assertions.assertEquals(savedOrganizationMembership.getPk().getUserId(), savedUser.getId());
-
-         */
     }
 }
