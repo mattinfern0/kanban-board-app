@@ -5,8 +5,6 @@ import { Link, useParams } from "react-router";
 import { CreateBoardModal } from "@/features/boards/components/CreateBoardModal.tsx";
 import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
-const MOCK_ORGANIZATION_ID = "846ba4b8-5556-4855-8fa6-b274dea3a3cc";
-
 export const BoardListView = () => {
   const params = useParams();
 
@@ -54,7 +52,7 @@ export const BoardListView = () => {
       <CreateBoardModal
         open={showCreateBoardDialog}
         onClose={() => setShowCreateBoardDialog(false)}
-        organizationId={MOCK_ORGANIZATION_ID}
+        organizationId={organizationId || ""}
       />
 
       <Group justify="space-between" align="center" mb="1rem">

@@ -38,7 +38,7 @@ export const CreateBoardModal = (props: CreateTaskDialogProps) => {
           onSuccess: (data) => {
             reset();
             enqueueSnackbar("Board created! Start adding some tasks!", { variant: "success" });
-            navigate(`/boards/${data.id}`);
+            navigate(`/${props.organizationId}/boards/${data.id}`);
           },
           onError: (error) => {
             enqueueSnackbar("Error creating board", { variant: "error" });

@@ -45,8 +45,11 @@ public class BoardsController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    BoardDetailDto createBoard(@RequestBody @Valid CreateBoardDto createBoardDtoOld) {
-        return boardsService.createNewBoard(createBoardDtoOld);
+    BoardDetailDto createBoard(@RequestBody @Valid CreateBoardDto createBoardDto, Principal principal) {
+        if (!userAccessService.canAccessOrganization(principal.getName(), createBoardDto.organizationId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this resource");
+        }
+        return boardsService.createNewBoard(createBoardDto);
     }
 
     @PutMapping("/{boardId}/header")

@@ -1,6 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useDeleteBoardMutation } from "@/features/boards/apis/deleteBoard.ts";
 import { Button, Checkbox, Group, Modal, Stack, Text, TextInput } from "@mantine/core";
 
@@ -29,6 +29,7 @@ export const DeleteBoardModal = (props: DeleteBoardDialogProps) => {
     },
   });
   const navigate = useNavigate();
+  const params = useParams();
   const { enqueueSnackbar } = useSnackbar();
 
   const onSubmit = handleSubmit(
@@ -42,7 +43,7 @@ export const DeleteBoardModal = (props: DeleteBoardDialogProps) => {
         {
           onSuccess: () => {
             enqueueSnackbar("Board deleted!", { variant: "success" });
-            navigate("/boards");
+            navigate(`/${params.organizationId}/boards`);
           },
           onError: (error) => {
             console.error(error);
