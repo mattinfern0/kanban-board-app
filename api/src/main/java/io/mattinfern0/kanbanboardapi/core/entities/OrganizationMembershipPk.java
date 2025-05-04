@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
@@ -7,23 +8,26 @@ import java.util.UUID;
 
 @Embeddable
 public class OrganizationMembershipPk implements Serializable {
+    @Column(name = "user_id")
     private UUID userId;
+
+    @Column(name = "organization_id")
     private UUID organizationId;
+
+    public OrganizationMembershipPk() {
+    }
+
+    public OrganizationMembershipPk(UUID organizationId, UUID userId) {
+        this.organizationId = organizationId;
+        this.userId = userId;
+    }
 
     public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
     public UUID getOrganizationId() {
         return organizationId;
-    }
-
-    public void setOrganizationId(UUID organizationId) {
-        this.organizationId = organizationId;
     }
 
     @Override

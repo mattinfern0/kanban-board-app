@@ -153,11 +153,7 @@ public class BoardsControllerIntegrationTest {
     }
 
     void addUserToOrganization(User user, Organization organization) {
-        OrganizationMembership membership = new OrganizationMembership();
-        OrganizationMembershipPk pk = new OrganizationMembershipPk();
-        pk.setOrganizationId(organization.getId());
-        pk.setUserId(user.getId());
-        membership.setPk(pk);
+        OrganizationMembership membership = new OrganizationMembership(organization, user);
         membership.setRole(OrganizationRole.MEMBER);
         organizationMembershipRepository.save(membership);
     }

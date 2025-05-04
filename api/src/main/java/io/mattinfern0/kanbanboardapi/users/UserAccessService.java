@@ -34,9 +34,7 @@ public class UserAccessService {
     }
 
     public boolean canAccessOrganization(User user, UUID organizationId) {
-        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk();
-        membershipPk.setOrganizationId(organizationId);
-        membershipPk.setUserId(user.getId());
+        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, user.getId());
         return organizationMembershipRepository.existsByPk(membershipPk);
     }
 
