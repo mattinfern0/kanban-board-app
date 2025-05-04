@@ -163,6 +163,7 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
   );
 
   const onAssigneeBlur = () => {
+    console.debug("Assignee blur");
     if (taskId == null || updateTaskAssigneesMutation.isPending) {
       return;
     }

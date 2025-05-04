@@ -15,7 +15,7 @@ export interface AssigneeSelectProps {
 }
 
 export function AssigneeSelect(props: Readonly<AssigneeSelectProps>) {
-  const { assigneeOptions, value, onChange } = props;
+  const { assigneeOptions, value, onChange, onBlur } = props;
 
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -74,6 +74,11 @@ export function AssigneeSelect(props: Readonly<AssigneeSelectProps>) {
     );
   });
 
+  const onInputBlur = () => {
+    combobox.closeDropdown();
+    onBlur();
+  };
+
   return (
     <Combobox store={combobox} onOptionSubmit={handleValueSelect} withinPortal={false}>
       <Combobox.DropdownTarget>
@@ -88,7 +93,7 @@ export function AssigneeSelect(props: Readonly<AssigneeSelectProps>) {
             <Combobox.EventsTarget>
               <PillsInput.Field
                 type="hidden"
-                onBlur={() => combobox.closeDropdown()}
+                onBlur={onInputBlur}
                 onKeyDown={(event) => {
                   if (event.key === "Backspace") {
                     event.preventDefault();
