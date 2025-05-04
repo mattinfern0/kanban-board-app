@@ -11,6 +11,9 @@ import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.CreateUpdateTaskDto;
 import io.mattinfern0.kanbanboardapi.tasks.dtos.TaskDetailDto;
 import io.mattinfern0.kanbanboardapi.tasks.mappers.TaskDtoMapper;
+import io.mattinfern0.kanbanboardapi.users.UserAccessService;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +23,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
+import java.security.Principal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,380 +50,812 @@ class TaskServiceUnitTest {
     UserRepository userRepository;
 
     @Mock
+    UserAccessService userAccessService;
+
+    @Mock
     TaskStatusService taskStatusService;
 
     @InjectMocks
     TaskService taskService;
 
-    @Test
-    void createTask__createsTaskWithCorrectSimpleFields() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
+    @Nested
+    class CreateTaskTests {
 
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testTaskStatus = new TaskStatus();
-        testTaskStatus.setCodename(testStatusCode);
+        @Test
+        void createsTaskWithCorrectSimpleFields() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
 
-        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            null,
-            testStatusCode,
-            TaskPriority.HIGH
-        );
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testTaskStatus = new TaskStatus();
+            testTaskStatus.setCodename(testStatusCode);
 
-        Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
-        );
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                null,
+                testStatusCode,
+                TaskPriority.HIGH
+            );
 
-        Mockito.when(
-            taskStatusService.findOrCreate(testStatusCode)
-        ).thenReturn(testTaskStatus);
+            Mockito.when(
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            );
 
-        TaskDetailDto result = taskService.createTask(testCreateDto);
-        assert result.organizationId().equals(testCreateDto.organizationId());
-        assert result.title().equals(testCreateDto.title());
-        assert result.description().equals(testCreateDto.description());
-        assert Objects.equals(result.priority(), testCreateDto.priority());
+            Mockito.when(
+                taskStatusService.findOrCreate(testStatusCode)
+            ).thenReturn(testTaskStatus);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.createTask(testPrincipal, testCreateDto);
+            assert result.organizationId().equals(testCreateDto.organizationId());
+            assert result.title().equals(testCreateDto.title());
+            assert result.description().equals(testCreateDto.description());
+            assert Objects.equals(result.priority(), testCreateDto.priority());
+        }
+
+        @Test
+        void createsTaskWithNoColumn_ifBoardColumnIsNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testTaskStatus = new TaskStatus();
+            testTaskStatus.setCodename(testStatusCode);
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                null,
+                testStatusCode,
+                null
+            );
+
+            Mockito.when(
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            );
+
+            Mockito.when(
+                taskStatusService.findOrCreate(testStatusCode)
+            ).thenReturn(testTaskStatus);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.createTask(testPrincipal, testCreateDto);
+            assert result.boardColumnId() == null;
+        }
+
+        @Test
+        void createsTaskWithColumn_ifBoardColumnIsNotNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testTaskStatus = new TaskStatus();
+            testTaskStatus.setCodename(testStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testTaskStatus);
+            testColumn.setBoard(testBoard);
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Mockito.when(
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            );
+
+            Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+                .thenReturn(Optional.of(testColumn));
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessBoard(testPrincipal, testBoard.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.createTask(testPrincipal, testCreateDto);
+            assert Objects.equals(result.boardColumnId(), testColumn.getId());
+        }
+
+        @Test
+        void setsStatusToDefault_whenStatusAndColumnAreNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                null,
+                null,
+                null
+            );
+
+            TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
+            TaskStatus defaultTaskStatus = new TaskStatus();
+            defaultTaskStatus.setCodename(defaultStatusCode);
+
+            Mockito.when(
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            );
+
+            Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.createTask(testPrincipal, testCreateDto);
+            assert result.status().equals(defaultStatusCode);
+        }
+
+        @Test
+        void setsStatusToColumnStatus_whenStatusAndColumnAreNotNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+            testColumn.setBoard(testBoard);
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+                .thenReturn(Optional.of(testColumn));
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessBoard(testPrincipal, testBoard.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.createTask(testPrincipal, testCreateDto);
+            assert result.status().equals(testColumnStatusCode);
+        }
+
+        @Test
+        void throwsErrorIfOrganizationIdIsPresentAndUserDoesNotHaveAccessToOrganization() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(false);
+
+
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> taskService.createTask(testPrincipal, testCreateDto));
+            String expectedMessage = "You don't have permission to create tasks in this organization";
+            assert exception.getMessage().equals(expectedMessage);
+        }
+
+        @Test
+        void throwsErrorIfBoardColumnIdIsPresentAndUserDoesNotHaveAccessToBoard() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+            testBoard.setOrganization(testOrganization);
+            testBoard.setTitle("Test Board");
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+            testColumn.setBoard(testBoard);
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+                .thenReturn(Optional.of(testColumn));
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessBoard(testPrincipal, testBoard.getId()))
+                .thenReturn(false);
+
+
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> taskService.createTask(testPrincipal, testCreateDto));
+            String expectedMessage = "You don't have permission to create tasks in this board";
+            assert exception.getMessage().equals(expectedMessage);
+        }
+    }
+
+    @Nested
+    class UpdateTaskTests {
+
+        @Test
+        void updatesSimpleFields() {
+            Organization newOrganization = new Organization();
+            newOrganization.setId(UUID.randomUUID());
+            Mockito.when(organizationRepository.findById(newOrganization.getId()))
+                .thenReturn(Optional.of(newOrganization));
+
+            TaskStatusCode newStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            Organization oldOrganization = new Organization();
+            oldOrganization.setId(UUID.randomUUID());
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+            existingTask.setOrganization(oldOrganization);
+            existingTask.setTitle("Old Title");
+            existingTask.setDescription("Old Description");
+
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+
+            CreateUpdateTaskDto updateDTO = new CreateUpdateTaskDto(
+                newOrganization.getId(),
+                "New Title",
+                "New Description",
+                null,
+                newStatusCode,
+                TaskPriority.LOW
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, newOrganization.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.updateTask(testPrincipal, existingTask.getId(), updateDTO);
+            assert result.organizationId().equals(updateDTO.organizationId());
+            assert result.title().equals(updateDTO.title());
+            assert result.description().equals(updateDTO.description());
+            assert Objects.equals(result.priority(), TaskPriority.LOW);
+        }
+
+        @Test
+        void removesColumn_ifBoardColumnIsNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testTaskStatus = new TaskStatus();
+            testTaskStatus.setCodename(testStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+
+            BoardColumn oldColumn = new BoardColumn();
+            oldColumn.setTaskStatus(testTaskStatus);
+            oldColumn.setBoard(testBoard);
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+            existingTask.setBoardColumn(oldColumn);
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+            CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                null,
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+
+
+            TaskDetailDto result = taskService.updateTask(testPrincipal, existingTask.getId(), testUpdateDto);
+            assert result.boardColumnId() == null;
+        }
+
+        @Test
+        void updatesColumn_ifBoardColumnIsNotNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testTaskStatus = new TaskStatus();
+            testTaskStatus.setCodename(testStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testTaskStatus);
+            testColumn.setBoard(testBoard);
+            Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+                .thenReturn(Optional.of(testColumn));
+
+            Task testTask = new Task();
+            testTask.setId(UUID.randomUUID());
+            Mockito.when(taskRepository.findById(testTask.getId())).thenReturn(Optional.of(testTask));
+
+            CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessBoard(testPrincipal, testBoard.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.updateTask(testPrincipal, testTask.getId(), testUpdateDto);
+            assert Objects.equals(result.boardColumnId(), testColumn.getId());
+        }
+
+        @Test
+        void setsStatusToDefault_whenStatusAndColumnAreNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+
+            CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                null,
+                null,
+                null
+            );
+
+            TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
+            TaskStatus defaultTaskStatus = new TaskStatus();
+            defaultTaskStatus.setCodename(defaultStatusCode);
+
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+            Mockito.when(
+                organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
+            );
+
+            Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
+
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.updateTask(testPrincipal, existingTask.getId(), testUpdateDto);
+            assert result.status().equals(defaultStatusCode);
+        }
+
+        @Test
+        void setsStatusToColumnStatus_whenStatusAndColumnAreNotNull() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+            testColumn.setBoard(testBoard);
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+            CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+                .thenReturn(Optional.of(testColumn));
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessBoard(testPrincipal, testBoard.getId()))
+                .thenReturn(true);
+
+            TaskDetailDto result = taskService.updateTask(testPrincipal, existingTask.getId(), testUpdateDto);
+            assert result.status().equals(testColumnStatusCode);
+        }
+
+        @Test
+        void throwsErrorIfTaskWithTaskIdDoesNotExist() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            UUID testTaskId = UUID.randomUUID();
+
+            CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                null,
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+
+            assertThrows(ResourceNotFoundException.class, () -> {
+                taskService.updateTask(testPrincipal, testTaskId, testUpdateDto);
+            });
+        }
+
+        @Test
+        void throwsErrorPrincipalDoesNotHaveAccessToTask() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(false);
+
+            AccessDeniedException exception = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.updateTask(testPrincipal, existingTask.getId(), testCreateDto)
+            );
+            String expectedMessage = "You do not have permission to update this task";
+            Assertions.assertEquals(expectedMessage, exception.getMessage());
+        }
+
+        @Test
+        void throwsErrorIfOrganizationIdIsPresentAndUserDoesNotHaveAccessToOrganization() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(false);
+
+            AccessDeniedException exception = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.updateTask(testPrincipal, existingTask.getId(), testCreateDto)
+            );
+            String expectedMessage = "You don't have permission to create tasks in this organization";
+            Assertions.assertEquals(expectedMessage, exception.getMessage());
+        }
+
+        @Test
+        void throwsErrorIfBoardColumnIdIsPresentAndUserDoesNotHaveAccessToBoard() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            Mockito.when(organizationRepository.findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
+
+            TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
+            TaskStatus testColumnTaskStatus = new TaskStatus();
+            testColumnTaskStatus.setCodename(testColumnStatusCode);
+
+            Board testBoard = new Board();
+            testBoard.setId(UUID.randomUUID());
+
+            BoardColumn testColumn = new BoardColumn();
+            testColumn.setId(UUID.randomUUID());
+            testColumn.setTaskStatus(testColumnTaskStatus);
+            testColumn.setBoard(testBoard);
+            Mockito.when(boardColumnRepository.findById(testColumn.getId()))
+                .thenReturn(Optional.of(testColumn));
+
+            Task existingTask = new Task();
+            existingTask.setId(UUID.randomUUID());
+            Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
+
+            CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
+                testOrganization.getId(),
+                "Test Task",
+                "Test Description",
+                testColumn.getId(),
+                testStatusCode,
+                null
+            );
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, existingTask.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+            Mockito
+                .when(userAccessService.canAccessBoard(testPrincipal, testBoard.getId()))
+                .thenReturn(false);
+
+            AccessDeniedException exception = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.updateTask(testPrincipal, existingTask.getId(), testCreateDto)
+            );
+            String expectedMessage = "You don't have permission to create tasks in this board";
+            Assertions.assertEquals(expectedMessage, exception.getMessage());
+        }
+    }
+
+    @Nested
+    class DeleteTaskTests {
+        @Test
+        void throws_error_if_task_with_taskId_does_not_exist() {
+            UUID testTaskId = UUID.randomUUID();
+            Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(false);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+
+            assertThrows(ResourceNotFoundException.class, () -> {
+                taskService.deleteTask(testPrincipal, testTaskId);
+            });
+        }
+
+        @Test
+        void throws_error_if_user_does_not_have_access_to_task() {
+            UUID testTaskId = UUID.randomUUID();
+            Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(true);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito.when(userAccessService.canAccessTask(testPrincipal, testTaskId)).thenReturn(false);
+
+            assertThrows(AccessDeniedException.class, () -> {
+                taskService.deleteTask(testPrincipal, testTaskId);
+            });
+        }
+    }
+
+    @Nested
+    class UpdateTaskAssigneesTest {
+        @Test
+        void works_with_validTaskId_and_assigneeIds() {
+            UUID testTaskId = UUID.randomUUID();
+            List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+            List<User> testUsers = new ArrayList<>();
+            for (UUID assigneeId : testAssigneeIds) {
+                User user = new User();
+                user.setId(assigneeId);
+                testUsers.add(user);
+            }
+            Task testTask = new Task();
+            testTask.setId(testTaskId);
+            Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+            Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+                .thenReturn(true);
+
+            taskService.updateTaskAssignees(testPrincipal, testTaskId, testAssigneeIds);
+
+            assert testTask.getAssignees().equals(testUsers);
+        }
+
+        @Test
+        void clears_assignees_when_assigneeIds_is_empty() {
+            UUID testTaskId = UUID.randomUUID();
+            List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+            List<User> testUsers = new ArrayList<>();
+            for (UUID assigneeId : testAssigneeIds) {
+                User user = new User();
+                user.setId(assigneeId);
+                testUsers.add(user);
+            }
+            Task testTask = new Task();
+            testTask.setId(testTaskId);
+            testTask.setAssignees(testUsers);
+            Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+                .thenReturn(true);
+
+            taskService.updateTaskAssignees(testPrincipal, testTaskId, new ArrayList<>());
+
+            assert testTask.getAssignees().isEmpty();
+        }
+
+        @Test
+        void throws_exception_if_at_least_one_of_users_with_assignee_id_not_found() {
+            UUID testTaskId = UUID.randomUUID();
+            List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+            List<User> testUsers = new ArrayList<>();
+            User testUser = new User();
+            testUser.setId(testAssigneeIds.getFirst());
+            testUsers.add(testUser);
+
+            Task testTask = new Task();
+            testTask.setId(testTaskId);
+            Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+            Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+                .thenReturn(true);
+
+            assertThrows(ResourceNotFoundException.class, () -> {
+                taskService.updateTaskAssignees(testPrincipal, testTaskId, testAssigneeIds);
+            });
+        }
     }
 
     @Test
-    void createTask__createsTaskWithNoColumn_ifBoardColumnIsNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testTaskStatus = new TaskStatus();
-        testTaskStatus.setCodename(testStatusCode);
-
-        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            null,
-            testStatusCode,
-            null
-        );
-
-        Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
-        );
-
-        Mockito.when(
-            taskStatusService.findOrCreate(testStatusCode)
-        ).thenReturn(testTaskStatus);
-
-        TaskDetailDto result = taskService.createTask(testCreateDto);
-        assert result.boardColumnId() == null;
-    }
-
-    @Test
-    void createTask__createsTaskWithColumn_ifBoardColumnIsNotNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testTaskStatus = new TaskStatus();
-        testTaskStatus.setCodename(testStatusCode);
-
-        BoardColumn testColumn = new BoardColumn();
-        testColumn.setId(UUID.randomUUID());
-        testColumn.setTaskStatus(testTaskStatus);
-
-        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            testColumn.getId(),
-            testStatusCode,
-            null
-        );
-
-        Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
-        );
-
-        Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
-
-        TaskDetailDto result = taskService.createTask(testCreateDto);
-        assert Objects.equals(result.boardColumnId(), testColumn.getId());
-    }
-
-    @Test
-    void createTask__setsStatusToDefault_whenStatusAndColumnAreNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            null,
-            null,
-            null
-        );
-
-        TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
-        TaskStatus defaultTaskStatus = new TaskStatus();
-        defaultTaskStatus.setCodename(defaultStatusCode);
-
-        Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
-        );
-
-        Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
-
-
-        TaskDetailDto result = taskService.createTask(testCreateDto);
-        assert result.status().equals(defaultStatusCode);
-    }
-
-    @Test
-    void createTask__setsStatusToColumnStatus_whenStatusAndColumnAreNotNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-
-        TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testColumnTaskStatus = new TaskStatus();
-        testColumnTaskStatus.setCodename(testColumnStatusCode);
-
-        BoardColumn testColumn = new BoardColumn();
-        testColumn.setId(UUID.randomUUID());
-        testColumn.setTaskStatus(testColumnTaskStatus);
-
-        CreateUpdateTaskDto testCreateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            testColumn.getId(),
-            testStatusCode,
-            null
-        );
-
-        Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
-
-        Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
-
-        TaskDetailDto result = taskService.createTask(testCreateDto);
-        assert result.status().equals(testColumnStatusCode);
-    }
-
-    @Test
-    void updateTask__updatesSimpleFields() {
-        Organization newOrganization = new Organization();
-        newOrganization.setId(UUID.randomUUID());
-        Mockito.when(organizationRepository.findById(newOrganization.getId()))
-            .thenReturn(Optional.of(newOrganization));
-
-        TaskStatusCode newStatusCode = TaskStatusCode.IN_PROGRESS;
-
-        Organization oldOrganization = new Organization();
-        oldOrganization.setId(UUID.randomUUID());
-
-        Task existingTask = new Task();
-        existingTask.setId(UUID.randomUUID());
-        existingTask.setOrganization(oldOrganization);
-        existingTask.setTitle("Old Title");
-        existingTask.setDescription("Old Description");
-
-        Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
-
-
-        CreateUpdateTaskDto updateDTO = new CreateUpdateTaskDto(
-            newOrganization.getId(),
-            "New Title",
-            "New Description",
-            null,
-            newStatusCode,
-            TaskPriority.LOW
-        );
-
-        TaskDetailDto result = taskService.updateTask(existingTask.getId(), updateDTO);
-        assert result.organizationId().equals(updateDTO.organizationId());
-        assert result.title().equals(updateDTO.title());
-        assert result.description().equals(updateDTO.description());
-        assert Objects.equals(result.priority(), TaskPriority.LOW);
-    }
-
-    @Test
-    void updateTask__removesColumn_ifBoardColumnIsNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-        Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testTaskStatus = new TaskStatus();
-        testTaskStatus.setCodename(testStatusCode);
-
-        BoardColumn oldColumn = new BoardColumn();
-        oldColumn.setTaskStatus(testTaskStatus);
-
-        Task existingTask = new Task();
-        existingTask.setId(UUID.randomUUID());
-        existingTask.setBoardColumn(oldColumn);
-        Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
-
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            null,
-            testStatusCode,
-            null
-        );
-
-        TaskDetailDto result = taskService.updateTask(existingTask.getId(), testUpdateDto);
-        assert result.boardColumnId() == null;
-    }
-
-    @Test
-    void updateTask__updatesColumn_ifBoardColumnIsNotNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-        Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testTaskStatus = new TaskStatus();
-        testTaskStatus.setCodename(testStatusCode);
-
-        BoardColumn testColumn = new BoardColumn();
-        testColumn.setId(UUID.randomUUID());
-        testColumn.setTaskStatus(testTaskStatus);
-        Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
-
-        Task testTask = new Task();
-        testTask.setId(UUID.randomUUID());
-        Mockito.when(taskRepository.findById(testTask.getId())).thenReturn(Optional.of(testTask));
-
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            testColumn.getId(),
-            testStatusCode,
-            null
-        );
-
-        TaskDetailDto result = taskService.updateTask(testTask.getId(), testUpdateDto);
-        assert Objects.equals(result.boardColumnId(), testColumn.getId());
-    }
-
-    @Test
-    void updateTask__setsStatusToDefault_whenStatusAndColumnAreNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        Task existingTask = new Task();
-        existingTask.setId(UUID.randomUUID());
-
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            null,
-            null,
-            null
-        );
-
-        TaskStatusCode defaultStatusCode = TaskStatusCode.BACKLOG;
-        TaskStatus defaultTaskStatus = new TaskStatus();
-        defaultTaskStatus.setCodename(defaultStatusCode);
-
-        Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
-
-        Mockito.when(
-            organizationRepository.findById(testOrganization.getId())).thenReturn(Optional.of(testOrganization)
-        );
-
-        Mockito.when(taskStatusService.findOrCreate(defaultStatusCode)).thenReturn(defaultTaskStatus);
-
-
-        TaskDetailDto result = taskService.updateTask(existingTask.getId(), testUpdateDto);
-        assert result.status().equals(defaultStatusCode);
-    }
-
-    @Test
-    void updateTask__setsStatusToColumnStatus_whenStatusAndColumnAreNotNull() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-
-        TaskStatusCode testColumnStatusCode = TaskStatusCode.IN_PROGRESS;
-        TaskStatus testColumnTaskStatus = new TaskStatus();
-        testColumnTaskStatus.setCodename(testColumnStatusCode);
-
-        BoardColumn testColumn = new BoardColumn();
-        testColumn.setId(UUID.randomUUID());
-        testColumn.setTaskStatus(testColumnTaskStatus);
-
-        Task existingTask = new Task();
-        existingTask.setId(UUID.randomUUID());
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            testColumn.getId(),
-            testStatusCode,
-            null
-        );
-
-        Mockito.when(taskRepository.findById(existingTask.getId())).thenReturn(Optional.of(existingTask));
-
-        Mockito.when(organizationRepository.findById(testOrganization.getId()))
-            .thenReturn(Optional.of(testOrganization));
-
-        Mockito.when(boardColumnRepository.findById(testColumn.getId()))
-            .thenReturn(Optional.of(testColumn));
-
-        TaskDetailDto result = taskService.updateTask(existingTask.getId(), testUpdateDto);
-        assert result.status().equals(testColumnStatusCode);
-    }
-
-    @Test
-    void updateTask__throwsErrorIfTaskWithTaskIdDoesNotExist() {
-        Organization testOrganization = new Organization();
-        testOrganization.setId(UUID.randomUUID());
-
-        TaskStatusCode testStatusCode = TaskStatusCode.IN_PROGRESS;
-
-        UUID testTaskId = UUID.randomUUID();
-
-        CreateUpdateTaskDto testUpdateDto = new CreateUpdateTaskDto(
-            testOrganization.getId(),
-            "Test Task",
-            "Test Description",
-            null,
-            testStatusCode,
-            null
-        );
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            taskService.updateTask(testTaskId, testUpdateDto);
-        });
-    }
-
-    @Test
-    void deleteTask__throwsErrorIfTaskWithTaskIdDoesNotExist() {
-        UUID testTaskId = UUID.randomUUID();
-        Mockito.when(taskRepository.existsById(testTaskId)).thenReturn(false);
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            taskService.deleteTask(testTaskId);
-        });
-    }
-
-    @Test
-    void updateTaskAssignees_works_with_validTaskId_and_assigneeIds() {
+    void throws_error_if_user_does_not_have_access_to_task() {
         UUID testTaskId = UUID.randomUUID();
         List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
         List<User> testUsers = new ArrayList<>();
@@ -430,47 +867,17 @@ class TaskServiceUnitTest {
         Task testTask = new Task();
         testTask.setId(testTaskId);
         Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
-        Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
-        taskService.updateTaskAssignees(testTaskId, testAssigneeIds);
 
-        assert testTask.getAssignees().equals(testUsers);
-    }
+        Principal testPrincipal = Mockito.mock(Principal.class);
+        Mockito
+            .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+            .thenReturn(false);
 
-    @Test
-    void updateTaskAssignees_clears_assignees_when_assigneeIds_is_empty() {
-        UUID testTaskId = UUID.randomUUID();
-        List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-        List<User> testUsers = new ArrayList<>();
-        for (UUID assigneeId : testAssigneeIds) {
-            User user = new User();
-            user.setId(assigneeId);
-            testUsers.add(user);
-        }
-        Task testTask = new Task();
-        testTask.setId(testTaskId);
-        testTask.setAssignees(testUsers);
-        Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
-        taskService.updateTaskAssignees(testTaskId, new ArrayList<>());
-
-        assert testTask.getAssignees().isEmpty();
-    }
-
-    @Test
-    void updateTaskAssignees_throws_exception_if_at_least_one_of_users_with_assignee_id_not_found() {
-        UUID testTaskId = UUID.randomUUID();
-        List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-        List<User> testUsers = new ArrayList<>();
-        User testUser = new User();
-        testUser.setId(testAssigneeIds.getFirst());
-        testUsers.add(testUser);
-
-        Task testTask = new Task();
-        testTask.setId(testTaskId);
-        Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
-        Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            taskService.updateTaskAssignees(testTaskId, testAssigneeIds);
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+            taskService.updateTaskAssignees(testPrincipal, testTaskId, testAssigneeIds);
         });
+
+        String expectedMessage = "You do not have permission to update this task";
+        Assertions.assertEquals(expectedMessage, exception.getMessage());
     }
 }

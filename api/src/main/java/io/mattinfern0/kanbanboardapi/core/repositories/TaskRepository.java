@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface TaskRepository extends JpaRepository<Task, UUID> {
     @Query("SELECT t FROM Task t WHERE t.boardColumn.board.id = :boardId")
     List<Task> findByBoardId(UUID boardId);
+
+    List<Task> findByOrganizationId(UUID organizationId);
 }

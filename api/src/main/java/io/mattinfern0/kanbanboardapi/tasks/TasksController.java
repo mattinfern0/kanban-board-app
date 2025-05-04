@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,49 +26,55 @@ public class TasksController {
     }
 
     @GetMapping("")
-    public List<TaskDetailDto> getTaskList() {
-        return taskService.getTaskList();
+    public List<TaskDetailDto> getTaskList(Principal principal, UUID organizationId) {
+        return taskService.getTaskList(principal, organizationId);
     }
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskDetailDto createTask(@Valid @RequestBody CreateUpdateTaskDto createUpdateTaskDto) {
-        return taskService.createTask(createUpdateTaskDto);
+    public TaskDetailDto createTask(
+        Principal principal,
+        @Valid @RequestBody CreateUpdateTaskDto createUpdateTaskDto
+    ) {
+        return taskService.createTask(principal, createUpdateTaskDto);
     }
 
     @GetMapping("/{taskId}")
-    public TaskDetailDto getTaskDetail(@PathVariable UUID taskId) {
-        return taskService.getTaskDetail(taskId);
+    public TaskDetailDto getTaskDetail(Principal principal, @PathVariable UUID taskId) {
+        return taskService.getTaskDetail(principal, taskId);
     }
 
     @PatchMapping("/{taskId}")
     public TaskDetailDto partialUpdateTask(
+        Principal principal,
         @PathVariable UUID taskId,
         @Valid @RequestBody CreateUpdateTaskDto createUpdateTaskDto
     ) {
-        return taskService.updateTask(taskId, createUpdateTaskDto);
+        return taskService.updateTask(principal, taskId, createUpdateTaskDto);
     }
 
     @PutMapping("/{taskId}/assignees")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTaskAssignees(
+        Principal principal,
         @PathVariable UUID taskId,
         @RequestBody @Valid List<@EntityWithIdExists(entityClass = User.class) UUID> assigneeIds
     ) {
-        taskService.updateTaskAssignees(taskId, assigneeIds);
+        taskService.updateTaskAssignees(principal, taskId, assigneeIds);
     }
 
     @DeleteMapping("/{taskId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTask(@PathVariable UUID taskId) {
-        taskService.deleteTask(taskId);
+    public void deleteTask(Principal principal, @PathVariable UUID taskId) {
+        taskService.deleteTask(principal, taskId);
     }
 
     @PutMapping("/{taskId}/column-position")
     public void updateTaskColumnPosition(
+        Principal principal,
         @PathVariable UUID taskId,
         @Valid @RequestBody UpdateTaskColumnPositionDTO updateTaskColumnPositionDTO
     ) {
-        taskService.updateTaskColumnPosition(taskId, updateTaskColumnPositionDTO);
+        taskService.updateTaskColumnPosition(principal, taskId, updateTaskColumnPositionDTO);
     }
 }
