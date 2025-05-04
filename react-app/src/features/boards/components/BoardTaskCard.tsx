@@ -13,7 +13,7 @@ export const BoardTaskCard = ({ boardTask, onClick }: BoardTaskCardProps) => {
   };
   const visibleAssignees = boardTask.assignees.slice(0, 3);
   const assigneeAvatars = visibleAssignees.map((assignee) => (
-    <Avatar key={assignee.userId} name={`${assignee.firstName} ${assignee.lastName}`} color="initials"></Avatar>
+    <Avatar key={assignee.userId} name={`${assignee.firstName} ${assignee.lastName}`} color="initials" />
   ));
 
   const numberExtraAssignees = boardTask.assignees.length - visibleAssignees.length;

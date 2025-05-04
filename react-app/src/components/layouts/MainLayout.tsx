@@ -5,6 +5,7 @@ import { AppShell, Avatar, Group, Menu, Title, UnstyledButton, useMantineTheme }
 import { useNavigate } from "react-router";
 import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
 import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
+import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,10 +17,20 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   const auth = useAuth();
   const navigate = useNavigate();
 
+  const currentUserDetailsQuery = useGetCurrentUserDetailsQuery();
+
   const onLogoutClick = async () => {
     await auth.logout();
     navigate("/login");
   };
+
+  let userAvatar = null;
+  if (currentUserDetailsQuery.isLoading || currentUserDetailsQuery.isError || !currentUserDetailsQuery.data) {
+    userAvatar = <Avatar component={UnstyledButton} variant="filled" />;
+  } else {
+    const fullName = `${currentUserDetailsQuery.data.firstName} ${currentUserDetailsQuery.data.lastName}`;
+    userAvatar = <Avatar name={fullName} color="initials" component={UnstyledButton} />;
+  }
 
   return (
     <AuthGuard>
@@ -38,9 +49,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
             <Group h="100%" justify="space-between" px="md">
               <Title variant="h6">Kanban App</Title>
               <Menu>
-                <Menu.Target>
-                  <Avatar component={UnstyledButton} variant="filled" />
-                </Menu.Target>
+                <Menu.Target>{userAvatar}</Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Item onClick={onLogoutClick}>Logout</Menu.Item>
                 </Menu.Dropdown>

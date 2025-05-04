@@ -1,4 +1,4 @@
-import { createTheme, MantineColorsTuple, virtualColor } from "@mantine/core";
+import { Avatar, createTheme, MantineColorsTuple, virtualColor } from "@mantine/core";
 
 const blueTeal: MantineColorsTuple = [
   "#e2fbff",
@@ -35,6 +35,13 @@ export const theme = createTheme({
       name: "success",
       light: "green",
       dark: "green",
+    }),
+  },
+  components: {
+    Avatar: Avatar.extend({
+      defaultProps: {
+        variant: "filled",
+      },
     }),
   },
 });
