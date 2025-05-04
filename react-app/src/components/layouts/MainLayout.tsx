@@ -47,7 +47,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         >
           <AppShell.Header>
             <Group h="100%" justify="space-between" px="md">
-              <Title variant="h6">Kanban App</Title>
+              <Title order={3}>Kanban App</Title>
               <Menu>
                 <Menu.Target>{userAvatar}</Menu.Target>
                 <Menu.Dropdown>

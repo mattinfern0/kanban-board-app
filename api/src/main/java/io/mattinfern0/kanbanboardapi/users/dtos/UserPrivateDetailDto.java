@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.users.dtos;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 public record UserPrivateDetailDto(
@@ -16,6 +17,8 @@ public record UserPrivateDetailDto(
     String lastName,
 
     @NotEmpty
-    UUID personalOrganizationId
+    UUID personalOrganizationId,
+
+    List<UserDetailOrganizationListItem> organizations
 ) {
 }
