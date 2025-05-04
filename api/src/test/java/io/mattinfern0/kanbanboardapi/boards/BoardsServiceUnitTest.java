@@ -67,7 +67,7 @@ class BoardsServiceUnitTest {
             UUID badId = UUID.randomUUID();
             Principal somePrincipal = Mockito.mock(Principal.class);
             Mockito
-                .when(userAccessService.canAccessBoard(Mockito.eq(somePrincipal), Mockito.any()))
+                .when(userAccessService.canAccessOrganization(Mockito.eq(somePrincipal), Mockito.any()))
                 .thenReturn(true);
 
             CreateBoardDto createBoardDto = new CreateBoardDto(
@@ -88,7 +88,7 @@ class BoardsServiceUnitTest {
 
             Principal somePrincipal = Mockito.mock(Principal.class);
             Mockito
-                .when(userAccessService.canAccessBoard(Mockito.eq(somePrincipal), Mockito.any()))
+                .when(userAccessService.canAccessOrganization(Mockito.eq(somePrincipal), Mockito.any()))
                 .thenReturn(true);
 
 
@@ -110,7 +110,7 @@ class BoardsServiceUnitTest {
             Organization testOrganization = createMockOrganization();
             Principal somePrincipal = Mockito.mock(Principal.class);
             Mockito
-                .when(userAccessService.canAccessBoard(Mockito.eq(somePrincipal), Mockito.any()))
+                .when(userAccessService.canAccessOrganization(Mockito.eq(somePrincipal), Mockito.any()))
                 .thenReturn(true);
 
             CreateBoardDto createBoardDto = new CreateBoardDto(
@@ -132,7 +132,7 @@ class BoardsServiceUnitTest {
 
             Principal somePrincipal = Mockito.mock(Principal.class);
             Mockito
-                .when(userAccessService.canAccessBoard(Mockito.eq(somePrincipal), Mockito.any()))
+                .when(userAccessService.canAccessOrganization(Mockito.eq(somePrincipal), Mockito.any()))
                 .thenReturn(true);
 
             CreateBoardDto createBoardDto = new CreateBoardDto(
@@ -162,7 +162,7 @@ class BoardsServiceUnitTest {
             Organization testOrganization = createMockOrganization();
             Principal somePrincipal = Mockito.mock(Principal.class);
             Mockito
-                .when(userAccessService.canAccessBoard(Mockito.eq(somePrincipal), Mockito.any()))
+                .when(userAccessService.canAccessOrganization(Mockito.eq(somePrincipal), Mockito.any()))
                 .thenReturn(true);
 
             CreateBoardDto createBoardDto = new CreateBoardDto(

@@ -87,7 +87,7 @@ public class BoardsService {
         Principal principal,
         @Valid CreateBoardDto createBoardDto
     ) {
-        if (!userAccessService.canAccessBoard(principal, createBoardDto.organizationId())) {
+        if (!userAccessService.canAccessOrganization(principal, createBoardDto.organizationId())) {
             throw new AccessDeniedException("You do not have permission to access this resource");
         }
 

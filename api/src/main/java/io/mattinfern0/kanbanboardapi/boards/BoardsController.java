@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.List;
@@ -41,9 +40,6 @@ public class BoardsController {
         Principal principal,
         @RequestBody @Valid CreateBoardDto createBoardDto
     ) {
-        if (!userAccessService.canAccessOrganization(principal, createBoardDto.organizationId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this resource");
-        }
         return boardsService.createNewBoard(principal, createBoardDto);
     }
 
