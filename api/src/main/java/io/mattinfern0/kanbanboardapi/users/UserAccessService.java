@@ -10,6 +10,7 @@ import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,36 +28,29 @@ public class UserAccessService {
         this.taskRepository = taskRepository;
     }
 
-    public boolean canAccessOrganization(UUID userId, UUID organizationId) {
-        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk();
-        membershipPk.setOrganizationId(organizationId);
-        membershipPk.setUserId(userId);
-        return organizationMembershipRepository.existsByPk(membershipPk);
-    }
-
-    public boolean canAccessOrganization(String firebaseId, UUID organizationId) {
-        Optional<User> user = userRepository.findByFirebaseId(firebaseId);
+    public boolean canAccessOrganization(Principal principal, UUID organizationId) {
+        Optional<User> user = userRepository.findByFirebaseId(principal.getName());
         if (user.isEmpty()) {
             return false;
         }
-        return canAccessOrganization(user.get().getId(), organizationId);
+
+        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk();
+        membershipPk.setOrganizationId(organizationId);
+        membershipPk.setUserId(user.get().getId());
+        return organizationMembershipRepository.existsByPk(membershipPk);
     }
 
-    public boolean canAccessBoard(String firebaseId, UUID boardId) {
+    public boolean canAccessBoard(Principal principal, UUID boardId) {
         Optional<Board> board = boardRepository.findById(boardId);
-        if (board.isEmpty()) {
-            return false;
-        }
-
-        return canAccessOrganization(firebaseId, board.get().getOrganization().getId());
+        return board
+            .filter(value -> canAccessOrganization(principal, value.getOrganization().getId()))
+            .isPresent();
     }
 
-    public boolean canAccessTask(String firebaseId, UUID taskId) {
+    public boolean canAccessTask(Principal principal, UUID taskId) {
         Optional<Task> task = taskRepository.findById(taskId);
-        if (task.isEmpty()) {
-            return false;
-        }
-
-        return canAccessOrganization(firebaseId, task.get().getOrganization().getId());
+        return task
+            .filter(value -> canAccessOrganization(principal, value.getOrganization().getId()))
+            .isPresent();
     }
 }

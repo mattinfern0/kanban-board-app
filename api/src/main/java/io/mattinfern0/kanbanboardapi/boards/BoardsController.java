@@ -32,39 +32,45 @@ public class BoardsController {
         @RequestParam(required = false) UUID organizationId,
         Principal principal
     ) {
-        if (organizationId == null) {
-            return List.of();
-        }
-
-        if (!userAccessService.canAccessOrganization(principal.getName(), organizationId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this resource");
-        }
-
-        return boardsService.getBoardList(organizationId);
+        return boardsService.getBoardList(principal, organizationId);
     }
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    BoardDetailDto createBoard(@RequestBody @Valid CreateBoardDto createBoardDto, Principal principal) {
-        if (!userAccessService.canAccessOrganization(principal.getName(), createBoardDto.organizationId())) {
+    BoardDetailDto createBoard(
+        Principal principal,
+        @RequestBody @Valid CreateBoardDto createBoardDto
+    ) {
+        if (!userAccessService.canAccessOrganization(principal, createBoardDto.organizationId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this resource");
         }
-        return boardsService.createNewBoard(createBoardDto);
+        return boardsService.createNewBoard(principal, createBoardDto);
     }
 
     @PutMapping("/{boardId}/header")
-    BoardDetailDto updateBoardHeader(@PathVariable UUID boardId, @RequestBody @Valid UpdateBoardHeaderDTO updateBoardHeaderDTO) {
-        return boardsService.updateBoard(boardId, updateBoardHeaderDTO);
+    BoardDetailDto updateBoardHeader(
+        Principal principal,
+        @PathVariable UUID boardId,
+        @RequestBody @Valid UpdateBoardHeaderDTO updateBoardHeaderDTO
+    ) {
+        return boardsService.updateBoard(principal, boardId, updateBoardHeaderDTO);
     }
 
     @GetMapping("/{boardId}")
-    BoardDetailDto getBoard(@PathVariable UUID boardId) {
-        return boardsService.getBoardDetail(boardId);
+    BoardDetailDto getBoard(
+        Principal principal,
+        @PathVariable UUID boardId
+    ) {
+        return boardsService.getBoardDetail(principal, boardId);
     }
 
     @DeleteMapping("/{boardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteBoard(@PathVariable UUID boardId, boolean deleteTasks) {
-        boardsService.deleteBoard(boardId, deleteTasks);
+    void deleteBoard(
+        Principal principal,
+        @PathVariable UUID boardId,
+        boolean deleteTasks
+    ) {
+        boardsService.deleteBoard(principal, boardId, deleteTasks);
     }
 }

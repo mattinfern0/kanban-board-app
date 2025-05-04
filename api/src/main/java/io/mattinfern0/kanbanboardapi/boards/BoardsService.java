@@ -17,11 +17,14 @@ import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
 import io.mattinfern0.kanbanboardapi.tasks.TaskStatusService;
+import io.mattinfern0.kanbanboardapi.users.UserAccessService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -36,21 +39,26 @@ public class BoardsService {
     private final BoardSummaryDtoMapper boardSummaryDtoMapper;
     private final BoardDetailDtoMapper boardDetailDtoMapper;
 
-
+    private final UserAccessService userAccessService;
     private final TaskStatusService taskStatusService;
 
     @Autowired
-    public BoardsService(BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, TaskRepository taskRepository, BoardSummaryDtoMapper boardSummaryDtoMapper, BoardDetailDtoMapper boardDetailDtoMapper, TaskStatusService taskStatusService) {
+    public BoardsService(BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, OrganizationRepository organizationRepository, TaskRepository taskRepository, BoardSummaryDtoMapper boardSummaryDtoMapper, BoardDetailDtoMapper boardDetailDtoMapper, UserAccessService userAccessService, TaskStatusService taskStatusService) {
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
         this.organizationRepository = organizationRepository;
         this.taskRepository = taskRepository;
         this.boardSummaryDtoMapper = boardSummaryDtoMapper;
         this.boardDetailDtoMapper = boardDetailDtoMapper;
+        this.userAccessService = userAccessService;
         this.taskStatusService = taskStatusService;
     }
 
-    BoardDetailDto getBoardDetail(UUID boardId) {
+    BoardDetailDto getBoardDetail(Principal principal, UUID boardId) {
+        if (!userAccessService.canAccessBoard(principal, boardId)) {
+            throw new AccessDeniedException("You do not have permission to access this resource");
+        }
+
         Board boardEntity = boardRepository
             .findById(boardId)
             .orElseThrow(() -> new ResourceNotFoundException(String.format("Board with id %s not found", boardId)));
@@ -58,34 +66,41 @@ public class BoardsService {
         return boardDetailDtoMapper.boardToBoardDetailDto(boardEntity);
     }
 
-    List<BoardSummaryDto> getUserBoardList(UUID userId) {
-        Organization userOrganization = organizationRepository
-            .findPersonalOrganization(userId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format("Personal organization for user id %s not found", userId)));
-
-        List<Board> boardEntities = boardRepository.findAllByOrganizationId(userOrganization.getId());
-        return boardSummaryDtoMapper.boardsToBoardSummaryDtos(boardEntities);
-    }
-
     List<BoardSummaryDto> getBoardList(
+        Principal principal,
         UUID organizationId
     ) {
+        if (organizationId == null) {
+            return List.of();
+        }
+
+        if (!userAccessService.canAccessOrganization(principal, organizationId)) {
+            throw new AccessDeniedException("You do not have permission to access this resource");
+        }
+
         List<Board> boardEntities = boardRepository.findAllByOrganizationId(organizationId);
         return boardSummaryDtoMapper.boardsToBoardSummaryDtos(boardEntities);
     }
 
     @Transactional
-    BoardDetailDto createNewBoard(@Valid CreateBoardDto createBoardDtoOld) {
+    BoardDetailDto createNewBoard(
+        Principal principal,
+        @Valid CreateBoardDto createBoardDto
+    ) {
+        if (!userAccessService.canAccessBoard(principal, createBoardDto.organizationId())) {
+            throw new AccessDeniedException("You do not have permission to access this resource");
+        }
+
         Organization organization = organizationRepository
-            .findById(createBoardDtoOld.organizationId())
+            .findById(createBoardDto.organizationId())
             .orElseThrow(() -> new ResourceNotFoundException(
-                String.format("Organization with id %s not found", createBoardDtoOld.organizationId()
+                String.format("Organization with id %s not found", createBoardDto.organizationId()
                 ))
             );
 
         Board newBoard = new Board();
         newBoard.setOrganization(organization);
-        newBoard.setTitle(createBoardDtoOld.title());
+        newBoard.setTitle(createBoardDto.title());
         boardRepository.save(newBoard);
 
         List<BoardColumn> newColumns = createDefaultNewBoardColumns();
@@ -97,7 +112,15 @@ public class BoardsService {
         return boardDetailDtoMapper.boardToBoardDetailDto(newBoard);
     }
 
-    BoardDetailDto updateBoard(UUID boardId, UpdateBoardHeaderDTO dto) {
+    BoardDetailDto updateBoard(
+        Principal principal,
+        UUID boardId,
+        UpdateBoardHeaderDTO dto
+    ) {
+        if (!userAccessService.canAccessBoard(principal, boardId)) {
+            throw new AccessDeniedException("You do not have permission to access this resource");
+        }
+
         Board board = boardRepository
             .findById(boardId)
             .orElseThrow(() -> new ResourceNotFoundException(String.format("Board with id %s not found", boardId)));
@@ -108,7 +131,15 @@ public class BoardsService {
     }
 
     @Transactional
-    void deleteBoard(UUID boardId, Boolean deleteTasks) {
+    void deleteBoard(
+        Principal principal,
+        UUID boardId,
+        Boolean deleteTasks
+    ) {
+        if (!userAccessService.canAccessBoard(principal, boardId)) {
+            throw new AccessDeniedException("You do not have permission to access this resource");
+        }
+
         List<Task> tasks = taskRepository.findByBoardId(boardId);
         tasks.forEach(task -> {
             task.setBoardColumn(null);
@@ -122,7 +153,6 @@ public class BoardsService {
         boardRepository.deleteById(boardId);
 
         if (deleteTasks) {
-
             taskRepository.deleteAll(tasks);
         }
     }

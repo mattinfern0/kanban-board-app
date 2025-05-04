@@ -4,17 +4,17 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardTaskDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.UpdateBoardHeaderDTO;
-import io.mattinfern0.kanbanboardapi.core.entities.Board;
-import io.mattinfern0.kanbanboardapi.core.entities.BoardColumn;
-import io.mattinfern0.kanbanboardapi.core.entities.Organization;
-import io.mattinfern0.kanbanboardapi.core.entities.Task;
+import io.mattinfern0.kanbanboardapi.core.entities.*;
+import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
 import io.mattinfern0.kanbanboardapi.core.repositories.*;
 import io.mattinfern0.kanbanboardapi.tasks.TaskStatusService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -24,6 +24,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.security.Principal;
 import java.util.List;
 
 @SpringBootTest()
@@ -51,8 +52,15 @@ public class BoardsControllerIntegrationTest {
 
     final TaskStatusService taskStatusService;
 
+    final UserRepository userRepository;
+
+    final static String MOCK_USER_FIREBASE_ID = "e39fARG2F9fqECcIXYjHnzzbZ652";
     @Autowired
-    public BoardsControllerIntegrationTest(OrganizationRepository organizationRepository, BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, TaskRepository taskRepository, TaskStatusRepository taskStatusRepository, EntityManager entityManager, BoardsController boardsController, TaskStatusService taskStatusService) {
+    private OrganizationMembershipRepository organizationMembershipRepository;
+
+
+    @Autowired
+    public BoardsControllerIntegrationTest(OrganizationRepository organizationRepository, BoardRepository boardRepository, BoardColumnRepository boardColumnRepository, TaskRepository taskRepository, TaskStatusRepository taskStatusRepository, EntityManager entityManager, BoardsController boardsController, TaskStatusService taskStatusService, UserRepository userRepository) {
         this.organizationRepository = organizationRepository;
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
@@ -61,6 +69,7 @@ public class BoardsControllerIntegrationTest {
         this.entityManager = entityManager;
         this.boardsController = boardsController;
         this.taskStatusService = taskStatusService;
+        this.userRepository = userRepository;
     }
 
     @BeforeEach
@@ -76,6 +85,7 @@ public class BoardsControllerIntegrationTest {
         boardColumnRepository.deleteAll();
         taskRepository.deleteAll();
         taskStatusRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     void createDefaultTaskStatuses() {
@@ -122,153 +132,209 @@ public class BoardsControllerIntegrationTest {
         return testBoard;
     }
 
-    @Test
-    @Transactional
-    public void testGetBoardWorksWithEmptyBoard() {
-        Board testBoard = createTestBoard();
-        BoardDetailDto response = boardsController.getBoard(testBoard.getId());
+    User createMockUser() {
+        Principal mockPrincipal = Mockito.mock(Principal.class);
+        Mockito.when(mockPrincipal.getName()).thenReturn(MOCK_USER_FIREBASE_ID);
 
-        assert response.id().equals(testBoard.getId());
-        assert response.title().equals(testBoard.getTitle());
+        User user = new User();
+        user.setFirebaseId(MOCK_USER_FIREBASE_ID);
+        user.setFirstName("Test First Name");
+        user.setLastName("Test Last Name");
 
-        for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
-            BoardColumn entity = testBoard.getBoardColumns().get(i);
-            BoardColumnDto dto = response.boardColumns().get(i);
-            assert entity.getId().equals(dto.id());
-            assert entity.getTitle().equals(dto.title());
+        userRepository.save(user);
+
+        return user;
+    }
+
+    Principal createPrincipal(User user) {
+        Principal mockPrincipal = Mockito.mock(Principal.class);
+        Mockito.when(mockPrincipal.getName()).thenReturn(user.getFirebaseId());
+        return mockPrincipal;
+    }
+
+    void addUserToOrganization(User user, Organization organization) {
+        OrganizationMembership membership = new OrganizationMembership();
+        OrganizationMembershipPk pk = new OrganizationMembershipPk();
+        pk.setOrganizationId(organization.getId());
+        pk.setUserId(user.getId());
+        membership.setPk(pk);
+        membership.setRole(OrganizationRole.MEMBER);
+        organizationMembershipRepository.save(membership);
+    }
+
+    @Nested
+    class GetBoardTests {
+        @Test
+        @Transactional
+        public void testGetBoardWorksWithEmptyBoard() {
+            Board testBoard = createTestBoard();
+            User testUser = createMockUser();
+            Principal testPrincipal = createPrincipal(testUser);
+            addUserToOrganization(testUser, testBoard.getOrganization());
+
+            BoardDetailDto response = boardsController.getBoard(testPrincipal, testBoard.getId());
+
+            assert response.id().equals(testBoard.getId());
+            assert response.title().equals(testBoard.getTitle());
+
+            for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
+                BoardColumn entity = testBoard.getBoardColumns().get(i);
+                BoardColumnDto dto = response.boardColumns().get(i);
+                assert entity.getId().equals(dto.id());
+                assert entity.getTitle().equals(dto.title());
+            }
+        }
+
+        @Test
+        @Transactional
+        public void testGetBoardWorksWithBoardWithTasks() {
+            Board testBoard = createTestBoard();
+            Task testTodoTask1 = new Task();
+            testTodoTask1.setTitle("Test Task 1");
+            testTodoTask1.setDescription("Testing");
+            testTodoTask1.setBoardColumn(testBoard.getBoardColumns().getFirst());
+            testTodoTask1.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.TODO));
+            testTodoTask1.setOrganization(testBoard.getOrganization());
+            taskRepository.save(testTodoTask1);
+
+            Task testTodoTask2 = new Task();
+            testTodoTask2.setTitle("Test Task 2");
+            testTodoTask2.setDescription("Testing");
+            testTodoTask2.setBoardColumn(testBoard.getBoardColumns().getFirst());
+            testTodoTask2.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.TODO));
+            testTodoTask2.setOrganization(testBoard.getOrganization());
+            taskRepository.save(testTodoTask2);
+
+            Task testCompletedTask = new Task();
+            testCompletedTask.setTitle("Test Completed 1");
+            testCompletedTask.setDescription("A completed task");
+            testCompletedTask.setBoardColumn(testBoard.getBoardColumns().get(2));
+            testCompletedTask.setTaskStatus(taskStatusService.findOrCreate(TaskStatusCode.COMPLETED));
+            testCompletedTask.setOrganization(testBoard.getOrganization());
+            taskRepository.save(testCompletedTask);
+
+            User testUser = createMockUser();
+            Principal testPrincipal = createPrincipal(testUser);
+            addUserToOrganization(testUser, testBoard.getOrganization());
+
+            BoardDetailDto response = boardsController.getBoard(testPrincipal, testBoard.getId());
+
+            assert response.id().equals(testBoard.getId());
+            assert response.title().equals(testBoard.getTitle());
+
+            for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
+                BoardColumn columnEntity = testBoard.getBoardColumns().get(i);
+                BoardColumnDto columnDto = response.boardColumns().get(i);
+                assert columnEntity.getId().equals(columnDto.id());
+                assert columnEntity.getTitle().equals(columnDto.title());
+
+                for (int j = 0; j < columnEntity.getTasks().size(); j++) {
+                    Task taskEntity = columnEntity.getTasks().get(j);
+                    BoardTaskDto taskDto = columnDto.tasks().get(j);
+
+                    assert taskEntity.getId().equals(taskDto.id());
+                    assert taskEntity.getTitle().equals(taskDto.title());
+                }
+            }
         }
     }
 
-    @Test
-    @Transactional
-    public void testGetBoardWorksWithBoardWithTasks() {
-        Board testBoard = createTestBoard();
-        Task testTodoTask1 = new Task();
-        testTodoTask1.setTitle("Test Task 1");
-        testTodoTask1.setDescription("Testing");
-        testTodoTask1.setBoardColumn(testBoard.getBoardColumns().get(0));
-        taskRepository.save(testTodoTask1);
+    @Nested
+    class DeleteBoardTests {
 
-        Task testTodoTask2 = new Task();
-        testTodoTask2.setTitle("Test Task 2");
-        testTodoTask2.setDescription("Testing");
-        testTodoTask2.setBoardColumn(testBoard.getBoardColumns().get(0));
-        taskRepository.save(testTodoTask2);
+        @Test
+        @Transactional
+        public void testDeleteBoard_setsTaskColumnToNullByDefault() {
+            Principal somePrincipal = Mockito.mock(Principal.class);
 
-        Task testCompletedTask = new Task();
-        testCompletedTask.setTitle("Test Completed 1");
-        testCompletedTask.setDescription("A completed task");
-        testCompletedTask.setBoardColumn(testBoard.getBoardColumns().get(2));
-        taskRepository.save(testCompletedTask);
+            Organization testOrganization = new Organization();
+            testOrganization.setDisplayName("Test Organization");
+            organizationRepository.save(testOrganization);
 
-        BoardDetailDto response = boardsController.getBoard(testBoard.getId());
+            Board testBoard = createTestBoard();
+            Task testTodoTask1 = new Task();
+            testTodoTask1.setTitle("Test Task 1");
+            testTodoTask1.setDescription("Testing");
+            testTodoTask1.setOrganization(testOrganization);
+            testBoard.getBoardColumns().getFirst().addTask(testTodoTask1);
+            taskRepository.save(testTodoTask1);
 
-        assert response.id().equals(testBoard.getId());
-        assert response.title().equals(testBoard.getTitle());
+            Task testTodoTask2 = new Task();
+            testTodoTask2.setTitle("Test Task 2");
+            testTodoTask2.setDescription("Testing");
+            testTodoTask2.setOrganization(testOrganization);
+            testBoard.getBoardColumns().getFirst().addTask(testTodoTask2);
+            taskRepository.save(testTodoTask2);
 
-        for (int i = 0; i < testBoard.getBoardColumns().size(); i++) {
-            BoardColumn columnEntity = testBoard.getBoardColumns().get(i);
-            BoardColumnDto columnDto = response.boardColumns().get(i);
-            assert columnEntity.getId().equals(columnDto.id());
-            assert columnEntity.getTitle().equals(columnDto.title());
+            Task testCompletedTask = new Task();
+            testCompletedTask.setTitle("Test Completed 1");
+            testCompletedTask.setDescription("A completed task");
+            testCompletedTask.setOrganization(testOrganization);
+            testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
+            taskRepository.save(testCompletedTask);
 
-            for (int j = 0; j < columnEntity.getTasks().size(); j++) {
-                Task taskEntity = columnEntity.getTasks().get(j);
-                BoardTaskDto taskDto = columnDto.tasks().get(j);
+            List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
 
-                assert taskEntity.getId().equals(taskDto.id());
-                assert taskEntity.getTitle().equals(taskDto.title());
+            boardsController.deleteBoard(somePrincipal, testBoard.getId(), false);
+
+            for (Task task : boardTasks) {
+                entityManager.refresh(task);
+                assert task.getBoardColumn() == null;
+            }
+        }
+
+        @Test
+        @Transactional
+        public void testDeleteBoard_deletesTasksIfDeleteTasksIsTrue() {
+            Principal somePrincipal = Mockito.mock(Principal.class);
+
+            Organization testOrganization = new Organization();
+            testOrganization.setDisplayName("Test Organization");
+            organizationRepository.save(testOrganization);
+
+            Board testBoard = createTestBoard();
+            Task testTodoTask1 = new Task();
+            testTodoTask1.setTitle("Test Task 1");
+            testTodoTask1.setDescription("Testing");
+            testTodoTask1.setOrganization(testOrganization);
+            testBoard.getBoardColumns().getFirst().addTask(testTodoTask1);
+            taskRepository.save(testTodoTask1);
+
+            Task testTodoTask2 = new Task();
+            testTodoTask2.setTitle("Test Task 2");
+            testTodoTask2.setDescription("Testing");
+            testTodoTask2.setOrganization(testOrganization);
+            testBoard.getBoardColumns().getFirst().addTask(testTodoTask2);
+            taskRepository.save(testTodoTask2);
+
+            Task testCompletedTask = new Task();
+            testCompletedTask.setTitle("Test Completed 1");
+            testCompletedTask.setDescription("A completed task");
+            testCompletedTask.setOrganization(testOrganization);
+            testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
+            taskRepository.save(testCompletedTask);
+
+            List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
+
+            boardsController.deleteBoard(somePrincipal, testBoard.getId(), true);
+
+            for (Task task : boardTasks) {
+                assert taskRepository.findById(task.getId()).isEmpty();
             }
         }
     }
 
     @Test
     @Transactional
-    public void testDeleteBoard_setsTaskColumnToNullByDefault() {
-        Organization testOrganization = new Organization();
-        testOrganization.setDisplayName("Test Organization");
-        organizationRepository.save(testOrganization);
+    public void test_updateBoardHeader_returnsUpdatedBoard() {
+        Principal somePrincipal = Mockito.mock(Principal.class);
 
-        Board testBoard = createTestBoard();
-        Task testTodoTask1 = new Task();
-        testTodoTask1.setTitle("Test Task 1");
-        testTodoTask1.setDescription("Testing");
-        testTodoTask1.setOrganization(testOrganization);
-        testBoard.getBoardColumns().get(0).addTask(testTodoTask1);
-        taskRepository.save(testTodoTask1);
-
-        Task testTodoTask2 = new Task();
-        testTodoTask2.setTitle("Test Task 2");
-        testTodoTask2.setDescription("Testing");
-        testTodoTask2.setOrganization(testOrganization);
-        testBoard.getBoardColumns().get(0).addTask(testTodoTask2);
-        taskRepository.save(testTodoTask2);
-
-        Task testCompletedTask = new Task();
-        testCompletedTask.setTitle("Test Completed 1");
-        testCompletedTask.setDescription("A completed task");
-        testCompletedTask.setOrganization(testOrganization);
-        testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
-        taskRepository.save(testCompletedTask);
-
-        List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
-
-        boardsController.deleteBoard(testBoard.getId(), false);
-
-        for (Task task : boardTasks) {
-            entityManager.refresh(task);
-            assert task.getBoardColumn() == null;
-        }
-    }
-
-    @Test
-    @Transactional
-    public void testDeleteBoard_deletesTasksIfDeleteTasksIsTrue() {
-        Organization testOrganization = new Organization();
-        testOrganization.setDisplayName("Test Organization");
-        organizationRepository.save(testOrganization);
-
-        Board testBoard = createTestBoard();
-        Task testTodoTask1 = new Task();
-        testTodoTask1.setTitle("Test Task 1");
-        testTodoTask1.setDescription("Testing");
-        testTodoTask1.setOrganization(testOrganization);
-        testBoard.getBoardColumns().get(0).addTask(testTodoTask1);
-        taskRepository.save(testTodoTask1);
-
-        Task testTodoTask2 = new Task();
-        testTodoTask2.setTitle("Test Task 2");
-        testTodoTask2.setDescription("Testing");
-        testTodoTask2.setOrganization(testOrganization);
-        testBoard.getBoardColumns().get(0).addTask(testTodoTask2);
-        taskRepository.save(testTodoTask2);
-
-        Task testCompletedTask = new Task();
-        testCompletedTask.setTitle("Test Completed 1");
-        testCompletedTask.setDescription("A completed task");
-        testCompletedTask.setOrganization(testOrganization);
-        testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
-        taskRepository.save(testCompletedTask);
-
-        List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
-
-        boardsController.deleteBoard(testBoard.getId(), true);
-
-        for (Task task : boardTasks) {
-            assert taskRepository.findById(task.getId()).isEmpty();
-        }
-    }
-
-    @Test
-    @Transactional
-    public void test_updateBoardHeade_returnsUpdatedBoard() {
         Board testBoard = createTestBoard();
         UpdateBoardHeaderDTO requestBody = new UpdateBoardHeaderDTO("New Title 23");
         assert !testBoard.getTitle().equals(requestBody.title());
-        BoardDetailDto response = boardsController.updateBoardHeader(testBoard.getId(), requestBody);
+        BoardDetailDto response = boardsController.updateBoardHeader(somePrincipal, testBoard.getId(), requestBody);
 
         assert response.id().equals(testBoard.getId());
         assert response.title().equals(requestBody.title());
     }
-
 }

@@ -52,4 +52,5 @@ public class UsersService {
             .orElseThrow(() -> new RuntimeException("User not found"));
         return userDTOMapper.entityToPrivateDetailDto(user);
     }
+
 }
