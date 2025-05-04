@@ -245,37 +245,35 @@ public class BoardsControllerIntegrationTest {
         @Test
         @Transactional
         public void testDeleteBoard_setsTaskColumnToNullByDefault() {
-            Principal somePrincipal = Mockito.mock(Principal.class);
-
-            Organization testOrganization = new Organization();
-            testOrganization.setDisplayName("Test Organization");
-            organizationRepository.save(testOrganization);
-
             Board testBoard = createTestBoard();
             Task testTodoTask1 = new Task();
             testTodoTask1.setTitle("Test Task 1");
             testTodoTask1.setDescription("Testing");
-            testTodoTask1.setOrganization(testOrganization);
+            testTodoTask1.setOrganization(testBoard.getOrganization());
             testBoard.getBoardColumns().getFirst().addTask(testTodoTask1);
             taskRepository.save(testTodoTask1);
 
             Task testTodoTask2 = new Task();
             testTodoTask2.setTitle("Test Task 2");
             testTodoTask2.setDescription("Testing");
-            testTodoTask2.setOrganization(testOrganization);
+            testTodoTask2.setOrganization(testBoard.getOrganization());
             testBoard.getBoardColumns().getFirst().addTask(testTodoTask2);
             taskRepository.save(testTodoTask2);
 
             Task testCompletedTask = new Task();
             testCompletedTask.setTitle("Test Completed 1");
             testCompletedTask.setDescription("A completed task");
-            testCompletedTask.setOrganization(testOrganization);
+            testCompletedTask.setOrganization(testBoard.getOrganization());
             testBoard.getBoardColumns().get(2).addTask(testCompletedTask);
             taskRepository.save(testCompletedTask);
 
             List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
 
-            boardsController.deleteBoard(somePrincipal, testBoard.getId(), false);
+            User testUser = createMockUser();
+            Principal testPrincipal = createPrincipal(testUser);
+            addUserToOrganization(testUser, testBoard.getOrganization());
+
+            boardsController.deleteBoard(testPrincipal, testBoard.getId(), false);
 
             for (Task task : boardTasks) {
                 entityManager.refresh(task);
@@ -286,13 +284,8 @@ public class BoardsControllerIntegrationTest {
         @Test
         @Transactional
         public void testDeleteBoard_deletesTasksIfDeleteTasksIsTrue() {
-            Principal somePrincipal = Mockito.mock(Principal.class);
-
-            Organization testOrganization = new Organization();
-            testOrganization.setDisplayName("Test Organization");
-            organizationRepository.save(testOrganization);
-
             Board testBoard = createTestBoard();
+            Organization testOrganization = testBoard.getOrganization();
             Task testTodoTask1 = new Task();
             testTodoTask1.setTitle("Test Task 1");
             testTodoTask1.setDescription("Testing");
@@ -316,7 +309,11 @@ public class BoardsControllerIntegrationTest {
 
             List<Task> boardTasks = taskRepository.findByBoardId(testBoard.getId());
 
-            boardsController.deleteBoard(somePrincipal, testBoard.getId(), true);
+            User testUser = createMockUser();
+            Principal testPrincipal = createPrincipal(testUser);
+            addUserToOrganization(testUser, testBoard.getOrganization());
+
+            boardsController.deleteBoard(testPrincipal, testBoard.getId(), true);
 
             for (Task task : boardTasks) {
                 assert taskRepository.findById(task.getId()).isEmpty();
@@ -327,12 +324,15 @@ public class BoardsControllerIntegrationTest {
     @Test
     @Transactional
     public void test_updateBoardHeader_returnsUpdatedBoard() {
-        Principal somePrincipal = Mockito.mock(Principal.class);
-
         Board testBoard = createTestBoard();
         UpdateBoardHeaderDTO requestBody = new UpdateBoardHeaderDTO("New Title 23");
         assert !testBoard.getTitle().equals(requestBody.title());
-        BoardDetailDto response = boardsController.updateBoardHeader(somePrincipal, testBoard.getId(), requestBody);
+
+        User testUser = createMockUser();
+        Principal testPrincipal = createPrincipal(testUser);
+        addUserToOrganization(testUser, testBoard.getOrganization());
+
+        BoardDetailDto response = boardsController.updateBoardHeader(testPrincipal, testBoard.getId(), requestBody);
 
         assert response.id().equals(testBoard.getId());
         assert response.title().equals(requestBody.title());

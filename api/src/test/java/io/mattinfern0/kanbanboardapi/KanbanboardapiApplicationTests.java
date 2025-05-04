@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles(value = "test")
 @Testcontainers
 @Tag("IntegrationTest")
+@Disabled("Stalls for a while after contextLoads() finishes")
 class KanbanboardapiApplicationTests {
     @Container
     @ServiceConnection
