@@ -127,9 +127,6 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
         return;
       }
 
-      console.debug("Updating task");
-      console.debug(data);
-
       const oldTaskData = taskDetailQuery.data;
 
       const newTaskData = structuredClone(taskDetailQuery.data);
@@ -162,7 +159,6 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
   );
 
   const onAssigneeBlur = () => {
-    console.debug("Assignee blur");
     if (taskId == null || updateTaskAssigneesMutation.isPending) {
       return;
     }

@@ -31,7 +31,6 @@ export const CreateBoardModal = (props: CreateTaskDialogProps) => {
 
   const onSubmit = handleSubmit(
     (data) => {
-      console.debug(data);
       createBoardMutation.mutate(
         { organizationId: props.organizationId, title: data.title },
         {
