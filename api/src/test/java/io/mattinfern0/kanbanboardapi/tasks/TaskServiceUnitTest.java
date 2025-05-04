@@ -59,6 +59,61 @@ class TaskServiceUnitTest {
     TaskService taskService;
 
     @Nested
+    class GetTaskListTests {
+        @Test
+        void organizationId_parameter_works() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
+            List<Task> tasksInOrganization = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                Task task = new Task();
+                task.setId(UUID.randomUUID());
+                task.setOrganization(testOrganization);
+                tasksInOrganization.add(task);
+            }
+
+            Mockito.when(taskRepository.findByOrganizationId(testOrganization.getId())).thenReturn(tasksInOrganization);
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganization.getId()))
+                .thenReturn(true);
+
+            List<TaskDetailDto> result = taskService.getTaskList(testPrincipal, testOrganization.getId());
+
+
+            Assertions.assertAll(
+                () -> Assertions.assertEquals(tasksInOrganization.size(), result.size()),
+                () -> {
+                    Set<UUID> responseIds = new HashSet<>();
+                    for (TaskDetailDto taskDetailDto : result) {
+                        responseIds.add(taskDetailDto.id());
+                    }
+
+                    Set<UUID> expectedIds = new HashSet<>();
+                    for (Task task : tasksInOrganization) {
+                        expectedIds.add(task.getId());
+                    }
+                    Assertions.assertEquals(expectedIds, responseIds);
+                }
+            );
+
+        }
+
+        @Test
+        void should_throw_error_if_user_does_not_have_access_to_organization() {
+            UUID testOrganizationId = UUID.randomUUID();
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessOrganization(testPrincipal, testOrganizationId))
+                .thenReturn(false);
+
+            assertThrows(AccessDeniedException.class, () -> taskService.getTaskList(testPrincipal, testOrganizationId));
+        }
+    }
+
+    @Nested
     class CreateTaskTests {
 
         @Test
