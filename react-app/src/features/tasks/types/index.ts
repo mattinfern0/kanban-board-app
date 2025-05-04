@@ -83,3 +83,7 @@ export const TaskDetailSchema = z.object({
 });
 
 export type TaskDetail = z.infer<typeof TaskDetailSchema>;
+
+export type GetTaskQueryParams = {
+  organizationId: string;
+};

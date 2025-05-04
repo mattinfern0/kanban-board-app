@@ -1,16 +1,17 @@
 import { client } from "@/lib/backendApi";
 import { useQuery } from "@tanstack/react-query";
-import { TaskDetail } from "../types";
+import { GetTaskQueryParams, TaskDetail } from "../types";
 
-export const getTaskList = async (): Promise<TaskDetail[]> => {
-  return await client.get(`tasks`).json();
+export const getTaskList = async (args: GetTaskQueryParams): Promise<TaskDetail[]> => {
+  const url = `tasks?${new URLSearchParams(args).toString()}`;
+  return await client.get(url).json();
 };
 
-export const useTaskListQuery = () => {
+export const useTaskListQuery = (args: GetTaskQueryParams) => {
   return useQuery({
     queryFn: async () => {
-      return await getTaskList();
+      return await getTaskList(args);
     },
-    queryKey: ["tasks"],
+    queryKey: ["tasks", args],
   });
 };

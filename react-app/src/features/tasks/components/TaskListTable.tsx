@@ -7,6 +7,7 @@ import { TaskStatus } from "@/types";
 import { TaskPriority } from "@/features/tasks/types";
 import { Group } from "@mantine/core";
 import { TaskPriorityIcon } from "@/features/tasks/components/TaskPriorityIcon.tsx";
+import { useParams } from "react-router";
 
 interface TableRowValues {
   id: string;
@@ -78,7 +79,11 @@ interface Props {
 }
 
 export const TaskListTable = (props: Readonly<Props>) => {
-  const taskListQuery = useTaskListQuery();
+  const params = useParams();
+
+  const taskListQuery = useTaskListQuery({
+    organizationId: params.organizationId || "",
+  });
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[0]);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<TableRowValues>>({
