@@ -777,19 +777,24 @@ class TaskServiceUnitTest {
     }
 
     @Nested
-    class UpdateTaskAssigneesTest {
+    class UpdateTaskAssigneesTests {
         @Test
         void works_with_validTaskId_and_assigneeIds() {
             UUID testTaskId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
             List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
             List<User> testUsers = new ArrayList<>();
             for (UUID assigneeId : testAssigneeIds) {
                 User user = new User();
                 user.setId(assigneeId);
+                Mockito.when(userAccessService.canAccessOrganization(user, testOrganization.getId())).thenReturn(true);
                 testUsers.add(user);
             }
             Task testTask = new Task();
             testTask.setId(testTaskId);
+            testTask.setOrganization(testOrganization);
             Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
             Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
 
@@ -806,6 +811,7 @@ class TaskServiceUnitTest {
         @Test
         void clears_assignees_when_assigneeIds_is_empty() {
             UUID testTaskId = UUID.randomUUID();
+
             List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
             List<User> testUsers = new ArrayList<>();
             for (UUID assigneeId : testAssigneeIds) {
@@ -832,6 +838,9 @@ class TaskServiceUnitTest {
         @Test
         void throws_exception_if_at_least_one_of_users_with_assignee_id_not_found() {
             UUID testTaskId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+
             List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
             List<User> testUsers = new ArrayList<>();
             User testUser = new User();
@@ -840,6 +849,7 @@ class TaskServiceUnitTest {
 
             Task testTask = new Task();
             testTask.setId(testTaskId);
+            testTask.setOrganization(testOrganization);
             Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
             Mockito.when(userRepository.findAllById(testAssigneeIds)).thenReturn(testUsers);
 
@@ -852,32 +862,65 @@ class TaskServiceUnitTest {
                 taskService.updateTaskAssignees(testPrincipal, testTaskId, testAssigneeIds);
             });
         }
-    }
 
-    @Test
-    void throws_error_if_user_does_not_have_access_to_task() {
-        UUID testTaskId = UUID.randomUUID();
-        List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-        List<User> testUsers = new ArrayList<>();
-        for (UUID assigneeId : testAssigneeIds) {
-            User user = new User();
-            user.setId(assigneeId);
-            testUsers.add(user);
+        @Test
+        void throws_error_if_user_does_not_have_access_to_task() {
+            UUID testTaskId = UUID.randomUUID();
+
+            List<UUID> testAssigneeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+            List<User> testUsers = new ArrayList<>();
+            for (UUID assigneeId : testAssigneeIds) {
+                User user = new User();
+                user.setId(assigneeId);
+                user.setFirebaseId(UUID.randomUUID().toString());
+
+                testUsers.add(user);
+            }
+            Task testTask = new Task();
+            testTask.setId(testTaskId);
+            Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+                .thenReturn(false);
+
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                taskService.updateTaskAssignees(testPrincipal, testTaskId, testAssigneeIds);
+            });
+
+            String expectedMessage = "You do not have permission to update this task";
+            Assertions.assertEquals(expectedMessage, exception.getMessage());
         }
-        Task testTask = new Task();
-        testTask.setId(testTaskId);
-        Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
 
-        Principal testPrincipal = Mockito.mock(Principal.class);
-        Mockito
-            .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
-            .thenReturn(false);
+        @Test
+        void throws_error_if_an_assignee_is_not_part_of_the_task_organization() {
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
-            taskService.updateTaskAssignees(testPrincipal, testTaskId, testAssigneeIds);
-        });
+            UUID testTaskId = UUID.randomUUID();
+            User testUser = new User();
+            testUser.setId(UUID.randomUUID());
+            Mockito.when(userAccessService.canAccessOrganization(testUser, testOrganization.getId())).thenReturn(false);
+            List<User> testUsers = List.of(testUser);
 
-        String expectedMessage = "You do not have permission to update this task";
-        Assertions.assertEquals(expectedMessage, exception.getMessage());
+            Task testTask = new Task();
+            testTask.setId(testTaskId);
+            testTask.setOrganization(testOrganization);
+            Mockito.when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(testTask));
+
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            Mockito
+                .when(userAccessService.canAccessTask(testPrincipal, testTask.getId()))
+                .thenReturn(true);
+            Mockito.when(userRepository.findAllById(Mockito.any())).thenReturn(testUsers);
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                taskService.updateTaskAssignees(testPrincipal, testTaskId, List.of(testUser.getId()));
+            });
+
+            String expectedMessage = "Some of the assignees do not belong to the task's organization";
+            Assertions.assertEquals(expectedMessage, exception.getMessage());
+        }
     }
 }

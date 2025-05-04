@@ -178,9 +178,18 @@ public class TaskService {
             task.getAssignees().clear();
         } else {
             List<User> assignees = userRepository.findAllById(assigneeIds);
+
             if (assignees.size() != assigneeIds.size()) {
                 throw new ResourceNotFoundException("One or more assignees not found");
             }
+
+            List<User> unauthorizedAssignees = assignees.stream()
+                .filter(user -> !userAccessService.canAccessOrganization(user, task.getOrganization().getId()))
+                .toList();
+            if (!unauthorizedAssignees.isEmpty()) {
+                throw new IllegalArgumentException("Some of the assignees do not belong to the task's organization");
+            }
+
             task.setAssignees(assignees);
         }
         taskRepository.saveAndFlush(task);

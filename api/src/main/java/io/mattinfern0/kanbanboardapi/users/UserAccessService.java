@@ -30,13 +30,13 @@ public class UserAccessService {
 
     public boolean canAccessOrganization(Principal principal, UUID organizationId) {
         Optional<User> user = userRepository.findByFirebaseId(principal.getName());
-        if (user.isEmpty()) {
-            return false;
-        }
+        return user.filter(value -> canAccessOrganization(value, organizationId)).isPresent();
+    }
 
+    public boolean canAccessOrganization(User user, UUID organizationId) {
         OrganizationMembershipPk membershipPk = new OrganizationMembershipPk();
         membershipPk.setOrganizationId(organizationId);
-        membershipPk.setUserId(user.get().getId());
+        membershipPk.setUserId(user.getId());
         return organizationMembershipRepository.existsByPk(membershipPk);
     }
 

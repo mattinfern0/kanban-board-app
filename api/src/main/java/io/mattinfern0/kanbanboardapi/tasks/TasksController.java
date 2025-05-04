@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.List;
@@ -60,7 +61,11 @@ public class TasksController {
         @PathVariable UUID taskId,
         @RequestBody @Valid List<@EntityWithIdExists(entityClass = User.class) UUID> assigneeIds
     ) {
-        taskService.updateTaskAssignees(principal, taskId, assigneeIds);
+        try {
+            taskService.updateTaskAssignees(principal, taskId, assigneeIds);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @DeleteMapping("/{taskId}")
