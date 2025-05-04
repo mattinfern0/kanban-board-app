@@ -10,6 +10,6 @@ export const useOrganizationDetailQuery = (organizationId: string, options?: { e
   return useQuery({
     queryFn: () => getOrganizationDetail(organizationId),
     queryKey: ["organizations", organizationId],
-    enabled: options?.enabled || true,
+    enabled: options ? options.enabled : true,
   });
 };
