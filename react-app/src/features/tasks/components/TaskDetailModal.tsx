@@ -6,7 +6,6 @@ import { useDeleteTaskMutation } from "@/features/tasks/apis/deleteTask.ts";
 import { TaskPriority, UpdateTaskFormSchema, UpdateTaskFormValues } from "@/features/tasks/types";
 import { Controller, useForm } from "react-hook-form";
 import { useUpdateTaskMutation } from "@/features/tasks/apis/updateTask.ts";
-import { useGetUsersQuery } from "@/features/users/apis/getUsers.ts";
 import { useUpdateTaskAssigneesMutation } from "@/features/tasks/apis/updateTaskAssignees.ts";
 import { ActionIcon, Badge, Grid, Group, Menu, Modal, Stack, Text, TextInput, Title } from "@mantine/core";
 import { AssigneeSelect } from "@/features/tasks/components/AssigneeSelect.tsx";
@@ -18,6 +17,7 @@ import { TaskDescriptionEditor } from "@/features/tasks/components/TaskDescripti
 import { RichTextEditor } from "@mantine/tiptap";
 import { Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useOrganizationDetailQuery } from "@/features/organizations/apis/getOrganizationDetail.ts";
 
 interface BoardTaskDetailProps {
   open: boolean;
@@ -99,10 +99,9 @@ const DescriptionView = (props: Readonly<DescriptionViewProps>) => {
 export const TaskDetailModal = (props: BoardTaskDetailProps) => {
   const { open, taskId, onClose, showBoardName } = props;
   const taskDetailQuery = useTaskDetailQuery(taskId);
-  const organizationUsersQuery = useGetUsersQuery(
-    { organizationId: taskDetailQuery.data?.organizationId },
-    { enabled: !!taskDetailQuery.data?.organizationId },
-  );
+  const organizationDetailsQuery = useOrganizationDetailQuery(taskDetailQuery.data?.organizationId || "", {
+    enabled: !!taskDetailQuery.data?.organizationId,
+  });
   const updateTaskMutation = useUpdateTaskMutation();
   const updateTaskAssigneesMutation = useUpdateTaskAssigneesMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
@@ -201,7 +200,12 @@ export const TaskDetailModal = (props: BoardTaskDetailProps) => {
 
   let dialogContent: React.ReactNode;
 
-  const assigneeOptions = organizationUsersQuery.data || [];
+  const assigneeOptions =
+    organizationDetailsQuery.data?.members.map((member) => ({
+      id: member.userId,
+      firstName: member.firstName,
+      lastName: member.lastName,
+    })) || [];
 
   if (taskDetailQuery.isPending) {
     dialogContent = <Title>Loading...</Title>;
