@@ -37,6 +37,7 @@ export const theme = createTheme({
       dark: "green",
     }),
   },
+  primaryColor: "blueTeal",
   components: {
     Avatar: Avatar.extend({
       defaultProps: {

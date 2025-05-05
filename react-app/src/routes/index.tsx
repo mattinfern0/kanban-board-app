@@ -9,6 +9,7 @@ import { TaskListView } from "@/features/tasks/routes/TaskListView.tsx";
 import { LoginView } from "@/features/auth/routes/LoginView.tsx";
 import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
 import { IndexView } from "@/routes/IndexView.tsx";
+import { SwitchOrganizationView } from "@/features/organizations/routes/SwitchOrganizationView.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -33,6 +34,14 @@ export const routes: RouteObject[] = [
       <AuthGuard>
         <IndexView />
       </AuthGuard>
+    ),
+  },
+  {
+    path: "/my/organizations",
+    element: (
+      <MainLayout>
+        <SwitchOrganizationView />
+      </MainLayout>
     ),
   },
   {

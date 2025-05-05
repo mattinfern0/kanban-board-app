@@ -1,6 +1,5 @@
 package io.mattinfern0.kanbanboardapi.users;
 
-import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.organizations.OrganizationService;
@@ -41,9 +40,7 @@ public class UsersService {
         user.setLastName(signUpDto.lastName());
         userRepository.saveAndFlush(user);
 
-        Organization personalOrganization = organizationService.createPersonalOrganization(user);
-
-
+        organizationService.createPersonalOrganization(user);
         return userDTOMapper.entityToSummaryDto(user);
     }
 

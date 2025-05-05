@@ -13,4 +13,10 @@ export type UserPrivateDetail = {
   firstName: string;
   lastName: string;
   personalOrganizationId: string;
+  organizations: UserDetailOrganizationItem[];
+};
+
+export type UserDetailOrganizationItem = {
+  id: string;
+  displayName: string;
 };

@@ -1,8 +1,8 @@
 import React from "react";
 import { AppSidebar } from "@/components/navs/AppSidebar.tsx";
 import { SnackbarProvider } from "notistack";
-import { AppShell, Avatar, Group, Menu, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
-import { useNavigate } from "react-router";
+import { AppShell, Avatar, Group, Menu, Text, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
 import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
 import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
@@ -47,7 +47,13 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         >
           <AppShell.Header>
             <Group h="100%" justify="space-between" px="md">
-              <Title order={3}>Kanban App</Title>
+              <Group gap="md" align="center">
+                <Title order={3}>Kanban App</Title>
+                <Text component={Link} to="/my/organizations" c="white">
+                  Organizations
+                </Text>
+              </Group>
+
               <Menu>
                 <Menu.Target>{userAvatar}</Menu.Target>
                 <Menu.Dropdown>

@@ -3,6 +3,7 @@ package io.mattinfern0.kanbanboardapi.core.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -24,6 +25,9 @@ public class User {
 
     @OneToOne(mappedBy = "personalForUser")
     private Organization personalOrganization;
+
+    @OneToMany(mappedBy = "user")
+    List<OrganizationMembership> memberships;
 
     public User() {
         this.id = UUID.randomUUID();
@@ -67,5 +71,15 @@ public class User {
 
     public void setPersonalOrganization(Organization personalOrganization) {
         this.personalOrganization = personalOrganization;
+    }
+
+    public List<OrganizationMembership> getMemberships() {
+        return memberships;
+    }
+
+    public List<Organization> getOrganizations() {
+        return this.getMemberships().stream()
+            .map(OrganizationMembership::getOrganization)
+            .toList();
     }
 }
