@@ -1,4 +1,4 @@
-import { BoardColumn as BoardColumnType, BoardDetail, BoardTask } from "@/features/boards/types";
+import { BoardColumn as BoardColumnType, BoardTask } from "@/features/boards/types";
 import React, { useEffect, useState } from "react";
 import {
   Active,
@@ -21,35 +21,39 @@ import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { arrayMove } from "@dnd-kit/sortable";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
 import { Grid } from "@mantine/core";
+import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 
-interface BoardColumnWorkspaceProps {
-  board: BoardDetail;
-  handleTaskCardClick: (task: BoardTask) => void;
-}
-
-interface UseBoardColumnWorkspaceReturn {
+interface UseBoardWorkspaceReturn {
   draggingTask: BoardTask | null;
   handleDragStart: (event: DragStartEvent) => void;
   handleDragOver: (event: DragOverEvent) => void;
   handleDragEnd: (event: DragEndEvent) => void;
   boardColumns: BoardColumnType[];
+  error: Error | null;
+  isPending: boolean;
+  isError: boolean;
 }
 
-const useBoardColumnWorkspace = (board: BoardDetail): UseBoardColumnWorkspaceReturn => {
+const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
+  const boardQuery = useBoardQuery(boardId);
+  const board = boardQuery.data;
+
   const [draggingTaskId, setDraggingTaskId] = useState<UniqueIdentifier | null>(null);
   const { enqueueSnackbar } = useSnackbar();
   const updateTaskColumnPositionMutation = useUpdateTaskColumnPositionMutation();
 
-  // Need to have a separate local state to make the DND UI work properly
-  const [localBoardColumns, setLocalBoardColumns] = useState<BoardColumnType[]>(board.boardColumns);
+  const boardColumns = board?.boardColumns;
 
-  const previousBoardColumns = usePrevious(board.boardColumns);
+  // Need to have a separate local state to make the DND UI work properly
+  const [localBoardColumns, setLocalBoardColumns] = useState<BoardColumnType[]>(boardColumns || []);
+
+  const previousBoardColumns = usePrevious(boardColumns);
   useEffect(() => {
-    if (deepEqual(board.boardColumns, previousBoardColumns)) {
+    if (deepEqual(boardColumns, previousBoardColumns)) {
       return;
     }
-    setLocalBoardColumns(board.boardColumns);
-  }, [board.boardColumns, previousBoardColumns]);
+    setLocalBoardColumns(boardColumns || []);
+  }, [boardColumns, previousBoardColumns]);
 
   const taskIdToTasks: Record<string, BoardTask> = {};
   const taskIdToBoardColumn: Record<string, BoardColumnType> = {};
@@ -62,10 +66,10 @@ const useBoardColumnWorkspace = (board: BoardDetail): UseBoardColumnWorkspaceRet
   }
 
   const getContainingBoardColumn = (dragElementId: UniqueIdentifier): BoardColumnType | undefined => {
-    if (dragElementId == undefined) {
+    if (dragElementId == undefined || boardColumns == null) {
       return undefined;
     }
-    return taskIdToBoardColumn[dragElementId] || board.boardColumns.find((c) => c.id === dragElementId);
+    return taskIdToBoardColumn[dragElementId] || boardColumns.find((c) => c.id === dragElementId);
   };
 
   const isDragElementTask = (active: Active): boolean => {
@@ -184,12 +188,22 @@ const useBoardColumnWorkspace = (board: BoardDetail): UseBoardColumnWorkspaceRet
     handleDragStart,
     handleDragOver,
     handleDragEnd,
+
+    error: boardQuery.error,
+    isPending: boardQuery.isPending,
+    isError: boardQuery.isError,
   };
 };
 
-export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
-  const { board, handleTaskCardClick } = props;
-  const { draggingTask, handleDragStart, handleDragOver, handleDragEnd, boardColumns } = useBoardColumnWorkspace(board);
+interface BoardWorkspaceProps {
+  boardId: string;
+  handleTaskCardClick: (task: BoardTask) => void;
+}
+
+export const BoardWorkspace = (props: BoardWorkspaceProps) => {
+  const { boardId, handleTaskCardClick } = props;
+  const { draggingTask, handleDragStart, handleDragOver, handleDragEnd, boardColumns, isError, isPending } =
+    useBoardWorkspace(boardId);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       // Differentiate between dragging a task vs. clicking to open the task detail dialog
@@ -199,6 +213,11 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
     }),
   );
 
+  if (isPending) {
+    return <div>Loading...</div>;
+  } else if (isError) {
+    return <div>Error loading board</div>;
+  }
   const gridColumnSize = 12 / boardColumns.length;
   const columnElements = boardColumns.map((c) => (
     <Grid.Col key={c.id} span={gridColumnSize}>
@@ -206,10 +225,9 @@ export const BoardColumnWorkspace = (props: BoardColumnWorkspaceProps) => {
     </Grid.Col>
   ));
 
-  let dragOverlayElement: React.ReactNode | null = null;
-  if (draggingTask) {
-    dragOverlayElement = <BoardTaskCard boardTask={draggingTask} onClick={() => {}} />;
-  }
+  const dragOverlayElement: React.ReactNode | null = draggingTask ? (
+    <BoardTaskCard boardTask={draggingTask} onClick={() => {}} />
+  ) : null;
 
   return (
     <DndContext

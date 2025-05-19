@@ -4,13 +4,13 @@ import { useState } from "react";
 import { BoardTask } from "@/features/boards/types";
 import { TaskDetailModal } from "@/features/tasks/components/TaskDetailModal.tsx";
 import { CreateTaskModal } from "@/features/tasks/components/CreateTaskModal.tsx";
-import { BoardColumnWorkspace } from "@/features/boards/components/BoardColumnWorkspace.tsx";
+import { BoardWorkspace } from "@/features/boards/components/BoardWorkspace.tsx";
 import { ActionIcon, Breadcrumbs, Button, Group, Text, Title } from "@mantine/core";
 import { IconSettingsFilled } from "@tabler/icons-react";
 
 export const BoardView = () => {
-  const { boardId, organizationId } = useParams();
-  const boardQuery = useBoardQuery(boardId || "");
+  const { boardId = "", organizationId } = useParams();
+  const boardQuery = useBoardQuery(boardId);
   const [showTaskDialog, setShowTaskDialog] = useState<boolean>(false);
   const [taskDialogTaskId, setTaskDialogTaskId] = useState<string | null>(null);
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState<boolean>(false);
@@ -71,7 +71,7 @@ export const BoardView = () => {
         </Group>
       </Group>
 
-      <BoardColumnWorkspace board={board} handleTaskCardClick={onTaskCardClick} />
+      <BoardWorkspace boardId={boardId} handleTaskCardClick={onTaskCardClick} />
     </>
   );
 };
