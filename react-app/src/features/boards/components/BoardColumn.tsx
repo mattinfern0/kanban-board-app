@@ -22,24 +22,29 @@ export const BoardColumn = ({ boardColumn, onTaskCardClick }: BoardColumnProps) 
   });
 
   return (
-    <Card withBorder>
-      <Group justify="space-between" mb="1rem" align="center">
-        <Text size="xl">{boardColumn.title}</Text>
-        {boardColumn.tasks.length > 0 && (
-          <Badge size="xl" color="gray">
-            {boardColumn.tasks.length}
-          </Badge>
-        )}
-      </Group>
+    <Stack>
+      <Card shadow="md">
+        <Group justify="space-between" align="center">
+          <Text size="xl">{boardColumn.title}</Text>
+          {boardColumn.tasks.length > 0 && (
+            <Badge size="xl" color="gray">
+              {boardColumn.tasks.length}
+            </Badge>
+          )}
+        </Group>
+      </Card>
 
       <SortableContext id={boardColumn.id} items={boardColumn.tasks} strategy={verticalListSortingStrategy}>
         <Stack
           ref={setNodeRef}
-          style={{ height: "60vh", backgroundColor: "lightgray", padding: "3px", overflowY: "scroll" }}
+          style={{
+            padding: "3px",
+            borderRadius: "3px",
+          }}
         >
           {cardElements}
         </Stack>
       </SortableContext>
-    </Card>
+    </Stack>
   );
 };

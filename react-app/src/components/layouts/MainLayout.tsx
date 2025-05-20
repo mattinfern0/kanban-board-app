@@ -43,12 +43,15 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
             header: {
               backgroundColor: theme.colors.blueTeal[4],
             },
+            main: {
+              backgroundColor: theme.colors.corkBrown[1],
+            },
           }}
         >
           <AppShell.Header>
             <Group h="100%" justify="space-between" px="md">
               <Group gap="md" align="center">
-                <Title order={3}>Kanban App</Title>
+                <Title order={3}>CorkScreen</Title>
                 <Text component={Link} to="/my/organizations" c="white">
                   Organizations
                 </Text>

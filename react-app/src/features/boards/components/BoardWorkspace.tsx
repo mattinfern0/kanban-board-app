@@ -20,7 +20,7 @@ import deepEqual from "deep-equal";
 import { BoardColumn } from "@/features/boards/components/BoardColumn.tsx";
 import { arrayMove } from "@dnd-kit/sortable";
 import { BoardTaskCard } from "@/features/boards/components/BoardTaskCard.tsx";
-import { Grid } from "@mantine/core";
+import { Grid, useMantineTheme } from "@mantine/core";
 import { useBoardQuery } from "@/features/boards/apis/getBoard.ts";
 
 interface UseBoardWorkspaceReturn {
@@ -202,6 +202,7 @@ interface BoardWorkspaceProps {
 
 export const BoardWorkspace = (props: BoardWorkspaceProps) => {
   const { boardId, handleTaskCardClick } = props;
+  const theme = useMantineTheme();
   const { draggingTask, handleDragStart, handleDragOver, handleDragEnd, boardColumns, isError, isPending } =
     useBoardWorkspace(boardId);
   const sensors = useSensors(
@@ -220,7 +221,11 @@ export const BoardWorkspace = (props: BoardWorkspaceProps) => {
   }
   const gridColumnSize = 12 / boardColumns.length;
   const columnElements = boardColumns.map((c) => (
-    <Grid.Col key={c.id} span={gridColumnSize}>
+    <Grid.Col
+      key={c.id}
+      span={gridColumnSize}
+      style={{ border: `3px solid`, borderColor: theme.colors.darkBrown[8], minHeight: "80vh" }}
+    >
       <BoardColumn boardColumn={c} onTaskCardClick={handleTaskCardClick} />
     </Grid.Col>
   ));
