@@ -24,7 +24,7 @@ export const BoardTaskCard = ({ boardTask, onClick }: BoardTaskCardProps) => {
       shadow="paper"
       style={{
         cursor: "pointer",
-        backgroundColor: theme.colors.yellow[0],
+        backgroundColor: theme.colors.stickyNote[0],
       }}
     >
       <Stack>

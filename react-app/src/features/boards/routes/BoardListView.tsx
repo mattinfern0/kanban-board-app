@@ -1,4 +1,4 @@
-import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Card, Group, Stack, Text, Title, useMantineTheme } from "@mantine/core";
 import { useBoardListQuery } from "@/features/boards/apis/getBoardList.ts";
 import { ReactNode, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -6,6 +6,7 @@ import { CreateBoardModal } from "@/features/boards/components/CreateBoardModal.
 import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
 export const BoardListView = () => {
+  const theme = useMantineTheme();
   const params = useParams();
 
   const userDetailsQuery = useGetCurrentUserDetailsQuery();
@@ -36,15 +37,13 @@ export const BoardListView = () => {
         key={board.id}
         component={Link}
         to={`/${board.organizationId}/boards/${board.id}`}
-        style={{ cursor: "pointer" }}
-        withBorder
+        style={{ cursor: "pointer", backgroundColor: theme.colors.stickyNote[0] }}
+        shadow="paper"
       >
         <Text size="xl">{board.title}</Text>
       </Card>
     ));
-    listElement = (
-      <Stack style={{ backgroundColor: "lightgray", padding: "1rem", minHeight: "75vh" }}>{boardCards}</Stack>
-    );
+    listElement = <Stack style={{ padding: "1rem", minHeight: "75vh" }}>{boardCards}</Stack>;
   }
 
   return (
