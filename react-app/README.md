@@ -6,5 +6,5 @@ Prerequisities
 
 Steps
 1. Run ```npm ci```
-2. Run npm run dev
+2. Run `npm run dev`
 3. Access the site at http://localhost:3000
