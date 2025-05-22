@@ -44,7 +44,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
               backgroundColor: theme.colors.blueTeal[4],
             },
             main: {
-              backgroundColor: theme.colors.corkBrown[1],
+              backgroundColor: theme.colors.corkBrown[2],
             },
           }}
         >
