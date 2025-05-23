@@ -4,11 +4,13 @@ import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
+import io.mattinfern0.kanbanboardapi.core.exceptions.IllegalOperationException;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.OrganizationDetailsDto;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.OrganizationMemberDto;
+import io.mattinfern0.kanbanboardapi.organizations.dtos.UpdateMembershipDto;
 import io.mattinfern0.kanbanboardapi.organizations.mappers.OrganizationDtoMapper;
 import io.mattinfern0.kanbanboardapi.users.UserAccessService;
 import org.junit.jupiter.api.Assertions;
@@ -166,6 +168,311 @@ class OrganizationServiceTest {
 
                     Assertions.assertEquals(expectedSet, actualSet);
                 }
+            );
+        }
+    }
+
+    @Nested
+    class UpdateMembershipTests {
+        @Test
+        void correctly_updates_membership() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+            User ownerUser = new User();
+            ownerUser.setId(UUID.randomUUID());
+            OrganizationMembership ownerMembership = new OrganizationMembership(testOrganization, ownerUser);
+            ownerMembership.setRole(OrganizationRole.OWNER);
+            testOrganization.setMemberships(List.of(ownerMembership));
+
+            UpdateMembershipDto testDto = new UpdateMembershipDto(
+                OrganizationRole.MEMBER
+            );
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.findById(Mockito.any()))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.countMembersWithRoleInOrganization(testOrganizationId, OrganizationRole.OWNER))
+                .thenReturn(2);
+
+
+            ArgumentCaptor<OrganizationMembership> memberArgumentCaptor = ArgumentCaptor.forClass(OrganizationMembership.class);
+            organizationService.updateMembership(testPrincipal, testOrganizationId, ownerUser.getId(), testDto);
+
+            Mockito.verify(organizationMembershipRepository).saveAndFlush(memberArgumentCaptor.capture());
+            OrganizationMembership updatedMembership = memberArgumentCaptor.getValue();
+            Assertions.assertEquals(OrganizationRole.MEMBER, updatedMembership.getRole());
+
+        }
+
+        @Test
+        void throws_error_organization_wont_have_any_owners_after_update() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+            User ownerUser = new User();
+            ownerUser.setId(UUID.randomUUID());
+            OrganizationMembership ownerMembership = new OrganizationMembership(testOrganization, ownerUser);
+            ownerMembership.setRole(OrganizationRole.OWNER);
+            testOrganization.setMemberships(List.of(ownerMembership));
+
+            UpdateMembershipDto testDto = new UpdateMembershipDto(
+                OrganizationRole.MEMBER
+            );
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.findById(Mockito.any()))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.countMembersWithRoleInOrganization(testOrganizationId, OrganizationRole.OWNER))
+                .thenReturn(1);
+
+            Exception ex = Assertions.assertThrows(
+                IllegalOperationException.class,
+                () -> organizationService.updateMembership(testPrincipal, testOrganizationId, ownerUser.getId(), testDto)
+            );
+
+            Assertions.assertEquals(
+                "At least 1 member must be an owner in the organization",
+                ex.getMessage()
+            );
+        }
+
+        @Test
+        void throws_error_if_principal_is_not_an_owner_of_the_organization() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+            User principalUser = new User();
+            principalUser.setId(UUID.randomUUID());
+            OrganizationMembership principalMembership = new OrganizationMembership(testOrganization, principalUser);
+            principalMembership.setRole(OrganizationRole.MEMBER);
+            testOrganization.setMemberships(List.of(principalMembership));
+
+            UpdateMembershipDto testDto = new UpdateMembershipDto(
+                OrganizationRole.MEMBER
+            );
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(principalMembership));
+
+
+            Exception ex = Assertions.assertThrows(
+                AccessDeniedException.class,
+                () -> organizationService.updateMembership(testPrincipal, testOrganizationId, principalUser.getId(), testDto)
+            );
+
+            Assertions.assertEquals(
+                "You do not have permission to update memberships in this organization",
+                ex.getMessage()
+            );
+        }
+
+        @Test
+        void throws_error_if_principal_is_not_part_of_the_organization() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+            User principalUser = new User();
+            principalUser.setId(UUID.randomUUID());
+            OrganizationMembership principalMembership = new OrganizationMembership(testOrganization, principalUser);
+            principalMembership.setRole(OrganizationRole.MEMBER);
+            testOrganization.setMemberships(List.of(principalMembership));
+
+            UpdateMembershipDto testDto = new UpdateMembershipDto(
+                OrganizationRole.MEMBER
+            );
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.empty());
+
+
+            Exception ex = Assertions.assertThrows(
+                AccessDeniedException.class,
+                () -> organizationService.updateMembership(testPrincipal, testOrganizationId, principalUser.getId(), testDto)
+            );
+
+            Assertions.assertEquals(
+                "You do not have access to this organization",
+                ex.getMessage()
+            );
+        }
+    }
+
+    @Nested
+    class DeleteMembershipTests {
+        @Test
+        void owners_can_delete_any_membership() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+
+            User targetUser = new User();
+            targetUser.setId(UUID.randomUUID());
+            OrganizationMembership targetMembership = new OrganizationMembership(testOrganization, targetUser);
+            targetMembership.setRole(OrganizationRole.MEMBER);
+
+            User ownerUser = new User();
+            ownerUser.setId(UUID.randomUUID());
+            OrganizationMembership ownerMembership = new OrganizationMembership(testOrganization, ownerUser);
+            ownerMembership.setRole(OrganizationRole.OWNER);
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.findById(Mockito.any()))
+                .thenReturn(Optional.of(targetMembership));
+
+            ArgumentCaptor<OrganizationMembership> memberArgumentCaptor = ArgumentCaptor.forClass(OrganizationMembership.class);
+            organizationService.deleteMembership(testPrincipal, testOrganizationId, ownerUser.getId());
+
+            Mockito.verify(organizationMembershipRepository).delete(memberArgumentCaptor.capture());
+            OrganizationMembership deletedMembership = memberArgumentCaptor.getValue();
+            Assertions.assertEquals(targetMembership, deletedMembership);
+        }
+
+        @Test
+        void users_can_delete_their_own_membership() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+
+            User principalUser = new User();
+            principalUser.setId(UUID.randomUUID());
+            OrganizationMembership principalMembership = new OrganizationMembership(testOrganization, principalUser);
+
+            // Should be able to delete their own membership, even if they are not an owner
+            principalMembership.setRole(OrganizationRole.MEMBER);
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(principalMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.findById(Mockito.any()))
+                .thenReturn(Optional.of(principalMembership));
+            
+            ArgumentCaptor<OrganizationMembership> memberArgumentCaptor = ArgumentCaptor.forClass(OrganizationMembership.class);
+            organizationService.deleteMembership(testPrincipal, testOrganizationId, principalUser.getId());
+
+            Mockito.verify(organizationMembershipRepository).delete(memberArgumentCaptor.capture());
+            OrganizationMembership deletedMembership = memberArgumentCaptor.getValue();
+            Assertions.assertEquals(principalMembership, deletedMembership);
+        }
+
+        @Test
+        void throws_error_organization_wont_have_any_owners_after_delete() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+            User ownerUser = new User();
+            ownerUser.setId(UUID.randomUUID());
+            OrganizationMembership ownerMembership = new OrganizationMembership(testOrganization, ownerUser);
+            ownerMembership.setRole(OrganizationRole.OWNER);
+            testOrganization.setMemberships(List.of(ownerMembership));
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.findById(Mockito.any()))
+                .thenReturn(Optional.of(ownerMembership));
+
+            Mockito
+                .when(organizationMembershipRepository.countMembersWithRoleInOrganization(testOrganizationId, OrganizationRole.OWNER))
+                .thenReturn(1);
+
+            Exception ex = Assertions.assertThrows(
+                IllegalOperationException.class,
+                () -> organizationService.deleteMembership(testPrincipal, testOrganizationId, ownerUser.getId())
+            );
+
+            Assertions.assertEquals(
+                "You cannot delete the last owner of the organization",
+                ex.getMessage()
+            );
+        }
+
+        @Test
+        void throws_error_if_principal_is_removing_a_different_member_and_is_not_an_owner_of_the_organization() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+
+            User principalUser = new User();
+            principalUser.setId(UUID.randomUUID());
+            OrganizationMembership principalMembership = new OrganizationMembership(testOrganization, principalUser);
+            principalMembership.setRole(OrganizationRole.MEMBER);
+
+            User otherUser = new User();
+            otherUser.setId(UUID.randomUUID());
+            OrganizationMembership targetMembership = new OrganizationMembership(testOrganization, otherUser);
+            targetMembership.setRole(OrganizationRole.MEMBER);
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.of(principalMembership));
+
+            Exception ex = Assertions.assertThrows(
+                AccessDeniedException.class,
+                () -> organizationService.deleteMembership(testPrincipal, testOrganizationId, otherUser.getId())
+            );
+
+            Assertions.assertEquals(
+                "You do not have permission to delete this membership",
+                ex.getMessage()
+            );
+        }
+
+        @Test
+        void throws_error_if_principal_is_not_part_of_the_organization() {
+            Principal testPrincipal = Mockito.mock(Principal.class);
+            UUID testOrganizationId = UUID.randomUUID();
+            Organization testOrganization = new Organization();
+            testOrganization.setId(testOrganizationId);
+            User principalUser = new User();
+            principalUser.setId(UUID.randomUUID());
+            OrganizationMembership principalMembership = new OrganizationMembership(testOrganization, principalUser);
+            principalMembership.setRole(OrganizationRole.MEMBER);
+            testOrganization.setMemberships(List.of(principalMembership));
+
+            Mockito
+                .when(userAccessService.getMembership(testPrincipal, testOrganizationId))
+                .thenReturn(Optional.empty());
+
+
+            Exception ex = Assertions.assertThrows(
+                AccessDeniedException.class,
+                () -> organizationService.deleteMembership(testPrincipal, testOrganizationId, principalUser.getId())
+            );
+
+            Assertions.assertEquals(
+                "You do not have access to this organization",
+                ex.getMessage()
             );
         }
     }

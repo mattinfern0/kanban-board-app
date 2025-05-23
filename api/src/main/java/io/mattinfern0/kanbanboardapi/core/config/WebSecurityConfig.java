@@ -1,4 +1,4 @@
-package io.mattinfern0.kanbanboardapi.core;
+package io.mattinfern0.kanbanboardapi.core.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

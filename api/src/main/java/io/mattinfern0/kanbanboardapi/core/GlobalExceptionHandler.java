@@ -1,6 +1,7 @@
 package io.mattinfern0.kanbanboardapi.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.mattinfern0.kanbanboardapi.core.exceptions.IllegalOperationException;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
@@ -21,6 +22,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        HttpHeaders headers = new HttpHeaders();
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
+        return this.handleExceptionInternal(ex, problemDetail, headers, status, request);
+    }
+
+    @ExceptionHandler(IllegalOperationException.class)
+    public ResponseEntity<Object> handleIllegalOperationException(IllegalOperationException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         HttpHeaders headers = new HttpHeaders();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
         return this.handleExceptionInternal(ex, problemDetail, headers, status, request);

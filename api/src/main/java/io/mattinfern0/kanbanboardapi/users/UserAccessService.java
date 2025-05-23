@@ -1,9 +1,6 @@
 package io.mattinfern0.kanbanboardapi.users;
 
-import io.mattinfern0.kanbanboardapi.core.entities.Board;
-import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembershipPk;
-import io.mattinfern0.kanbanboardapi.core.entities.Task;
-import io.mattinfern0.kanbanboardapi.core.entities.User;
+import io.mattinfern0.kanbanboardapi.core.entities.*;
 import io.mattinfern0.kanbanboardapi.core.repositories.BoardRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.TaskRepository;
@@ -50,5 +47,14 @@ public class UserAccessService {
         return task
             .filter(value -> canAccessOrganization(principal, value.getOrganization().getId()))
             .isPresent();
+    }
+
+    public Optional<OrganizationMembership> getMembership(Principal principal, UUID organizationId) {
+        Optional<User> user = userRepository.findByFirebaseId(principal.getName());
+        if (user.isEmpty()) {
+            return Optional.empty();
+        }
+        OrganizationMembershipPk pk = new OrganizationMembershipPk(organizationId, user.get().getId());
+        return organizationMembershipRepository.findById(pk);
     }
 }

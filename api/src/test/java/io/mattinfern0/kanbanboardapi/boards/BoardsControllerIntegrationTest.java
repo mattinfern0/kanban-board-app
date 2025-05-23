@@ -4,6 +4,7 @@ import io.mattinfern0.kanbanboardapi.boards.dtos.BoardColumnDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardDetailDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.BoardTaskDto;
 import io.mattinfern0.kanbanboardapi.boards.dtos.UpdateBoardHeaderDTO;
+import io.mattinfern0.kanbanboardapi.core.config.FirebaseTestConfig;
 import io.mattinfern0.kanbanboardapi.core.entities.*;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
 import io.mattinfern0.kanbanboardapi.core.enums.TaskStatusCode;
@@ -18,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -29,6 +31,7 @@ import java.util.List;
 
 @SpringBootTest()
 @ActiveProfiles(value = "test")
+@Import({FirebaseTestConfig.class})
 @Testcontainers
 @Tag("IntegrationTest")
 public class BoardsControllerIntegrationTest {

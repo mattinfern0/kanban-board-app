@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.users;
 
+import com.google.firebase.FirebaseApp;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.organizations.OrganizationService;
@@ -17,7 +18,7 @@ public class UsersService {
     final UserDTOMapper userDTOMapper;
     final OrganizationService organizationService;
 
-    public UsersService(UserRepository userRepository, UserDTOMapper userDTOMapper, OrganizationService organizationService) {
+    public UsersService(UserRepository userRepository, UserDTOMapper userDTOMapper, OrganizationService organizationService, FirebaseApp firebaseApp) {
         this.userRepository = userRepository;
         this.userDTOMapper = userDTOMapper;
         this.organizationService = organizationService;
@@ -49,5 +50,4 @@ public class UsersService {
             .orElseThrow(() -> new RuntimeException("User not found"));
         return userDTOMapper.entityToPrivateDetailDto(user);
     }
-
 }
