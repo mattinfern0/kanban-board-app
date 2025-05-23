@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.core.entities;
 
+import io.mattinfern0.kanbanboardapi.core.enums.OrganizationInviteStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -23,6 +24,9 @@ public class OrganizationInvite {
     @ManyToOne
     @JoinColumn(name = "organization_id")
     Organization organization;
+
+    @Column(nullable = false, name = "status_id")
+    OrganizationInviteStatus status;
 
     @Column(name = "email")
     @Email
@@ -81,5 +85,13 @@ public class OrganizationInvite {
 
     public void setExpiresAt(ZonedDateTime expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public OrganizationInviteStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrganizationInviteStatus status) {
+        this.status = status;
     }
 }
