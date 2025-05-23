@@ -42,23 +42,23 @@ const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
   const { enqueueSnackbar } = useSnackbar();
   const updateTaskColumnPositionMutation = useUpdateTaskColumnPositionMutation();
 
-  const boardColumns = board?.boardColumns;
+  const serverColumns = board?.boardColumns;
 
   // Need to have a separate local state to make the DND UI work properly
-  const [localBoardColumns, setLocalBoardColumns] = useState<BoardColumnType[]>(boardColumns || []);
+  const [clientColumns, setClientColumns] = useState<BoardColumnType[]>(serverColumns || []);
 
-  const previousBoardColumns = usePrevious(boardColumns);
+  const previousServerColumns = usePrevious(serverColumns);
   useEffect(() => {
-    if (deepEqual(boardColumns, previousBoardColumns)) {
+    if (deepEqual(serverColumns, previousServerColumns)) {
       return;
     }
-    setLocalBoardColumns(boardColumns || []);
-  }, [boardColumns, previousBoardColumns]);
+    setClientColumns(serverColumns || []);
+  }, [serverColumns, previousServerColumns]);
 
   const taskIdToTasks: Record<string, BoardTask> = {};
   const taskIdToBoardColumn: Record<string, BoardColumnType> = {};
 
-  for (const column of localBoardColumns) {
+  for (const column of clientColumns) {
     for (const task of column.tasks) {
       taskIdToTasks[task.id] = task;
       taskIdToBoardColumn[task.id] = column;
@@ -66,10 +66,10 @@ const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
   }
 
   const getContainingBoardColumn = (dragElementId: UniqueIdentifier): BoardColumnType | undefined => {
-    if (dragElementId == undefined || boardColumns == null) {
+    if (dragElementId == undefined || serverColumns == null) {
       return undefined;
     }
-    return taskIdToBoardColumn[dragElementId] || boardColumns.find((c) => c.id === dragElementId);
+    return taskIdToBoardColumn[dragElementId] || serverColumns.find((c) => c.id === dragElementId);
   };
 
   const isDragElementTask = (active: Active): boolean => {
@@ -101,7 +101,7 @@ const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
     // If the task is being dragged over to a different column, remove the task from the active column
     // and make it appear in the correct position in the over column. This will only affect the UI state (localBoardColumn)
     // and won't be persisted to the backend until the task is dropped.
-    setLocalBoardColumns((oldData) => {
+    setClientColumns((oldData) => {
       const newData = structuredClone(oldData);
 
       const newDataOriginalColumn = newData.find((c) => c.id === originalColumn.id);
@@ -147,8 +147,7 @@ const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
     const activeIndex = overColumn.tasks.findIndex((task) => task.id === active.id);
     const overIndex = overColumn.tasks.findIndex((task) => task.id === over.id);
 
-    const oldLocalBoardColumns = localBoardColumns;
-    setLocalBoardColumns((oldData) => {
+    setClientColumns((oldData) => {
       const newData = structuredClone(oldData);
 
       const newDataOverColumn = newData.find((c) => c.id === overColumn.id);
@@ -166,8 +165,8 @@ const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
       },
       {
         onError: () => {
-          enqueueSnackbar("Failed to move task.", { variant: "error" });
-          setLocalBoardColumns(oldLocalBoardColumns);
+          enqueueSnackbar("An error occurred while moving this task.", { variant: "error" });
+          setClientColumns(serverColumns || []);
         },
       },
     );
@@ -182,7 +181,7 @@ const useBoardWorkspace = (boardId: string): UseBoardWorkspaceReturn => {
   };
 
   return {
-    boardColumns: localBoardColumns,
+    boardColumns: clientColumns,
 
     draggingTask: (draggingTaskId ? taskIdToTasks[draggingTaskId] : null) || null,
     handleDragStart,
