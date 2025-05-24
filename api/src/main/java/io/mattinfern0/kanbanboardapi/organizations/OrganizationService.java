@@ -95,17 +95,17 @@ public class OrganizationService {
         UUID userId,
         UpdateMembershipDto updateMembershipDto
     ) {
-        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, userId);
-        OrganizationMembership targetMembership = organizationMembershipRepository
-            .findById(membershipPk)
-            .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
-
         OrganizationMembership principalMembership = userAccessService.getMembership(principal, organizationId)
             .orElseThrow(() -> new AccessDeniedException("You do not have access to this organization"));
 
         if (!principalMembership.getRole().equals(OrganizationRole.OWNER)) {
             throw new AccessDeniedException("You do not have permission to update memberships in this organization");
         }
+
+        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, userId);
+        OrganizationMembership targetMembership = organizationMembershipRepository
+            .findById(membershipPk)
+            .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
 
         OrganizationRole oldRole = targetMembership.getRole();
         OrganizationRole newRole = updateMembershipDto.role();
@@ -126,17 +126,17 @@ public class OrganizationService {
         UUID organizationId,
         UUID userId
     ) {
-        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, userId);
-        OrganizationMembership targetMembership = organizationMembershipRepository
-            .findById(membershipPk)
-            .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
-
         OrganizationMembership principalMembership = userAccessService.getMembership(principal, organizationId)
             .orElseThrow(() -> new AccessDeniedException("You do not have access to this organization"));
 
         if (!principalMembership.getRole().equals(OrganizationRole.OWNER)) {
             throw new AccessDeniedException("You do not have permission to delete members in this organization");
         }
+
+        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, userId);
+        OrganizationMembership targetMembership = organizationMembershipRepository
+            .findById(membershipPk)
+            .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
 
         if (organizationMembershipRepository.countOwnersInOrganization(organizationId) <= 1) {
             throw new IllegalStateException("You cannot delete the last owner of the organization");
