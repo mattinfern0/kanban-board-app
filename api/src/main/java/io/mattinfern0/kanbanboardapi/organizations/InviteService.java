@@ -47,6 +47,8 @@ public class InviteService {
         // TODO: There may be a more secure way to generate this token
         inviteEntity.setToken(UUID.randomUUID().toString());
 
+        // TODO: Set expiration date for the invite
+
         organizationInviteRepository.save(inviteEntity);
 
         return inviteDtoMapper.entityToDto(inviteEntity);
