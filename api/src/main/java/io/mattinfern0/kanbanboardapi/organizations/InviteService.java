@@ -6,6 +6,7 @@ import io.mattinfern0.kanbanboardapi.core.entities.OrganizationInvite;
 import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationInviteStatus;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
+import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationInviteRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
@@ -16,6 +17,7 @@ import io.mattinfern0.kanbanboardapi.organizations.dtos.InviteeListItemDto;
 import io.mattinfern0.kanbanboardapi.organizations.mappers.InviteDtoMapper;
 import io.mattinfern0.kanbanboardapi.users.FirebaseUserService;
 import io.mattinfern0.kanbanboardapi.users.UserAccessService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -33,14 +35,16 @@ public class InviteService {
     final InviteDtoMapper inviteDtoMapper;
     private final FirebaseUserService firebaseUserService;
     final UserAccessService userAccessService;
+    private final OrganizationService organizationService;
 
     @Autowired
-    public InviteService(OrganizationRepository organizationRepository, OrganizationMembershipRepository organizationMembershipRepository, UserRepository userRepository, OrganizationInviteRepository organizationInviteRepository, InviteDtoMapper inviteDtoMapper, FirebaseUserService firebaseUserService, UserAccessService userAccessService) {
+    public InviteService(OrganizationRepository organizationRepository, OrganizationMembershipRepository organizationMembershipRepository, UserRepository userRepository, OrganizationInviteRepository organizationInviteRepository, InviteDtoMapper inviteDtoMapper, FirebaseUserService firebaseUserService, UserAccessService userAccessService, OrganizationService organizationService) {
         this.organizationRepository = organizationRepository;
         this.organizationInviteRepository = organizationInviteRepository;
         this.inviteDtoMapper = inviteDtoMapper;
         this.firebaseUserService = firebaseUserService;
         this.userAccessService = userAccessService;
+        this.organizationService = organizationService;
     }
 
     public InviteDetailDto createInvite(Principal principal, CreateInviteDto createInviteDto) {
@@ -86,10 +90,11 @@ public class InviteService {
         return inviteDtoMapper.entityToDetailDto(inviteEntity);
     }
 
+    @Transactional
     public void acceptInvite(Principal principal, String inviteToken) {
         OrganizationInvite invite = organizationInviteRepository
             .findByToken(inviteToken)
-            .orElseThrow(() -> new IllegalArgumentException("Invite with token not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Invite with token not found"));
 
         if (!isInviteForUser(invite, principal)) {
             throw new AccessDeniedException("This invite is not for you");
@@ -102,7 +107,7 @@ public class InviteService {
         invite.setStatus(OrganizationInviteStatus.ACCEPTED);
         organizationInviteRepository.save(invite);
 
-        // TODO: Add user to the organization as a member
+        organizationService.addUserToOrganization(principal, invite.getOrganization().getId(), OrganizationRole.MEMBER);
     }
 
     public void revokeInvite(UUID inviteId) {
@@ -133,6 +138,6 @@ public class InviteService {
 
     boolean isInviteForUser(OrganizationInvite invite, Principal principal) {
         UserRecord firebaseUserDetails = firebaseUserService.getUserDetails(principal);
-        return invite.getEmail().equals(firebaseUserDetails.getEmail());
+        return invite.getEmail().equalsIgnoreCase(firebaseUserDetails.getEmail());
     }
 }

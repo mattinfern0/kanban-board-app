@@ -7,6 +7,7 @@ import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
+import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.OrganizationDetailsDto;
 import io.mattinfern0.kanbanboardapi.organizations.mappers.OrganizationDtoMapper;
 import io.mattinfern0.kanbanboardapi.users.UserAccessService;
@@ -21,18 +22,20 @@ import java.util.UUID;
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationMembershipRepository organizationMembershipRepository;
+    final UserRepository userRepository;
     final UserAccessService userAccessService;
 
     final OrganizationDtoMapper organizationDtoMapper;
 
     public OrganizationService(
         OrganizationRepository organizationRepository,
-        OrganizationMembershipRepository organizationMembershipRepository,
+        OrganizationMembershipRepository organizationMembershipRepository, UserRepository userRepository,
         UserAccessService userAccessService,
         OrganizationDtoMapper organizationDtoMapper
     ) {
         this.organizationRepository = organizationRepository;
         this.organizationMembershipRepository = organizationMembershipRepository;
+        this.userRepository = userRepository;
         this.userAccessService = userAccessService;
         this.organizationDtoMapper = organizationDtoMapper;
     }
@@ -49,6 +52,25 @@ public class OrganizationService {
 
         organizationMembershipRepository.saveAndFlush(organizationMembership);
         return personalOrganization;
+    }
+
+    @Transactional
+    public OrganizationMembership addUserToOrganization(
+        Principal principal,
+        UUID organizationId,
+        OrganizationRole role
+    ) {
+        Organization organization = organizationRepository
+            .findById(organizationId)
+            .orElseThrow(() -> new IllegalArgumentException("Organization with id not found"));
+
+        User user = userRepository
+            .findByFirebaseId(principal.getName())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        OrganizationMembership membership = new OrganizationMembership(organization, user);
+        membership.setRole(role);
+        return organizationMembershipRepository.saveAndFlush(membership);
     }
 
     public OrganizationDetailsDto getOrganizationDetails(Principal principal, UUID organizationId) {
