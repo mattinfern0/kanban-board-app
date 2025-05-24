@@ -2,6 +2,7 @@ package io.mattinfern0.kanbanboardapi.organizations;
 
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
+import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembershipPk;
 import io.mattinfern0.kanbanboardapi.core.entities.User;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
 import io.mattinfern0.kanbanboardapi.core.exceptions.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationMembershipRep
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.UserRepository;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.OrganizationDetailsDto;
+import io.mattinfern0.kanbanboardapi.organizations.dtos.UpdateMembershipDto;
 import io.mattinfern0.kanbanboardapi.organizations.mappers.OrganizationDtoMapper;
 import io.mattinfern0.kanbanboardapi.users.UserAccessService;
 import jakarta.transaction.Transactional;
@@ -83,5 +85,63 @@ public class OrganizationService {
         }
 
         return organizationDtoMapper.organizationEntitytoDetailsDto(organization);
+    }
+
+
+    @Transactional
+    public void updateMembership(
+        Principal principal,
+        UUID organizationId,
+        UUID userId,
+        UpdateMembershipDto updateMembershipDto
+    ) {
+        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, userId);
+        OrganizationMembership targetMembership = organizationMembershipRepository
+            .findById(membershipPk)
+            .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
+
+        OrganizationMembership principalMembership = userAccessService.getMembership(principal, organizationId)
+            .orElseThrow(() -> new AccessDeniedException("You do not have access to this organization"));
+
+        if (!principalMembership.getRole().equals(OrganizationRole.OWNER)) {
+            throw new AccessDeniedException("You do not have permission to update memberships in this organization");
+        }
+
+        OrganizationRole oldRole = targetMembership.getRole();
+        OrganizationRole newRole = updateMembershipDto.role();
+        if (oldRole.equals(OrganizationRole.OWNER) && newRole.equals(OrganizationRole.MEMBER)) {
+            if (organizationMembershipRepository.countOwnersInOrganization(organizationId) <= 1) {
+                throw new IllegalStateException("At least 1 member must be an owner in the organization");
+            }
+        }
+
+        targetMembership.setRole(newRole);
+        organizationMembershipRepository.saveAndFlush(targetMembership);
+    }
+
+
+    @Transactional
+    public void deleteMembership(
+        Principal principal,
+        UUID organizationId,
+        UUID userId
+    ) {
+        OrganizationMembershipPk membershipPk = new OrganizationMembershipPk(organizationId, userId);
+        OrganizationMembership targetMembership = organizationMembershipRepository
+            .findById(membershipPk)
+            .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
+
+        OrganizationMembership principalMembership = userAccessService.getMembership(principal, organizationId)
+            .orElseThrow(() -> new AccessDeniedException("You do not have access to this organization"));
+
+        if (!principalMembership.getRole().equals(OrganizationRole.OWNER)) {
+            throw new AccessDeniedException("You do not have permission to delete members in this organization");
+        }
+
+        if (organizationMembershipRepository.countOwnersInOrganization(organizationId) <= 1) {
+            throw new IllegalStateException("You cannot delete the last owner of the organization");
+        }
+
+        organizationMembershipRepository.delete(targetMembership);
     }
 }
