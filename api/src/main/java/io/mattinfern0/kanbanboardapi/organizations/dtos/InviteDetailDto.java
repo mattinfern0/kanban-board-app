@@ -18,6 +18,8 @@ public record InviteDetailDto(
 
     OrganizationInviteStatus status,
 
-    ZonedDateTime expiresAt
+    ZonedDateTime expiresAt,
+
+    String token
 ) {
 }

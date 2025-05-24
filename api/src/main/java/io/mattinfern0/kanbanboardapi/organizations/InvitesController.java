@@ -28,6 +28,11 @@ public class InvitesController {
         return inviteService.createInvite(principal, createInviteDto);
     }
 
+    @GetMapping("/users/me/invites")
+    public List<InviteDetailDto> getCurrentUserInvites(Principal principal) {
+        return inviteService.getCurrentPrincipalInvites(principal);
+    }
+
     @GetMapping("/organizations/{organizationId}/invitees")
     public List<InviteeListItemDto> getOrganizationInvitees(
         Principal principal,

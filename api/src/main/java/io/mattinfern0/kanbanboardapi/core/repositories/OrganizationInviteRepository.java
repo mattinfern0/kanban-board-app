@@ -13,7 +13,7 @@ public interface OrganizationInviteRepository extends JpaRepository<Organization
             SELECT invite
             FROM OrganizationInvite invite
             WHERE
-                invite.email = :email
+                lower(invite.email) = lower(:email)
                 AND invite.organization.id = :organizationId
                 And invite.status = 1
                 AND invite.expiresAt > CURRENT_TIMESTAMP
@@ -29,6 +29,16 @@ public interface OrganizationInviteRepository extends JpaRepository<Organization
                 AND invite.expiresAt > CURRENT_TIMESTAMP
         """)
     List<OrganizationInvite> findValidByOrganizationId(UUID organizationId);
+
+    @Query("""
+            SELECT invite
+            FROM OrganizationInvite invite
+            WHERE
+                lower(invite.email) = lower(:email)
+                And invite.status = 1
+                AND invite.expiresAt > CURRENT_TIMESTAMP
+        """)
+    List<OrganizationInvite> findPendingByEmail(String email);
 
 
     Optional<OrganizationInvite> findByToken(String token);

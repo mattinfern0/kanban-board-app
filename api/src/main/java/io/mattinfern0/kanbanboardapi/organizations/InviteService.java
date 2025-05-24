@@ -123,6 +123,14 @@ public class InviteService {
         return inviteDtoMapper.entityListToInviteeList(entites);
     }
 
+    public List<InviteDetailDto> getCurrentPrincipalInvites(Principal principal) {
+        UserRecord firebaseUserDetails = firebaseUserService.getUserDetails(principal);
+        String email = firebaseUserDetails.getEmail();
+
+        List<OrganizationInvite> invites = organizationInviteRepository.findPendingByEmail(email);
+        return inviteDtoMapper.entityListToDetailDtoList(invites);
+    }
+
     boolean isInviteForUser(OrganizationInvite invite, Principal principal) {
         UserRecord firebaseUserDetails = firebaseUserService.getUserDetails(principal);
         return invite.getEmail().equals(firebaseUserDetails.getEmail());
