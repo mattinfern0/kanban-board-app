@@ -6,18 +6,16 @@ import jakarta.validation.constraints.Email;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public record InviteDto(
+public record InviteeListItemDto(
     UUID id,
 
     ZonedDateTime createdAt,
-
-    InviteDtoOrganization organization,
 
     @Email
     String email,
 
     OrganizationInviteStatus status,
 
-    ZonedDateTime expiredAt
+    ZonedDateTime expiresAt
 ) {
 }

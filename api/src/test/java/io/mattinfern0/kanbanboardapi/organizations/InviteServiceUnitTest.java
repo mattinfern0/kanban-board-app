@@ -4,13 +4,16 @@ import com.google.firebase.auth.UserRecord;
 import io.mattinfern0.kanbanboardapi.core.config.FirebaseTestConfig;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.OrganizationInvite;
+import io.mattinfern0.kanbanboardapi.core.entities.OrganizationMembership;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationInviteStatus;
+import io.mattinfern0.kanbanboardapi.core.enums.OrganizationRole;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationInviteRepository;
 import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.CreateInviteDto;
-import io.mattinfern0.kanbanboardapi.organizations.dtos.InviteDto;
+import io.mattinfern0.kanbanboardapi.organizations.dtos.InviteDetailDto;
 import io.mattinfern0.kanbanboardapi.organizations.mappers.InviteDtoMapper;
 import io.mattinfern0.kanbanboardapi.users.FirebaseUserService;
+import io.mattinfern0.kanbanboardapi.users.UserAccessService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -43,6 +46,9 @@ class InviteServiceUnitTest {
     @Mock
     FirebaseUserService firebaseUserService;
 
+    @Mock
+    UserAccessService userAccessService;
+
     @Spy
     InviteDtoMapper inviteDtoMapper = Mappers.getMapper(InviteDtoMapper.class);
 
@@ -66,7 +72,101 @@ class InviteServiceUnitTest {
                     .findById(testOrganization.getId()))
                 .thenReturn(Optional.of(testOrganization));
 
-            InviteDto result = inviteService.createInvite(createInviteDto);
+            Principal mockPrincipal = Mockito.mock(Principal.class);
+            OrganizationMembership mockMembership = new OrganizationMembership();
+            mockMembership.setRole(OrganizationRole.OWNER);
+            Mockito.when(userAccessService
+                    .getMembership(mockPrincipal, testOrganization.getId()))
+                .thenReturn(Optional.of(mockMembership));
+
+            InviteDetailDto result = inviteService.createInvite(mockPrincipal, createInviteDto);
+
+            Assertions.assertAll(
+                () -> Assertions.assertEquals(createInviteDto.email(), result.email()),
+                () -> Assertions.assertEquals(testOrganization.getId(), result.organization().id()),
+                () -> Assertions.assertEquals(testOrganization.getDisplayName(), result.organization().name()),
+                () -> Assertions.assertEquals(OrganizationInviteStatus.PENDING, result.status())
+            );
+        }
+
+        @Test
+        void throwsError_ifPrincipalIsNotOwnerOfOrganization() {
+
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            testOrganization.setDisplayName("Test Organization");
+            CreateInviteDto createInviteDto = new CreateInviteDto(
+                testOrganization.getId(),
+                "jSmith42@email.com"
+            );
+
+            Mockito.when(organizationRepository
+                    .findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            Principal mockPrincipal = Mockito.mock(Principal.class);
+            OrganizationMembership mockMembership = new OrganizationMembership();
+            mockMembership.setRole(OrganizationRole.MEMBER);
+            Mockito.when(userAccessService
+                    .getMembership(mockPrincipal, testOrganization.getId()))
+                .thenReturn(Optional.of(mockMembership));
+
+            Exception ex = Assertions.assertThrows(AccessDeniedException.class, () -> inviteService.createInvite(mockPrincipal, createInviteDto));
+
+            Assertions.assertEquals("You do not have permission to invite users to this organization", ex.getMessage());
+        }
+
+        @Test
+        void throwsError_ifPrincipalIsNotPartOfOrganization() {
+
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            testOrganization.setDisplayName("Test Organization");
+            CreateInviteDto createInviteDto = new CreateInviteDto(
+                testOrganization.getId(),
+                "jSmith42@email.com"
+            );
+
+            Mockito.when(organizationRepository
+                    .findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            Principal mockPrincipal = Mockito.mock(Principal.class);
+
+            Exception ex = Assertions.assertThrows(AccessDeniedException.class, () -> inviteService.createInvite(mockPrincipal, createInviteDto));
+
+            Assertions.assertEquals("You do not have permission to invite users to this organization", ex.getMessage());
+        }
+
+        @Test
+        void throwsError_ifInviteeIsAlreadyMember() {
+
+            Organization testOrganization = new Organization();
+            testOrganization.setId(UUID.randomUUID());
+            testOrganization.setDisplayName("Test Organization");
+            CreateInviteDto createInviteDto = new CreateInviteDto(
+                testOrganization.getId(),
+                "jSmith42@email.com"
+            );
+
+            Mockito.when(organizationRepository
+                    .findById(testOrganization.getId()))
+                .thenReturn(Optional.of(testOrganization));
+
+            Principal mockPrincipal = Mockito.mock(Principal.class);
+            OrganizationMembership mockPrincipalMembership = new OrganizationMembership();
+            mockPrincipalMembership.setRole(OrganizationRole.OWNER);
+            Mockito.when(userAccessService
+                    .getMembership(mockPrincipal, testOrganization.getId()))
+                .thenReturn(Optional.of(mockPrincipalMembership));
+
+            OrganizationMembership mockInviteeMembership = new OrganizationMembership();
+            mockInviteeMembership.setRole(OrganizationRole.MEMBER);
+            Mockito.when(userAccessService
+                    .getMembership(Mockito.any(), Mockito.any()))
+                .thenReturn(Optional.of(mockInviteeMembership));
+
+            InviteDetailDto result = inviteService.createInvite(mockPrincipal, createInviteDto);
 
             Assertions.assertAll(
                 () -> Assertions.assertEquals(createInviteDto.email(), result.email()),
