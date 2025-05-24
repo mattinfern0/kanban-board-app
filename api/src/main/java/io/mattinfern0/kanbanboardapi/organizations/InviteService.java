@@ -69,6 +69,8 @@ public class InviteService {
 
         invite.setStatus(OrganizationInviteStatus.ACCEPTED);
         organizationInviteRepository.save(invite);
+
+        // TODO: Add user to the organization as a member
     }
 
     public void revokeInvite(UUID inviteId) {
