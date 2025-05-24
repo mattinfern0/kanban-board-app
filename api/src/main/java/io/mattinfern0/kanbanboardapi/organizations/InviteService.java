@@ -38,6 +38,13 @@ public class InviteService {
             .findById(createInviteDto.organizationId())
             .orElseThrow(() -> new IllegalArgumentException("Organization with id not found"));
 
+        /*
+            TODO CHecks:
+            - Check if the invitee is a member of the organization
+            - Check if the invitee already has a pending invite
+            - CHeck if the principal is a member of the organization
+        * */
+
         OrganizationInvite inviteEntity = new OrganizationInvite();
         inviteEntity.setEmail(createInviteDto.email());
         inviteEntity.setId(UUID.randomUUID());
