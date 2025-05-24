@@ -54,9 +54,8 @@ public class InviteService {
             .findByToken(inviteToken)
             .orElseThrow(() -> new IllegalArgumentException("Invite with token not found"));
 
-        UserRecord firebaseUserDetails = firebaseUserService.getUserDetails(principal);
-        if (!invite.getEmail().equals(firebaseUserDetails.getEmail())) {
-            throw new AccessDeniedException("Invite does not match user");
+        if (!isInviteForUser(invite, principal)) {
+            throw new AccessDeniedException("This invite is not for you");
         }
 
         if (invite.getStatus() != OrganizationInviteStatus.PENDING) {
@@ -78,5 +77,10 @@ public class InviteService {
 
         invite.setStatus(OrganizationInviteStatus.REVOKED);
         organizationInviteRepository.save(invite);
+    }
+
+    boolean isInviteForUser(OrganizationInvite invite, Principal principal) {
+        UserRecord firebaseUserDetails = firebaseUserService.getUserDetails(principal);
+        return invite.getEmail().equals(firebaseUserDetails.getEmail());
     }
 }

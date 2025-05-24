@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.security.Principal;
 import java.time.ZoneOffset;
@@ -78,6 +79,33 @@ class InviteServiceUnitTest {
 
     @Nested
     class AcceptInviteTests {
+        @Test
+        void throwsError_ifUsersEmailDoesNotMatchInvite() {
+
+            OrganizationInvite invite = new OrganizationInvite();
+            invite.setStatus(OrganizationInviteStatus.ACCEPTED);
+            invite.setEmail("appleSauce@email");
+
+            Mockito.when(inviteRepository
+                    .findByToken(Mockito.anyString()))
+                .thenReturn(Optional.of(invite));
+
+            Principal principal = Mockito.mock(Principal.class);
+            UserRecord mockUserRecord = Mockito.mock(UserRecord.class);
+            Mockito.when(mockUserRecord.getEmail()).thenReturn("orangeJuice@email");
+
+            Mockito.when(firebaseUserService
+                    .getUserDetails(principal))
+                .thenReturn(mockUserRecord);
+
+            Exception ex = assertThrows(
+                AccessDeniedException.class,
+                () -> inviteService.acceptInvite(principal, "some_token")
+            );
+
+            Assertions.assertEquals("This invite is not for you", ex.getMessage());
+        }
+
         @Test
         void throwsError_ifInviteIsRevoked() {
 
