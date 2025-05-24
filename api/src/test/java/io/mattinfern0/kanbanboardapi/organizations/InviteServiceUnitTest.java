@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.security.Principal;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("UnitTest")
 @ExtendWith(MockitoExtension.class)
-class InviteServiceTest {
+class InviteServiceUnitTest {
     @Mock
     OrganizationRepository organizationRepository;
 
@@ -97,9 +98,11 @@ class InviteServiceTest {
                     .findByToken(Mockito.anyString()))
                 .thenReturn(Optional.of(invite));
 
+            Principal principal = Mockito.mock(Principal.class);
+
             Exception ex = assertThrows(
                 IllegalStateException.class,
-                () -> inviteService.acceptInvite("some_token")
+                () -> inviteService.acceptInvite(principal, "some_token")
             );
 
             Assertions.assertEquals("Invite is not pending", ex.getMessage());

@@ -50,4 +50,5 @@ public class UsersService {
         return userDTOMapper.entityToPrivateDetailDto(user);
     }
 
+
 }

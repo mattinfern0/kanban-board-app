@@ -11,6 +11,7 @@ import io.mattinfern0.kanbanboardapi.organizations.mappers.InviteDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @Service
@@ -43,7 +44,7 @@ public class InviteService {
         return inviteDtoMapper.entityToDto(inviteEntity);
     }
 
-    public void acceptInvite(String inviteToken) {
+    public void acceptInvite(Principal principal, String inviteToken) {
         OrganizationInvite invite = organizationInviteRepository
             .findByToken(inviteToken)
             .orElseThrow(() -> new IllegalArgumentException("Invite with token not found"));
