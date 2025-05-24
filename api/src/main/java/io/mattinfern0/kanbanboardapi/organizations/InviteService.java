@@ -44,6 +44,9 @@ public class InviteService {
         inviteEntity.setOrganization(organization);
         inviteEntity.setStatus(OrganizationInviteStatus.PENDING);
 
+        // TODO: There may be a more secure way to generate this token
+        inviteEntity.setToken(UUID.randomUUID().toString());
+
         organizationInviteRepository.save(inviteEntity);
 
         return inviteDtoMapper.entityToDto(inviteEntity);
