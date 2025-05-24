@@ -1,4 +1,4 @@
-package io.mattinfern0.kanbanboardapi.core;
+package io.mattinfern0.kanbanboardapi.core.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -16,7 +16,7 @@ public class FirebaseConfig {
     private String serviceAccountKeyPath;
 
     @Bean
-    public FirebaseApp firebaseAuth() throws IOException {
+    public FirebaseApp firebaseApp() throws IOException {
         FileInputStream inputStream = new FileInputStream(serviceAccountKeyPath);
 
         FirebaseOptions options = new FirebaseOptions.Builder()

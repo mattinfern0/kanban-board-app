@@ -1,5 +1,6 @@
 package io.mattinfern0.kanbanboardapi.organizations;
 
+import com.google.firebase.auth.UserRecord;
 import io.mattinfern0.kanbanboardapi.core.entities.Organization;
 import io.mattinfern0.kanbanboardapi.core.entities.OrganizationInvite;
 import io.mattinfern0.kanbanboardapi.core.enums.OrganizationInviteStatus;
@@ -8,7 +9,9 @@ import io.mattinfern0.kanbanboardapi.core.repositories.OrganizationRepository;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.CreateInviteDto;
 import io.mattinfern0.kanbanboardapi.organizations.dtos.InviteDto;
 import io.mattinfern0.kanbanboardapi.organizations.mappers.InviteDtoMapper;
+import io.mattinfern0.kanbanboardapi.users.FirebaseUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -20,12 +23,14 @@ public class InviteService {
     final OrganizationInviteRepository organizationInviteRepository;
 
     final InviteDtoMapper inviteDtoMapper;
+    private final FirebaseUserService firebaseUserService;
 
     @Autowired
-    public InviteService(OrganizationRepository organizationRepository, OrganizationInviteRepository organizationInviteRepository, InviteDtoMapper inviteDtoMapper) {
+    public InviteService(OrganizationRepository organizationRepository, OrganizationInviteRepository organizationInviteRepository, InviteDtoMapper inviteDtoMapper, FirebaseUserService firebaseUserService) {
         this.organizationRepository = organizationRepository;
         this.organizationInviteRepository = organizationInviteRepository;
         this.inviteDtoMapper = inviteDtoMapper;
+        this.firebaseUserService = firebaseUserService;
     }
 
     public InviteDto createInvite(CreateInviteDto createInviteDto) {
@@ -48,6 +53,11 @@ public class InviteService {
         OrganizationInvite invite = organizationInviteRepository
             .findByToken(inviteToken)
             .orElseThrow(() -> new IllegalArgumentException("Invite with token not found"));
+
+        UserRecord firebaseUserDetails = firebaseUserService.getUserDetails(principal);
+        if (!invite.getEmail().equals(firebaseUserDetails.getEmail())) {
+            throw new AccessDeniedException("Invite does not match user");
+        }
 
         if (invite.getStatus() != OrganizationInviteStatus.PENDING) {
             throw new IllegalStateException("Invite is not pending");
