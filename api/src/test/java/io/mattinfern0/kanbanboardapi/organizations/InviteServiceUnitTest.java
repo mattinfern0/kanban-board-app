@@ -489,7 +489,9 @@ class InviteServiceUnitTest {
                     .findById(invite.getId()))
                 .thenReturn(Optional.of(invite));
 
-            inviteService.revokeInvite(invite.getId());
+            Principal principal = Mockito.mock(Principal.class);
+
+            inviteService.revokeInvite(principal, invite.getId());
 
             Assertions.assertEquals(OrganizationInviteStatus.REVOKED, invite.getStatus());
         }
@@ -505,9 +507,11 @@ class InviteServiceUnitTest {
                     .findById(invite.getId()))
                 .thenReturn(Optional.of(invite));
 
+            Principal principal = Mockito.mock(Principal.class);
+
             Exception ex = assertThrows(
                 IllegalOperationException.class,
-                () -> inviteService.revokeInvite(invite.getId())
+                () -> inviteService.revokeInvite(principal, invite.getId())
             );
 
             Assertions.assertEquals("Invite is not pending", ex.getMessage());
@@ -524,9 +528,11 @@ class InviteServiceUnitTest {
                     .findById(invite.getId()))
                 .thenReturn(Optional.of(invite));
 
+            Principal principal = Mockito.mock(Principal.class);
+
             Exception ex = assertThrows(
                 IllegalOperationException.class,
-                () -> inviteService.revokeInvite(invite.getId())
+                () -> inviteService.revokeInvite(principal, invite.getId())
             );
 
             Assertions.assertEquals("Invite is not pending", ex.getMessage());
