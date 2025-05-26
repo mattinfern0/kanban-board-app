@@ -31,6 +31,15 @@ public class InvitesController {
         return inviteService.createInvite(principal, createInviteDto);
     }
 
+    @PostMapping("/invites/{inviteId}/revoke")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void revokeInvite(
+        Principal principal,
+        @Valid @PathVariable UUID inviteId
+    ) {
+        inviteService.revokeInvite(principal, inviteId);
+    }
+
     @PostMapping("/invites/accept")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void acceptInvite(

@@ -1,8 +1,8 @@
-import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
+import { useCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 import { Navigate } from "react-router";
 
 export const IndexView = () => {
-  const userDetailsQuery = useGetCurrentUserDetailsQuery();
+  const userDetailsQuery = useCurrentUserDetailsQuery();
 
   if (userDetailsQuery.isPending) {
     return null;

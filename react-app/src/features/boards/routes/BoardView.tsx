@@ -8,13 +8,13 @@ import { BoardWorkspace } from "@/features/boards/components/BoardWorkspace.tsx"
 import { ActionIcon, Breadcrumbs, Button, Group, Text, Title } from "@mantine/core";
 import { IconSettingsFilled } from "@tabler/icons-react";
 import { useOrganizationDetailQuery } from "@/features/organizations/apis/getOrganizationDetail.ts";
-import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
+import { useCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
 export const BoardView = () => {
   const { boardId = "", organizationId = "" } = useParams();
   const boardQuery = useBoardQuery(boardId);
   const organizationDetailQuery = useOrganizationDetailQuery(organizationId);
-  const userDetailQuery = useGetCurrentUserDetailsQuery();
+  const userDetailQuery = useCurrentUserDetailsQuery();
   const [showTaskDialog, setShowTaskDialog] = useState<boolean>(false);
   const [taskDialogTaskId, setTaskDialogTaskId] = useState<string | null>(null);
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState<boolean>(false);

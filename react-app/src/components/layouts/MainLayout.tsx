@@ -1,36 +1,17 @@
 import React from "react";
 import { AppSidebar } from "@/components/navs/AppSidebar.tsx";
 import { SnackbarProvider } from "notistack";
-import { AppShell, Avatar, Group, Menu, Text, Title, UnstyledButton, useMantineTheme } from "@mantine/core";
-import { Link, useNavigate } from "react-router";
-import { useAuth } from "@/features/auth/components/AuthProvider.tsx";
+import { AppShell, useMantineTheme } from "@mantine/core";
 import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
-import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
+import { AppHeader } from "@/components/navs/AppHeader.tsx";
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  showSidebar?: boolean;
 }
 
-export const MainLayout = ({ children }: MainLayoutProps) => {
+export const MainLayout = ({ children, showSidebar = true }: MainLayoutProps) => {
   const theme = useMantineTheme();
-
-  const auth = useAuth();
-  const navigate = useNavigate();
-
-  const currentUserDetailsQuery = useGetCurrentUserDetailsQuery();
-
-  const onLogoutClick = async () => {
-    await auth.logout();
-    navigate("/login");
-  };
-
-  let userAvatar = null;
-  if (currentUserDetailsQuery.isLoading || currentUserDetailsQuery.isError || !currentUserDetailsQuery.data) {
-    userAvatar = <Avatar component={UnstyledButton} variant="filled" />;
-  } else {
-    const fullName = `${currentUserDetailsQuery.data.firstName} ${currentUserDetailsQuery.data.lastName}`;
-    userAvatar = <Avatar name={fullName} color="initials" component={UnstyledButton} />;
-  }
 
   return (
     <AuthGuard>
@@ -49,25 +30,13 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           }}
         >
           <AppShell.Header>
-            <Group h="100%" justify="space-between" px="md">
-              <Group gap="md" align="center">
-                <Title order={3}>CorkScreen</Title>
-                <Text component={Link} to="/my/organizations" c="white">
-                  Organizations
-                </Text>
-              </Group>
-
-              <Menu>
-                <Menu.Target>{userAvatar}</Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item onClick={onLogoutClick}>Logout</Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            </Group>
+            <AppHeader />
           </AppShell.Header>
-          <AppShell.Navbar p="md">
-            <AppSidebar />
-          </AppShell.Navbar>
+          {showSidebar && (
+            <AppShell.Navbar p="md">
+              <AppSidebar />
+            </AppShell.Navbar>
+          )}
           <AppShell.Main>{children}</AppShell.Main>
         </AppShell>
       </SnackbarProvider>

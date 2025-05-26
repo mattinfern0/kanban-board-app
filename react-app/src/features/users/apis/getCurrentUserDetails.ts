@@ -6,7 +6,7 @@ export const getCurrentUserDetails = async (): Promise<UserPrivateDetail> => {
   return await client.get("users/me").json();
 };
 
-export const useGetCurrentUserDetailsQuery = () => {
+export const useCurrentUserDetailsQuery = () => {
   return useQuery({
     queryFn: async () => {
       return await getCurrentUserDetails();

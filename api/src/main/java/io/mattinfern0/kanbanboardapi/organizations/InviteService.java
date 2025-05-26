@@ -127,10 +127,12 @@ public class InviteService {
     }
 
     @Transactional
-    public void revokeInvite(UUID inviteId) {
+    public void revokeInvite(Principal principal, UUID inviteId) {
         OrganizationInvite invite = organizationInviteRepository
             .findById(inviteId)
             .orElseThrow(() -> new IllegalArgumentException("Invite with id not found"));
+
+        // TODO Check if principal is owner of organization or the invitee
 
         if (invite.getStatus() != OrganizationInviteStatus.PENDING) {
             throw new IllegalOperationException("Invite is not pending");

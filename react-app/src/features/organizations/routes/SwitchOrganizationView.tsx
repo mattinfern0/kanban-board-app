@@ -1,12 +1,12 @@
 import { Avatar, Box, Card, Divider, Group, Stack, Text } from "@mantine/core";
 import { ReactNode } from "react";
 import { Link } from "react-router";
-import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
+import { useCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
 export const SwitchOrganizationView = () => {
   // const params = useParams();
 
-  const userDetailsQuery = useGetCurrentUserDetailsQuery();
+  const userDetailsQuery = useCurrentUserDetailsQuery();
 
   // const currentOrganizationId = params?.organizationId || null;
 

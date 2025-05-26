@@ -10,6 +10,8 @@ import { LoginView } from "@/features/auth/routes/LoginView.tsx";
 import { AuthGuard } from "@/features/auth/components/AuthGuard.tsx";
 import { IndexView } from "@/routes/IndexView.tsx";
 import { SwitchOrganizationView } from "@/features/organizations/routes/SwitchOrganizationView.tsx";
+import { OrganizationDetail } from "@/features/organizations/routes/OrganizationDetail.tsx";
+import { UserAccount } from "@/features/users/routes/UserAccount.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -45,6 +47,14 @@ export const routes: RouteObject[] = [
     ),
   },
   {
+    path: "/my/account",
+    element: (
+      <MainLayout showSidebar={false}>
+        <UserAccount />
+      </MainLayout>
+    ),
+  },
+  {
     path: "/:organizationId",
     children: [
       {
@@ -76,6 +86,14 @@ export const routes: RouteObject[] = [
         element: (
           <MainLayout>
             <BoardSettings />
+          </MainLayout>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <MainLayout>
+            <OrganizationDetail />
           </MainLayout>
         ),
       },

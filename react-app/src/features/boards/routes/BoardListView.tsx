@@ -3,13 +3,13 @@ import { useBoardListQuery } from "@/features/boards/apis/getBoardList.ts";
 import { ReactNode, useState } from "react";
 import { Link, useParams } from "react-router";
 import { CreateBoardModal } from "@/features/boards/components/CreateBoardModal.tsx";
-import { useGetCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
+import { useCurrentUserDetailsQuery } from "@/features/users/apis/getCurrentUserDetails.ts";
 
 export const BoardListView = () => {
   const theme = useMantineTheme();
   const params = useParams();
 
-  const userDetailsQuery = useGetCurrentUserDetailsQuery();
+  const userDetailsQuery = useCurrentUserDetailsQuery();
 
   const organizationId = params?.organizationId || null;
 
